@@ -155,6 +155,7 @@ as a model number.
 | [2026-08-26](results/2026-08-26/) | Benchmarks harness: muse-spark-1.2 vs mimo-v2.5-free (opencode) | **mimo-v2.5-free wins.** Live: 56.7 vs 44.1 agent score; isolated: 71.0 vs 56.2. Both models scored better stripped of idle skills. Mimo's calls/par ratio (6.5/5.9) was nearly optimal; Muse Spark's was 2× par ([reports](results/2026-08-26/)) |
 | [2026-09-04](results/2026-09-04/REPORT-flash-next-analysis.md) | Should Qwen3.8-Flash-Next replace Qwen3.6-35B-A3B for local hosting? | **No.** Wins only think-OFF (+7pp, noise); loses think-ON 58.9 vs 78.6 (21 truncated) and both agentic modes at 2–17× wall time. Solo tenant (~100 GB), shipped KV default fails this box's safety check |
 | [2026-09-05](results/2026-09-05/REPORT-flash-next-v2-analysis.md) | Does updated Flash-Next HEAD change the verdict? | **No.** All deltas vs 09-04 within noise (85.7 / 53.6 / 87.5 / 81.2). Reliability fixed (ships bootable defaults, zero watchdog events) — accuracy did not move |
+| [2026-09-14](results/2026-09-14/REPORT-minicpm5-2b-mlx-dspark-cap7.md) | Is MiniCPM5-2B via mlx-dspark good for agentic workflows on an M1 Max? | **Usable, but not strong.** Thinking OFF scored 36.6 vs 37.7 ON while using 3.5× fewer output tokens and 3.1× less wall time; the 6.2-point solve-rate delta is within noise |
 
 The recurring lesson: benchmark both thinking modes on the workload you actually run,
 through the agent you actually run it. Reasoning-trained models collapse without their
