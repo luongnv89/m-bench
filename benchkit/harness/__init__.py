@@ -5,6 +5,7 @@ See benchkit/harness/base.py for why this exists and ROADMAP.md for what is next
 __all__ = [
     "HARNESSES",
     "ClaudeCodeHarness",
+    "DevinHarness",
     "Harness",
     "HarnessConfig",
     "HarnessResult",
@@ -19,11 +20,12 @@ from .base import HarnessConfig as HarnessConfig
 from .base import HarnessResult as HarnessResult
 from .base import run_task as run_task
 from .claudecode import ClaudeCodeHarness
+from .devin import DevinHarness
 from .opencode import OpenCodeHarness
 from .pi import PiHarness
 
 HARNESSES = {"pi": PiHarness, "opencode": OpenCodeHarness,
-              "claude-code": ClaudeCodeHarness}
+              "claude-code": ClaudeCodeHarness, "devin": DevinHarness}
 
 
 def get(name, cfg=None, **kw):

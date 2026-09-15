@@ -21,7 +21,7 @@ set -uo pipefail
 
 usage() {
   cat >&2 <<'USAGE'
-usage: detect_setup.sh [--harness pi|opencode|claude-code]
+usage: detect_setup.sh [--harness pi|opencode|claude-code|devin]
 
 Detects the harness this shell is running inside and the model it is set to.
 Pass --harness to skip harness detection (model detection still runs).
@@ -39,8 +39,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 case "$FORCE_HARNESS" in
-  ""|pi|opencode|claude-code) ;;
-  *) echo "detect_setup: unknown harness '$FORCE_HARNESS'; have: pi, opencode, claude-code" >&2; exit 4 ;;
+  ""|pi|opencode|claude-code|devin) ;;
+  *) echo "detect_setup: unknown harness '$FORCE_HARNESS'; have: pi, opencode, claude-code, devin" >&2; exit 4 ;;
 esac
 
 # --- json reading ----------------------------------------------------------
@@ -85,6 +85,8 @@ if [ -z "$harness" ]; then                      # environment markers
     harness="opencode"; harness_source="env:OPENCODE"
   elif [ -n "${PI_CODING_AGENT_DIR:-}${PI_AGENT_DIR:-}${PI_SESSION_ID:-}" ]; then
     harness="pi"; harness_source="env:PI"
+  elif [ -n "${CHISEL_SESSION_DB:-}${DEVIN_SESSION_ID:-}${DEVIN_CLI:-}" ]; then
+    harness="devin"; harness_source="env:CHISEL_SESSION_DB"
   fi
 fi
 
@@ -107,6 +109,7 @@ if [ -z "$harness" ]; then                      # process ancestry (ps: Linux + 
       claude|claude-code) harness="claude-code"; harness_source="ancestry:$probe"; break ;;
       opencode)           harness="opencode";    harness_source="ancestry:$probe"; break ;;
       pi)                 harness="pi";          harness_source="ancestry:$probe"; break ;;
+      devin)              harness="devin";       harness_source="ancestry:$probe"; break ;;
     esac
     pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
     [ -n "$pid" ] || break
@@ -118,7 +121,7 @@ if [ -z "$harness" ]; then
   echo "detect_setup: cannot tell which harness this shell is inside." >&2
   echo "  Checked: CLAUDECODE / OPENCODE_* / PI_* environment markers, then the" >&2
   echo "  process ancestry of PID ${PPID:-?}. Neither named a known harness." >&2
-  echo "  Re-run with --harness pi|opencode|claude-code, or ask the user." >&2
+  echo "  Re-run with --harness pi|opencode|claude-code|devin, or ask the user." >&2
   exit 3
 fi
 
@@ -187,6 +190,23 @@ case "$harness" in
       ""|off|none) thinking=0; thinking_source="pi settings.json defaultThinkingLevel=${lvl:-unset}" ;;
       *)           thinking=1; thinking_source="pi settings.json defaultThinkingLevel=$lvl" ;;
     esac
+    ;;
+  devin)
+    # agent.model in config.json is the saved default; an in-session switch
+    # leaves no trace, exactly as with claude-code — the file is intent.
+    if [ -n "$model" ]; then :
+    elif [ -n "${DEVIN_MODEL:-}" ]; then
+      model="$DEVIN_MODEL"; model_source="env:DEVIN_MODEL"
+    else
+      dcfg="${XDG_CONFIG_HOME:-$HOME/.config}/devin/config.json"
+      for f in "$PWD/.devin/config.local.json" "$PWD/.devin/config.json" "$dcfg"; do
+        v=$(json_get "$f" agent.model) || continue
+        [ -n "$v" ] || continue
+        model="$v"; model_source="file:$f"; break
+      done
+    fi
+    # effort is encoded in the model variant (swe-2-medium/-high/-max), so
+    # --thinking has nothing to map onto — stays "unsupported"
     ;;
 esac
 

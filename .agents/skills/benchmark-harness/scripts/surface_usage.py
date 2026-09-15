@@ -46,11 +46,23 @@ BUILTIN = {
         "read", "write", "edit", "bash", "glob", "grep", "list", "patch",
         "todowrite", "todoread", "webfetch", "task",
     },
+    "devin": {
+        "read", "write", "edit", "exec", "grep", "find_file_by_name",
+        "notebook_edit", "notebook_read", "todo_write", "web_search",
+        "webfetch", "get_output", "kill_shell", "write_to_process",
+        "ask_user_question", "browser_preview", "close_browser_preview",
+        "read_subagent", "request_scope", "run_subagent",
+    },
 }
 
 #: A claude-code MCP tool call is named `mcp__<server>__<tool>`; the server is
 #: recoverable from the name alone, which is why MCP needs no allowlist.
 _MCP = re.compile(r"^mcp__(?P<server>[^_]+(?:_[^_]+)*?)__(?P<tool>.+)$")
+
+#: Devin routes MCP through generic mcp_* dispatch tools; the server name lives
+#: in the call's arguments, which benchkit does not persist — counted, not named.
+_DEVIN_MCP = {"mcp_call_tool", "mcp_list_servers", "mcp_list_tools",
+              "mcp_read_resource"}
 
 #: Tool names that mean "a skill was invoked". The skill's own name lives in
 #: the tool-call input, which benchkit does not persist (claudecode.py records
@@ -74,6 +86,8 @@ def classify(name, harness, builtin_seen=None):
     m = _MCP.match(name)
     if m:
         return MCP_KIND, m.group("server")
+    if harness == "devin" and name in _DEVIN_MCP:
+        return MCP_KIND, "(server not recorded)"
     if name in _SKILL_TOOLS:
         return SKILL_KIND, "(name not recorded)"
     if builtin_seen is not None:

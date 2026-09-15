@@ -46,7 +46,7 @@ All `BENCH_*` vars read by `benchkit/runner.py:Config.from_env()`; full list wit
 │   ├── runner.py        # Config + suite runner
 │   ├── suites/          # one-shot task definitions
 │   ├── agentic/         # agentic tasks + oracles
-│   ├── harness/         # pi.py, opencode.py, claudecode.py + models.py picker
+│   ├── harness/         # pi.py, opencode.py, claudecode.py, devin.py + models.py picker
 │   └── references.py    # reference solutions
 ├── configs/             # serving recipes; results/ — append-only archives
 ├── AGENTS.md            # model-evaluation runbook

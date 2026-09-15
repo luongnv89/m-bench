@@ -55,6 +55,7 @@ them had a token-hungry MCP server injected into every task.
 | pi | version, agent dir, installed extension packages, catalogue provider count |
 | opencode | version, config path, plugin count, global skill count |
 | claude-code | version, config dir, global + project skill counts, MCP server names |
+| devin | version, config path, listed skill count, MCP server count, plugin count |
 
 `project context` records whether a `CLAUDE.md` / `AGENTS.md` sits in the working directory.
 Benchkit's own tasks run in throwaway temp dirs, so these do not leak into task prompts —

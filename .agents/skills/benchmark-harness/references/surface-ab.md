@@ -37,6 +37,7 @@ Isolation is per-adapter, and the arms are not equally clean:
 | pi | `--no-extensions`, `--no-context-files` | yes — extensions and context only |
 | opencode | `--pure` | yes — all-or-nothing, but only the surface |
 | claude-code | `--bare`, `--disable-slash-commands`, `--strict-mcp-config`, `--mcp-config '{}'`, `--setting-sources ""` | **no** — see below |
+| devin | `XDG_CONFIG_HOME` + `XDG_DATA_HOME` redirects, `--config` throwaway (`read_config_from` off, `subagents_enabled` off) | **no** — see below |
 
 **claude-code's isolated arm also pins the built-in tool set.** `benchkit/harness/claudecode.py`
 sets `self.tools = [] if self.live else list(DEFAULT_TOOLS)`, and `DEFAULT_TOOLS` excludes
@@ -45,6 +46,14 @@ other models and contaminate a measurement. So a claude-code isolated arm loses 
 *and* three built-in tools. A delta on claude-code is an upper bound on the surface's
 contribution, not a measurement of it. Say so when reporting; never present it as the
 surface alone.
+
+**devin's isolated arm leaks part of the surface.** Devin discovers skills by
+filesystem path, not config, so the XDG redirects strip user config, MCP servers
+and XDG skills but `~/.agents/skills`, `~/.claude/skills` and
+`~/.codeium/*/skills` still load — verified: `<available_skills>` is injected
+even in isolated runs. `subagents_enabled: false` likewise leaves `run_subagent`
+advertised. A devin delta therefore measures the config/MCP/XDG-skill surface
+only; the HOME-relative surface is on in both arms and invisible to the diff.
 
 The exact flags each adapter drops are recorded per run in the result JSON at
 `summary.harness.disabled_isolation` — read them from there rather than trusting this
@@ -56,7 +65,7 @@ table, which can go stale.
 
 | Kind | Rule |
 |---|---|
-| `mcp` | name matches `mcp__<server>__<tool>` — the server is in the name |
+| `mcp` | name matches `mcp__<server>__<tool>` (claude-code), or is a devin `mcp_*` dispatch tool — the server is not recorded |
 | `skill` | name is `Skill`, `skill` or `SlashCommand` |
 | `builtin` | see below |
 | `surface` | ran in the live arm, never in the isolated arm |

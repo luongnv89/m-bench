@@ -1,6 +1,6 @@
 ---
 name: benchmark-harness
-description: "Evaluate the coding harness you are running inside (pi, opencode, claude-code) on its live setup and current model, via bench setup run. Measures it with and without its skills, MCP servers and plugins on --ab, and reports which of them the run actually called. Use when the user runs /benchmark-harness. Not for serving sweeps, model compare, or one-shot suites."
+description: "Evaluate the coding harness you are running inside (pi, opencode, claude-code, devin) on its live setup and current model, via bench setup run. Measures it with and without its skills, MCP servers and plugins on --ab, and reports which of them the run actually called. Use when the user runs /benchmark-harness. Not for serving sweeps, model compare, or one-shot suites."
 license: MIT
 effort: high
 metadata:
@@ -46,7 +46,7 @@ Check these in step 1; each failure stops the run rather than being worked aroun
 - The `dgx-spark-llm-lab` repo, at issue #76 or newer (it must have `bench setup`). Set
   `BENCH_REPO` when invoking from elsewhere.
 - Python ≥ 3.10 with `benchkit` importable (`pip install -e .`).
-- One of `pi`, `opencode` or `claude-code` installed, and this shell running inside it.
+- One of `pi`, `opencode`, `claude-code` or `devin` installed, and this shell running inside it.
 - Credentials the harness already uses — the run borrows your own auth, and a hosted model
   bills your account.
 - `./bench validate --suite agentic-all` printing `16/16`.
@@ -94,7 +94,7 @@ Arguments to **this skill**; step 4 maps them onto `bench` flags.
 
 | Knob | Default | Override |
 |---|---|---|
-| harness | detected (step 2) | `--harness pi\|opencode\|claude-code` |
+| harness | detected (step 2) | `--harness pi\|opencode\|claude-code\|devin` |
 | model | the harness's current selection | `-m <provider/model>` or any unique substring |
 | suite | `agentic-hard` (8 tasks) | `--suite agentic\|agentic-hard\|agentic-all` |
 | samples | `1` | `--samples N` |
@@ -159,12 +159,13 @@ symlink to the same files. It prints `harness=`, `provider=`, `model=`, `model_s
    leaves no trace on disk. If *you* are the session being measured, your own model beats
    the file — say so, and confirm it in step 3.
 5. **Thinking is a pi-only axis.** `thinking=1` → pass `--thinking`; `0` or `unsupported`
-   → omit it. pi maps it to `--thinking off|high`; opencode and claude-code ignore the flag
-   and their server default applies, so report `n/a` rather than implying a mode was set.
+   → omit it. pi maps it to `--thinking off|high`; opencode, claude-code and devin ignore
+   the flag — on devin effort is encoded in the model variant (`swe-2-max` vs
+   `-medium`) — so report `n/a` rather than implying a mode was set.
 6. **Exit 3 means the harness is unknown, not broken.** Say plainly that this shell is not
-   inside pi, opencode or claude-code — a Cursor or aider session is not measurable here —
-   and offer `--harness` for one of the three instead of pretending the numbers describe
-   the harness the user is in.
+   inside pi, opencode, claude-code or devin — a Cursor or aider session is not measurable
+   here — and offer `--harness` for one of the four instead of pretending the numbers
+   describe the harness the user is in.
 
 Per-harness sources, precedence and edge cases: `references/detection.md`.
 

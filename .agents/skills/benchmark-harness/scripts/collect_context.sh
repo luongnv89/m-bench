@@ -165,6 +165,13 @@ for p in (os.path.expanduser("~/.claude.json"), os.path.expanduser("~/.claude/se
     except Exception: pass
 else: print("none recorded")' 2>/dev/null)"
     ;;
+  devin)
+    row "version"  "$(devin version 2>/dev/null | tail -1)"
+    row "config"   "${XDG_CONFIG_HOME:-$HOME/.config}/devin/config.json"
+    row "skills"   "$(devin skills list 2>/dev/null | grep -cE '\[(user|model)') listed (devin skills list)"
+    row "mcp"      "$(devin mcp list 2>/dev/null | grep -c '•') configured"
+    row "plugins"  "$(devin plugins list 2>/dev/null | grep -cE '\S') listed"
+    ;;
   *) row "version" "" ;;
 esac
 project=""

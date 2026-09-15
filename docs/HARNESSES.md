@@ -324,6 +324,55 @@ one real gap:
 Input tokens sum `input_tokens` plus both cache fields, so the column stays comparable with
 pi's and opencode's, which count every token sent.
 
+## The Devin adapter
+
+`benchkit/harness/devin.py`, driving `devin -p <prompt> --export <file>`. Devin's
+print-mode stdout is only the final response, so nothing is folded from the
+stream — all telemetry comes from the ATIF export the CLI writes after every
+turn: `tool_calls[].function_name` per `agent` step (calls and the trace),
+`observation.results` (results), and per-step `metrics` (token usage). Turns are
+the count of `agent` steps.
+
+Devin serves Cognition-hosted models only — there is no OpenAI-compatible mode,
+and `--endpoint` is refused by `available()`. `list_models()` parses
+`devin models list` into (family, model) pairs, so `-m swe-2-max` or
+`-m claude-opus-5` resolve against the account's real catalogue. Authentication
+is the user's own `devin auth` login (`credentials.toml`).
+
+### What isolated mode strips — and what it cannot
+
+Devin has no `--pure`/`--bare` equivalent and no tool pinning, so isolation is
+assembled from three levers: a redirected `XDG_CONFIG_HOME` (removes the user
+config, its hooks, and `mcp_config.json` — every user-scope MCP server), a
+redirected `XDG_DATA_HOME` (session DB — the `--no-session` counterpart — with
+`credentials.toml` symlinked back in), and a throwaway `--config` that disables
+`read_config_from` imports (the `--no-context-files` counterpart) and
+`subagents_enabled` (the `Task` counterpart).
+
+The leaks, verified empirically and carried in `describe()`'s caveats:
+HOME-relative skill dirs (`~/.agents/skills`, `~/.claude/skills`,
+`~/.codeium/*/skills`) still load — Devin discovers skills by path, not config;
+`run_subagent` stays advertised even with `subagents_enabled: false`; and
+`web_search`/`webfetch`/`skill`/`mcp_*` cannot be denied (permission scopes only
+cover `read/edit/grep/glob/exec`).
+
+`--permission-mode dangerous` and `--respect-workspace-trust false` are passed in
+both modes: print mode cannot prompt, and the temp workspace is untrusted by
+definition — same reasoning as opencode's `--auto`.
+
+### What it cannot measure
+
+- **`failed_calls` reads 0**: ATIF observations carry no error flag — a failed
+  shell command is ordinary result content, so real tool failures are not
+  distinguishable. `valid_call_rate` is meaningless for this adapter.
+- **`reasoning_tokens` reads 0**: steps carry `reasoning_content` text but no
+  token count; those tokens are inside `completion_tokens`.
+- **`--thinking` does nothing**: effort is encoded in the model variant
+  (`swe-2-medium` vs `swe-2-max`), not a flag. The detector reports
+  `unsupported`, as for opencode and claude-code.
+- **`stop_reason` is derived**: rc 0 + a parsed export reads `finished`; ATIF
+  has no field for it, and there is no `--max-turns` equivalent.
+
 ## Planned adapters
 
 Codex (CLI with a custom OpenAI-compatible base URL). See [ROADMAP.md](../ROADMAP.md).

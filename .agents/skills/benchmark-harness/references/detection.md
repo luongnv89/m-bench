@@ -14,7 +14,8 @@ Tried in order; the first hit wins and is reported in `harness_source=`.
 | 2 | `CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, `CLAUDE_CODE_SESSION_ID` | claude-code |
 | 3 | `OPENCODE`, `OPENCODE_BIN_PATH`, `OPENCODE_CLIENT`, `OPENCODE_SESSION_ID` | opencode |
 | 4 | `PI_CODING_AGENT_DIR`, `PI_AGENT_DIR`, `PI_SESSION_ID` | pi |
-| 5 | process ancestry, up to 12 levels | `ps -o args=`, Linux and macOS |
+| 5 | `CHISEL_SESSION_DB`, `DEVIN_SESSION_ID`, `DEVIN_CLI` | devin |
+| 6 | process ancestry, up to 12 levels | `ps -o args=`, Linux and macOS |
 | — | none matched | exit 3, message names what was checked |
 
 Ancestry compares the **basename of argv[0]** (or of argv[1] behind `node`/`bun`/`deno`/
@@ -36,6 +37,7 @@ override, and the CLI already honours it), and explicit user arguments outrank t
 | claude-code | `ANTHROPIC_MODEL` → `./.claude/settings.local.json` → `./.claude/settings.json` → `$CLAUDE_CONFIG_DIR/settings{,.local}.json` (`.model`) | **intent, not proof** — a `/model` switch inside the session leaves no trace on disk |
 | opencode | `OPENCODE_MODEL` → `$OPENCODE_CONFIG` → `./opencode.json(c)` → `~/.config/opencode/opencode.json` → `~/.config/opencode/config.json` (`.model`, `provider/model`) | often absent: opencode keeps the TUI selection in its own database, not in JSON |
 | pi | `$PI_CODING_AGENT_DIR/settings.json` (`defaultProvider` + `defaultModel`), default `~/.pi/agent` | reliable — pi writes the selection to disk |
+| devin | `DEVIN_MODEL` → `./.devin/config{,.local}.json` → `$XDG_CONFIG_HOME/devin/config.json` (`agent.model`) | **intent, not proof** — same caveat as claude-code: an in-session model switch leaves no trace |
 
 An empty `model=` is a normal answer. Resolve it by asking, never by guessing:
 
