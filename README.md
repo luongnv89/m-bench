@@ -156,6 +156,7 @@ as a model number.
 | [2026-09-04](results/2026-09-04/REPORT-flash-next-analysis.md) | Should Qwen3.8-Flash-Next replace Qwen3.6-35B-A3B for local hosting? | **No.** Wins only think-OFF (+7pp, noise); loses think-ON 58.9 vs 78.6 (21 truncated) and both agentic modes at 2–17× wall time. Solo tenant (~100 GB), shipped KV default fails this box's safety check |
 | [2026-09-05](results/2026-09-05/REPORT-flash-next-v2-analysis.md) | Does updated Flash-Next HEAD change the verdict? | **No.** All deltas vs 09-04 within noise (85.7 / 53.6 / 87.5 / 81.2). Reliability fixed (ships bootable defaults, zero watchdog events) — accuracy did not move |
 | [2026-09-14](results/2026-09-14/REPORT-minicpm5-2b-mlx-dspark-cap7.md) | Is MiniCPM5-2B via mlx-dspark good for agentic workflows on an M1 Max? | **Usable, but not strong.** Thinking OFF scored 36.6 vs 37.7 ON while using 3.5× fewer output tokens and 3.1× less wall time; the 6.2-point solve-rate delta is within noise |
+| [2026-09-15](results/2026-09-15/REPORT-live.md) | Is the daily Devin CLI + SWE-2 Max setup any good, and does its live surface earn the tokens? | **Yes on both counts, surface aside.** 8/8 solved live, agent score 72.6 (efficiency-limited: 8.4 calls vs 5.9 par); isolated arm 71.3 — the +1.2 delta is noise. 86 skills + 1 MCP installed but 1 surface call in 67 — the surface was idle. First run through the new `devin` adapter |
 
 The recurring lesson: benchmark both thinking modes on the workload you actually run,
 through the agent you actually run it. Reasoning-trained models collapse without their
