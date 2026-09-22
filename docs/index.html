@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="m-bench — measured LLM setups for your machine. Harness, model, and thinking mode ranked on hardware you actually have." />
+  <title>m-bench — Find the best LLM setup for your machine</title>
+  <meta name="theme-color" content="#0A0A0B" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="m-bench — the best LLM setup is the one measured on your hardware" />
+  <meta property="og:description" content="Harness, model, and thinking mode, measured on real machines. Same weights move 23 points depending on the agent around them." />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --canvas: #0A0A0B;
+      --surface: #111113;
+      --surface-2: #16161A;
+      --line: #1F1F24;
+      --line-strong: #2A2A31;
+      --ink: #FAFAFA;
+      /* muted/dim were near-identical (#A1A1A1 vs #9CA3AF); split them so the
+         hierarchy actually reads. dim still clears 4.5:1 on --surface-2. */
+      --ink-muted: #B4B4BA;
+      --ink-dim: #8B8B94;
+      --volt: #00FF41;
+      --warn: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
+      --font-display: "Instrument Serif", Georgia, serif;
+      --font-body: "IBM Plex Sans", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      --radius: 2px;
+      --max: 1120px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    /* grain atmosphere */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    a { color: var(--ink); text-decoration-color: var(--volt); text-underline-offset: 3px; }
+    a:hover { color: var(--volt); }
+    :focus-visible {
+      outline: 2px solid var(--volt);
+      outline-offset: 3px;
+    }
+    img { max-width: 100%; display: block; }
+    .mono { font-family: var(--font-mono); }
+    .volt { color: var(--volt); }
+    .muted { color: var(--ink-muted); }
+    .dim { color: var(--ink-dim); }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
+    /* skip link: hidden until keyboard focus, then pinned top-left */
+    .skip-link {
+      position: fixed; top: 0.6rem; left: 0.6rem; z-index: 100;
+      transform: translateY(-160%);
+      font-family: var(--font-mono); font-size: 0.78rem;
+      background: var(--ink); color: var(--canvas); padding: 0.55rem 0.8rem;
+      text-decoration: none;
+    }
+    .skip-link:focus { transform: none; color: var(--canvas); }
+    #main:focus { outline: none; }
+    code {
+      font-family: var(--font-mono); font-size: 0.92em; color: var(--ink);
+      text-transform: none; letter-spacing: 0;
+    }
+    .load-error {
+      margin: 1.5rem auto 0; padding: 0.9rem 1.1rem;
+      border: 1px solid rgba(239,68,68,0.45); color: var(--danger);
+      font-family: var(--font-mono); font-size: 0.8rem;
+    }
+
+    /* —— layout —— */
+    .wrap { width: min(100% - 2.5rem, var(--max)); margin-inline: auto; position: relative; z-index: 1; }
+    section { padding: 5.5rem 0; border-top: 1px solid var(--line); }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--volt);
+      margin: 0 0 1rem;
+    }
+    .eyebrow::before { content: "▸ "; color: var(--ink-dim); }
+    h1, h2, .display {
+      font-family: var(--font-display);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    h1 { font-size: clamp(2.6rem, 6.5vw, 4.6rem); }
+    h2 { font-size: clamp(1.9rem, 3.5vw, 2.75rem); }
+    h3 { font-family: var(--font-body); font-size: 1.05rem; font-weight: 600; margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+    p { margin: 0 0 1rem; color: var(--ink-muted); }
+    .lead { font-size: 1.125rem; max-width: 38rem; color: var(--ink-muted); }
+    .section-head { margin-bottom: 2.5rem; max-width: 40rem; }
+    .section-head p { margin-top: 0.85rem; }
+
+    /* —— nav —— */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(10, 10, 11, 0.82);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px; gap: 1rem;
+    }
+    .brand { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; color: var(--ink); }
+    .brand img { width: 28px; height: 28px; }
+    .brand-name { font-family: var(--font-mono); font-weight: 600; font-size: 0.95rem; letter-spacing: -0.02em; }
+    .brand-name span { color: var(--volt); }
+    .nav-links { display: flex; gap: 1.4rem; align-items: center; list-style: none; margin: 0; padding: 0; }
+    .nav-links a {
+      font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em;
+      text-decoration: none; color: var(--ink-muted); text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--volt); }
+    .nav-cta {
+      font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em;
+      text-decoration: none; color: var(--canvas) !important;
+      background: var(--ink); padding: 0.45rem 0.85rem; border-radius: var(--radius);
+      text-transform: uppercase; font-weight: 500;
+    }
+    .nav-cta:hover { background: transparent; color: var(--volt) !important; box-shadow: inset 0 0 0 1px var(--volt); }
+    .nav-toggle {
+      display: none; background: none; border: 1px solid var(--line-strong);
+      color: var(--ink); font-family: var(--font-mono); font-size: 0.75rem;
+      padding: 0.4rem 0.65rem; cursor: pointer; border-radius: var(--radius);
+    }
+
+    /* —— hero —— */
+    .hero {
+      padding: 5rem 0 4.5rem;
+      border-top: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3rem;
+      align-items: end;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--volt);
+    }
+    .hero-meta {
+      display: flex; flex-wrap: wrap; gap: 1.25rem;
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-dim);
+      margin-top: 1.75rem; letter-spacing: 0.04em;
+    }
+    .hero-meta strong { color: var(--ink-muted); font-weight: 500; }
+    .gauge {
+      border: 1px solid var(--line-strong);
+      background: linear-gradient(180deg, var(--surface-2), var(--surface));
+      padding: 1.4rem 1.5rem 1.5rem;
+      position: relative;
+    }
+    .gauge::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line-strong) 20%, var(--volt) 50%, var(--line-strong) 80%, transparent);
+      opacity: 0.85;
+    }
+    .gauge-label {
+      font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--ink-dim); margin-bottom: 0.75rem;
+    }
+    .gauge-score {
+      font-family: var(--font-display); font-size: 4rem; line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .gauge-score .unit { font-family: var(--font-mono); font-size: 0.85rem; color: var(--volt); letter-spacing: 0.06em; margin-left: 0.4rem; }
+    .gauge-sub { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.6rem; }
+    /* hero mini-chart: the real four harness scores, not decoration */
+    .gauge-rows { display: grid; gap: 0.55rem; margin-top: 1.25rem; }
+    .gauge-row {
+      display: grid; grid-template-columns: 6.5rem 1fr 2.6rem; gap: 0.7rem; align-items: center;
+      font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-muted);
+    }
+    .gauge-row .g-track { height: 6px; background: var(--line); position: relative; }
+    .gauge-row .g-fill {
+      position: absolute; inset: 0 auto 0 0; width: var(--w);
+      background: var(--ink-dim);
+      transform-origin: left; animation: grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: var(--d, 0s);
+    }
+    .gauge-row.top .g-fill { background: var(--volt); }
+    .gauge-row.top { color: var(--ink); }
+    .gauge-row .g-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+
+    /* —— machine switcher —— */
+    .machine-tabs {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+      border: 1px solid var(--line-strong);
+      margin-bottom: 0;
+    }
+    .machine-tab {
+      appearance: none; border: none; border-right: 1px solid var(--line-strong);
+      background: var(--surface); color: var(--ink-muted);
+      padding: 1.1rem 1rem; text-align: left; cursor: pointer;
+      font-family: var(--font-body); transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+    .machine-tab:last-child { border-right: none; }
+    .machine-tab:hover { background: var(--surface-2); color: var(--ink); }
+    .machine-tab[aria-selected="true"] {
+      background: var(--surface-2); color: var(--ink);
+      box-shadow: inset 0 -2px 0 var(--volt);
+    }
+    .machine-tab[aria-selected="true"] .tab-name { color: var(--ink); }
+    .machine-tab .tab-name { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .machine-tab .tab-spec { display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-dim); letter-spacing: 0.02em; }
+    .machine-tab[aria-selected="true"] .tab-spec { color: var(--ink-muted); }
+
+    .machine-panel {
+      border: 1px solid var(--line-strong);
+      border-top: none;
+      background: var(--surface);
+      padding: 1.75rem;
+    }
+    .machine-specs {
+      display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem;
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-dim);
+      margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line);
+      letter-spacing: 0.03em;
+    }
+    .machine-specs span strong { color: var(--ink-muted); font-weight: 500; }
+    .machine-tagline { font-style: italic; font-family: var(--font-display); font-size: 1.2rem; color: var(--ink-muted); margin: 0 0 1.5rem; }
+
+    .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .rec-card {
+      border: 1px solid var(--line);
+      background: var(--canvas);
+      padding: 1.2rem 1.15rem 1.15rem;
+      display: flex; flex-direction: column; gap: 0.65rem;
+      min-height: 100%;
+      position: relative;
+      transition: border-color 0.15s;
+    }
+    .rec-card:hover { border-color: var(--line-strong); }
+    /* every card is a per-workload pick; the old absolute "RECOMMENDED" tag
+       collided with the workload label, so the lead card is marked by border only */
+    .rec-card.primary { border-color: rgba(0, 255, 65, 0.35); }
+    .rec-workload {
+      font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-dim);
+    }
+    .rec-score {
+      font-family: var(--font-display); font-size: 2.4rem; line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .rec-score small {
+      font-family: var(--font-mono); font-size: 0.7rem; color: var(--volt);
+      display: block; margin-top: 0.35rem; letter-spacing: 0.04em; font-weight: 500;
+    }
+    .rec-pair { display: grid; gap: 0.35rem; margin-top: 0.2rem; }
+    .rec-pair div {
+      display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.5rem;
+      font-size: 0.84rem;
+    }
+    .rec-pair dt {
+      font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-dim);
+      text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15rem;
+    }
+    .rec-pair dd { margin: 0; color: var(--ink); font-weight: 500; }
+    .rec-note { font-size: 0.78rem; color: var(--ink-muted); margin-top: auto; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
+    .rec-config {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--volt);
+      background: transparent; box-shadow: inset 0 0 0 1px rgba(0,255,65,0.35);
+      padding: 0.4rem 0.5rem; word-break: break-all;
+    }
+    .rec-link {
+      font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-dim);
+      text-decoration: none; letter-spacing: 0.04em;
+    }
+    .rec-link:hover { color: var(--volt); }
+
+    /* —— charts —— */
+    .chart-block {
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      padding: 1.75rem;
+    }
+    .chart-block + .chart-block { margin-top: 1.25rem; }
+    .chart-title {
+      font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-dim); margin-bottom: 0.35rem;
+    }
+    .chart-question {
+      font-family: var(--font-display); font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+      margin: 0 0 1.5rem; color: var(--ink); line-height: 1.25;
+    }
+    .bar-rows { display: grid; gap: 0.85rem; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 7.5rem 1fr 3.2rem;
+      grid-template-areas: "label track val" ". meta meta";
+      column-gap: 0.85rem; row-gap: 0.3rem;
+      align-items: center;
+    }
+    .split-2 .bar-row { grid-template-columns: 9rem 1fr 3rem; }
+    .bar-label { grid-area: label; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted); }
+    /* bars share a fixed 0–100 axis (not scaled to the max), so lengths compare honestly */
+    .bar-track {
+      grid-area: track;
+      height: 22px; background: var(--line); position: relative; overflow: hidden;
+    }
+    /* final width is set inline; the entrance is pure CSS, so bars never stay empty
+       if JS observers don't fire */
+    .bar-fill {
+      height: 100%; width: var(--w);
+      background: linear-gradient(90deg, #1C1C21, #3A3A42);
+      border-right: 2px solid var(--volt);
+      transform-origin: left;
+      animation: grow 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: var(--d, 0s);
+    }
+    .bar-fill.alt { background: linear-gradient(90deg, #1C1C21, #2E3540); border-right-color: var(--info); }
+    .bar-row.is-lead .bar-fill { background: linear-gradient(90deg, #1C1C21, #4A4A54); }
+    /* hatched band = within the ~8-pt noise floor of the leader */
+    .noise-band {
+      position: absolute; top: 0; bottom: 0; left: var(--from); width: var(--span);
+      background: repeating-linear-gradient(135deg, rgba(0,255,65,0.16) 0 2px, transparent 2px 6px);
+      border-left: 1px dashed rgba(0,255,65,0.45);
+      pointer-events: none;
+    }
+    .bar-legend {
+      display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;
+      font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-dim); letter-spacing: 0.02em;
+    }
+    .bar-legend i {
+      display: inline-block; width: 22px; height: 10px;
+      background: repeating-linear-gradient(135deg, rgba(0,255,65,0.35) 0 2px, transparent 2px 6px);
+      border-left: 1px dashed var(--volt);
+    }
+    .bar-val {
+      grid-area: val;
+      font-family: var(--font-mono); font-size: 0.9rem; font-weight: 500;
+      text-align: right; color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .bar-meta {
+      grid-area: meta;
+      font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-dim);
+      letter-spacing: 0.02em;
+    }
+    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .chart-note {
+      margin-top: 1.35rem; padding-top: 1rem; border-top: 1px solid var(--line);
+      font-size: 0.88rem; color: var(--ink-muted);
+    }
+    .chart-note a { font-family: var(--font-mono); font-size: 0.78rem; }
+
+    .split-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    /* the sibling margin above is for stacked blocks; in the grid it pushed the
+       right panel 20px down */
+    .split-2 > .chart-block + .chart-block { margin-top: 0; }
+    .verdict-pill {
+      display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.3rem 0.55rem; border: 1px solid var(--line-strong);
+      color: var(--ink-muted); margin-bottom: 1rem;
+    }
+    /* both panels are advice, so both pills use the "go" colour; red read as "don't" */
+    .verdict-pill.yes { border-color: rgba(0,255,65,0.4); color: var(--volt); }
+    .delta {
+      font-family: var(--font-mono); font-size: 0.8rem; color: var(--volt);
+      margin-top: 1rem; padding-top: 0.85rem; border-top: 1px dashed var(--line);
+    }
+    .delta.cost { color: var(--warn); }
+
+    /* —— results explorer —— */
+    .filters {
+      display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;
+      align-items: end;
+    }
+    .filter-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .filter-field label {
+      font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-dim);
+    }
+    .filter-field select {
+      appearance: none;
+      background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23A1A1A1' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 0.7rem center;
+      border: 1px solid var(--line-strong); color: var(--ink);
+      font-family: var(--font-mono); font-size: 0.8rem;
+      padding: 0.5rem 2rem 0.5rem 0.7rem; min-width: 10rem;
+      border-radius: var(--radius); cursor: pointer;
+    }
+    .filter-field select:hover { border-color: var(--ink-dim); }
+    .filter-reset {
+      background: none; border: 1px solid var(--line-strong); color: var(--ink-muted);
+      font-family: var(--font-mono); font-size: 0.75rem; padding: 0.5rem 0.8rem;
+      cursor: pointer; border-radius: var(--radius); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-left: auto;
+    }
+    .filter-reset:hover { color: var(--volt); border-color: var(--volt); }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line-strong); background: var(--surface); }
+    table.results {
+      width: 100%; border-collapse: collapse; font-size: 0.86rem;
+      min-width: 720px;
+    }
+    table.results th {
+      font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-dim); text-align: left;
+      padding: 0.85rem 1rem; border-bottom: 1px solid var(--line-strong);
+      background: var(--surface-2); position: sticky; top: 0;
+    }
+    table.results th.num, table.results td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.results td {
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--line);
+      color: var(--ink-muted); vertical-align: middle;
+    }
+    table.results tr:last-child td { border-bottom: none; }
+    table.results tr:hover td { background: rgba(255,255,255,0.02); color: var(--ink); }
+    table.results .model-cell { color: var(--ink); font-weight: 500; }
+    table.results .model-cell a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+    table.results .model-cell a:hover { color: var(--volt); border-bottom-color: var(--volt); }
+    table.results .model-cell a::after { content: " ↗"; font-size: 0.75em; color: var(--ink-dim); }
+    /* green is reserved for the best score per suite in the current view,
+       so it still means something after filtering */
+    table.results .score-cell {
+      font-family: var(--font-mono); font-weight: 600; color: var(--ink);
+      font-size: 0.95rem; white-space: nowrap;
+    }
+    table.results .score-cell.best { color: var(--volt); }
+    table.results .score-cell .unit {
+      font-size: 0.62rem; font-weight: 400; color: var(--ink-dim);
+      margin-left: 0.35rem; letter-spacing: 0.04em;
+    }
+    th .sort {
+      all: unset; cursor: pointer; display: inline-flex; gap: 0.35rem; align-items: center;
+      font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
+    }
+    th .sort:hover, th[aria-sort] .sort { color: var(--ink); }
+    th .sort:focus-visible { outline: 2px solid var(--volt); outline-offset: 3px; }
+    th .sort::after { content: "↕"; opacity: 0.45; }
+    th[aria-sort="ascending"] .sort::after { content: "↑"; opacity: 1; color: var(--volt); }
+    th[aria-sort="descending"] .sort::after { content: "↓"; opacity: 1; color: var(--volt); }
+    .badge {
+      display: inline-block; font-family: var(--font-mono); font-size: 0.65rem;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.15rem 0.4rem; border: 1px solid var(--line-strong);
+      color: var(--ink-dim); border-radius: var(--radius);
+    }
+    .badge.live { border-color: rgba(59,130,246,0.5); color: var(--info); }
+    .badge.isolated { border-color: var(--line-strong); }
+    .table-empty {
+      padding: 2rem; text-align: center; color: var(--ink-dim);
+      font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .table-empty button {
+      background: none; border: none; color: var(--volt); cursor: pointer;
+      font-family: var(--font-mono); text-decoration: underline; font-size: 0.85rem;
+    }
+    .result-count {
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-dim);
+      margin-top: 0.75rem; letter-spacing: 0.04em;
+    }
+
+    /* —— campaigns —— */
+    .campaign-list { display: grid; gap: 0; border-left: 1px solid var(--line-strong); margin-left: 0.5rem; }
+    .campaign {
+      position: relative; padding: 1.15rem 0 1.15rem 1.75rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .campaign:last-child { border-bottom: none; }
+    .campaign::before {
+      content: ""; position: absolute; left: -4px; top: 1.5rem;
+      width: 7px; height: 7px; background: var(--canvas);
+      border: 1px solid var(--volt); border-radius: 50%;
+    }
+    .campaign-date {
+      font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em;
+      color: var(--ink-dim); margin-bottom: 0.35rem;
+    }
+    .campaign-q { font-weight: 600; color: var(--ink); margin-bottom: 0.3rem; font-size: 0.98rem; }
+    .campaign-a { color: var(--ink-muted); font-size: 0.92rem; margin: 0; }
+    .campaign-a strong { color: var(--volt); font-weight: 500; }
+    .campaign a.report-link {
+      font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-dim);
+      text-decoration: none; letter-spacing: 0.04em;
+    }
+    .campaign a.report-link:hover { color: var(--volt); }
+
+    /* —— suites —— */
+    .suite-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line-strong); border: 1px solid var(--line-strong); }
+    .suite {
+      background: var(--surface); padding: 1.2rem 1.1rem;
+    }
+    .suite-name { font-family: var(--font-mono); font-size: 0.85rem; color: var(--volt); font-weight: 500; }
+    .suite-tasks { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-dim); letter-spacing: 0.06em; margin: 0.3rem 0 0.5rem; }
+    .suite-desc { font-size: 0.85rem; color: var(--ink-muted); margin: 0; }
+
+    /* —— CTA —— */
+    .cta-band {
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.03), transparent 45%),
+        var(--surface);
+      padding: 2.5rem;
+      display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; align-items: center;
+    }
+    .cta-band > * { min-width: 0; } /* let the long command scroll instead of widening the page */
+    .cta-band h2 { margin-bottom: 0.75rem; }
+    .cta-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-family: var(--font-mono); font-size: 0.82rem; letter-spacing: 0.06em;
+      text-transform: uppercase; text-decoration: none; font-weight: 500;
+      padding: 0.85rem 1.2rem; border-radius: var(--radius); border: 1px solid transparent;
+      cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .btn-primary { background: var(--ink); color: var(--canvas); border-color: var(--ink); }
+    .btn-primary:hover { background: transparent; color: var(--volt); border-color: var(--volt); }
+    .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+    .btn-ghost:hover { border-color: var(--volt); color: var(--volt); }
+    .cmd {
+      display: flex; align-items: center; gap: 0.75rem;
+      font-family: var(--font-mono); font-size: 0.78rem; color: var(--volt);
+      background: var(--canvas); border: 1px solid var(--line);
+      padding: 0.45rem 0.45rem 0.45rem 0.9rem;
+    }
+    .cmd code { color: var(--volt); flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; }
+    .cmd code::before { content: "$ "; color: var(--ink-dim); }
+    .copy-btn {
+      flex: none; background: none; border: 1px solid var(--line-strong); color: var(--ink-muted);
+      font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.35rem 0.6rem; cursor: pointer; border-radius: var(--radius);
+    }
+    .copy-btn:hover { color: var(--volt); border-color: var(--volt); }
+
+    /* —— footer —— */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2.5rem 0 3rem;
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-dim);
+    }
+    .footer-inner {
+      display: flex; flex-wrap: wrap; gap: 1rem 2rem; justify-content: space-between;
+      align-items: center;
+    }
+    .footer-links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .footer-links a { color: var(--ink-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--volt); }
+
+    /* —— entrance —— */
+    .reveal {
+      opacity: 0; transform: translateY(14px);
+      animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .reveal:nth-child(1) { animation-delay: 0.05s; }
+    .reveal:nth-child(2) { animation-delay: 0.15s; }
+    .reveal:nth-child(3) { animation-delay: 0.25s; }
+    .reveal:nth-child(4) { animation-delay: 0.35s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    /* —— responsive —— */
+    @media (max-width: 960px) {
+      .hero-grid, .split-2, .cta-band { grid-template-columns: 1fr; }
+      .rec-grid, .suite-grid { grid-template-columns: 1fr; }
+      .machine-tabs { grid-template-columns: 1fr; }
+      .machine-tab { border-right: none; border-bottom: 1px solid var(--line-strong); }
+      .machine-tab:last-child { border-bottom: none; }
+      .machine-tab[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--volt); }
+      .gauge { max-width: 100%; }
+    }
+    @media (max-width: 768px) {
+      .nav-toggle { display: block; }
+      .nav-links {
+        display: none; position: absolute; top: 60px; left: 0; right: 0;
+        flex-direction: column; align-items: stretch; gap: 0;
+        background: rgba(10,10,11,0.97); border-bottom: 1px solid var(--line);
+        padding: 0.5rem 0;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a { display: block; padding: 0.85rem 1.25rem; }
+      .nav-links .nav-cta { margin: 0.5rem 1.25rem; text-align: center; }
+      /* label + value on one line, bar full-width below, meta under it */
+      .bar-row, .split-2 .bar-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "label val" "track track" "meta meta";
+      }
+      .gauge-row { grid-template-columns: 5.5rem 1fr 2.4rem; }
+      .filters { display: grid; grid-template-columns: 1fr 1fr; }
+      .filter-field select { min-width: 0; width: 100%; }
+      .filter-reset { margin-left: 0; align-self: end; }
+      section { padding: 3.5rem 0; }
+      .cta-band { padding: 1.75rem; }
+    }
+    /* phones: the 8-column ledger becomes stacked rows (model + score on top,
+       the rest as a meta line); the header turns into a row of sort chips */
+    @media (max-width: 640px) {
+      .table-wrap { overflow: visible; }
+      table.results { min-width: 0; }
+      table.results thead tr {
+        display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.75rem;
+        background: var(--surface-2); border-bottom: 1px solid var(--line-strong);
+      }
+      table.results th { position: static; padding: 0; border: none; background: none; }
+      table.results th .sort { border: 1px solid var(--line-strong); padding: 0.35rem 0.5rem; }
+      table.results tbody tr {
+        display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.6rem;
+        padding: 0.85rem 0.9rem; border-bottom: 1px solid var(--line);
+      }
+      table.results tbody tr:last-child { border-bottom: none; }
+      table.results td { padding: 0; border: none; font-size: 0.74rem; }
+      table.results td.model-cell { order: -2; flex: 1 1 60%; font-size: 0.9rem; }
+      table.results td.score-cell { order: -1; margin-left: auto; font-size: 1rem; }
+      table.results tr:hover td { background: none; }
+    }
+    @media (max-width: 375px) {
+      .wrap { width: min(100% - 1.5rem, var(--max)); }
+      h1 { font-size: 2.3rem; }
+      .gauge-score { font-size: 3rem; }
+      .rec-score { font-size: 2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+      .bar-fill, .g-fill { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="m-bench home">
+        <img src="assets/logo-mark.svg" alt="" width="28" height="28" />
+        <span class="brand-name">m<span>-</span>bench</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" id="nav-toggle">Menu</button>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="#recommend">Setups</a></li>
+        <li><a href="#harness">Harness</a></li>
+        <li><a href="#thinking">Thinking</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#findings">Findings</a></li>
+        <li><a class="nav-cta" href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <noscript><p class="wrap load-error">This page renders its results with JavaScript. The raw data is in <a href="data.json">data.json</a>.</p></noscript>
+    <p class="wrap load-error" id="load-error" role="alert" hidden></p>
+    <!-- HERO -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="wrap">
+        <div class="hero-grid">
+          <div class="reveal">
+            <p class="eyebrow">Machine-local LLM ranking</p>
+            <h1 id="hero-title">The best setup<br />is the one measured<br /><em>on your hardware.</em></h1>
+            <p class="lead" style="margin-top:1.5rem;">
+              Public leaderboards rank models on machines you don't own, through agents you don't run.
+              m-bench measures serving config, thinking mode, and harness — then names a winner for <em>this</em> box.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#recommend">Find your setup ↓</a>
+              <a class="btn btn-ghost" href="#run-it">Measure your own box</a>
+            </div>
+            <div class="hero-meta">
+              <span><strong>3</strong> machines</span>
+              <span><strong>5</strong> harnesses</span>
+              <span><strong>28</strong> one-shot tasks</span>
+              <span><strong>16</strong> agentic tasks</span>
+              <span class="volt">validate 28/28</span>
+            </div>
+          </div>
+          <aside class="gauge reveal" aria-labelledby="gauge-label">
+            <div class="gauge-label" id="gauge-label">Same weights · different agent</div>
+            <div class="gauge-score" id="gauge-score">—<span class="unit">pt spread</span></div>
+            <div class="gauge-sub" id="gauge-sub">Qwen3.6-35B-A3B · agentic-hard · think-OFF</div>
+            <div class="gauge-rows" id="gauge-rows"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- MACHINE RECOMMENDER -->
+    <section id="recommend" aria-labelledby="rec-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">01 — Your machine</p>
+          <h2 id="rec-title">Which harness + model should I use?</h2>
+          <p>Pick the hardware that matches yours. Each card is a measured run — score, thinking mode, and a link to the raw report.</p>
+        </header>
+
+        <div class="machine-tabs" role="tablist" aria-label="Select your machine" id="machine-tabs"></div>
+        <div class="machine-panel" id="machine-panel" role="tabpanel" tabindex="0"></div>
+      </div>
+    </section>
+
+    <!-- HARNESS IMPACT -->
+    <section id="harness" aria-labelledby="harness-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">02 — The agent around the model</p>
+          <h2 id="harness-title">Same weights. Four harnesses. 23 points apart.</h2>
+          <p>Half of what you run is not the model — it is the coding agent's system prompt, tool schemas, and how much context it resends.</p>
+        </header>
+
+        <div class="chart-block">
+          <div class="chart-title">Agent score · agentic-hard · think-OFF</div>
+          <p class="chart-question" id="harness-question"></p>
+          <div class="bar-rows" id="harness-bars" role="list" aria-label="Agent score by harness, 0 to 100"></div>
+          <p class="bar-legend" aria-hidden="true"><i></i> within ~8 pts of the leader: a tie at 2 samples</p>
+          <p class="chart-note" id="harness-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- THINKING -->
+    <section id="thinking" aria-labelledby="think-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">03 — Thinking mode</p>
+          <h2 id="think-title">Both modes. Different products.</h2>
+          <p>Reasoning-trained models collapse without their thinking block. Non-reasoning models burn thousands of tokens with it. The answer flips by workload.</p>
+        </header>
+
+        <div class="split-2">
+          <div class="chart-block">
+            <span class="verdict-pill yes" id="oneshot-pill">Default · thinking OFF</span>
+            <div class="chart-title" id="oneshot-title"></div>
+            <div class="bar-rows" id="oneshot-bars" role="list" aria-label="One-shot pass@1 by thinking mode, 0 to 100"></div>
+            <p class="delta cost" id="oneshot-delta"></p>
+            <p class="chart-note" id="oneshot-report"></p>
+          </div>
+          <div class="chart-block">
+            <span class="verdict-pill yes" id="tool-pill">Slight edge · thinking ON</span>
+            <div class="chart-title" id="tool-title"></div>
+            <div class="bar-rows" id="tool-bars" role="list" aria-label="Agent score by thinking mode, 0 to 100"></div>
+            <p class="delta" id="tool-delta"></p>
+            <p class="chart-note" id="tool-report"></p>
+          </div>
+        </div>
+        <p class="bar-legend" aria-hidden="true"><i></i> within ~8 pts of the better mode: a tie at 2 samples</p>
+        <p class="chart-note" id="think-lesson" style="border:none;padding-top:0.5rem;"></p>
+      </div>
+    </section>
+
+    <!-- RESULTS EXPLORER -->
+    <section id="results" aria-labelledby="results-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">04 — Full ledger</p>
+          <h2 id="results-title">Every measured run, filterable.</h2>
+          <p>Click a column to sort, click a model to open its report. <span class="volt">Green</span> marks the best score per suite in view. Noise floor ≈ 8 points at two samples.</p>
+        </header>
+
+        <div class="filters" role="search" aria-label="Filter results">
+          <div class="filter-field">
+            <label for="f-machine">Machine</label>
+            <select id="f-machine"><option value="">All machines</option></select>
+          </div>
+          <div class="filter-field">
+            <label for="f-harness">Harness</label>
+            <select id="f-harness"><option value="">All harnesses</option></select>
+          </div>
+          <div class="filter-field">
+            <label for="f-mode">Mode</label>
+            <select id="f-mode">
+              <option value="">All modes</option>
+              <option value="isolated">Isolated</option>
+              <option value="live">Live</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="f-suite">Suite</label>
+            <select id="f-suite"><option value="">All suites</option></select>
+          </div>
+          <div class="filter-field">
+            <label for="f-thinking">Thinking</label>
+            <select id="f-thinking">
+              <option value="">Any</option>
+              <option value="ON">ON</option>
+              <option value="OFF">OFF</option>
+            </select>
+          </div>
+          <button type="button" class="filter-reset" id="f-reset">Reset</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="results" id="results-table">
+            <thead>
+              <tr>
+                <th scope="col" data-key="date" aria-sort="descending"><button type="button" class="sort">Date</button></th>
+                <th scope="col" data-key="machine"><button type="button" class="sort">Machine</button></th>
+                <th scope="col" data-key="model"><button type="button" class="sort">Model</button></th>
+                <th scope="col" data-key="harness"><button type="button" class="sort">Harness</button></th>
+                <th scope="col" data-key="mode"><button type="button" class="sort">Mode</button></th>
+                <th scope="col" data-key="thinking"><button type="button" class="sort">Think</button></th>
+                <th scope="col" data-key="suite"><button type="button" class="sort">Suite</button></th>
+                <th scope="col" class="num" data-key="score"><button type="button" class="sort">Score</button></th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+          <div class="table-empty" id="results-empty" hidden>
+            No runs match these filters. <button type="button" id="empty-reset">Clear filters</button>
+          </div>
+        </div>
+        <p class="result-count" id="result-count"></p>
+      </div>
+    </section>
+
+    <!-- FINDINGS -->
+    <section id="findings" aria-labelledby="findings-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">05 — Campaign log</p>
+          <h2 id="findings-title">What the measurements answered.</h2>
+          <p>Each campaign asks one question and ends in a decision — not a summary.</p>
+        </header>
+        <div class="campaign-list" id="campaign-list"></div>
+      </div>
+    </section>
+
+    <!-- SUITES + CTA -->
+    <section id="suites" aria-labelledby="suites-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">06 — The suites</p>
+          <h2 id="suites-title">Hidden tests. Proven passable.</h2>
+          <p>Every task ships a reference solution. If <span class="mono volt">./bench validate</span> is not 28/28, no score means anything.</p>
+        </header>
+        <div class="suite-grid" id="suite-grid"></div>
+
+        <div class="cta-band" id="run-it" style="margin-top:2.5rem;">
+          <div>
+            <p class="eyebrow">Reproduce it</p>
+            <h2>Measure your own box.</h2>
+            <p class="lead">Point at any OpenAI-compatible endpoint. Run both thinking modes. Rank the harness. Apply the winner.</p>
+            <div class="cmd" style="margin-top:1rem;"><code id="cmd-text">pip install -e . &amp;&amp; ./bench validate</code><button type="button" class="copy-btn" id="copy-cmd">Copy</button></div>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="https://github.com/luongnv89/m-bench" rel="noopener">Clone on GitHub</a>
+            <a class="btn btn-ghost" href="https://github.com/luongnv89/m-bench/blob/main/AGENTS.md" rel="noopener">Agent runbook</a>
+            <a class="btn btn-ghost" href="https://github.com/luongnv89/m-bench/tree/main/results" rel="noopener">Raw results</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div>© m-bench · MIT · measured where it runs</div>
+      <div class="footer-links">
+        <a href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a>
+        <a href="https://github.com/luongnv89/m-bench/blob/main/README.md" rel="noopener">README</a>
+        <a href="https://github.com/luongnv89/m-bench/blob/main/docs/HARNESSES.md" rel="noopener">Harnesses</a>
+        <a href="https://github.com/luongnv89/m-bench/blob/main/docs/REPRODUCING.md" rel="noopener">Reproducing</a>
+      </div>
+      <div id="data-stamp">data · loading…</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const REPO = "https://github.com/luongnv89/m-bench/";
+      const NOISE = 8; // pts — differences under this at --samples 2 are ties
+      let data = null;
+      let activeMachine = 0;
+      let sort = { key: "date", dir: "desc" };
+
+      const $ = (s, r) => (r || document).querySelector(s);
+      const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+      const esc = (s) => String(s == null ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+      // escape, then render `ticks` as inline code (titles in data.json use them)
+      const fmt = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+      // directories must go through tree/, files through blob/
+      const gh = (p) => REPO + (p.endsWith("/") ? "tree/main/" : "blob/main/") + p;
+      const machineName = (id) => {
+        const m = data.machines.find((x) => x.id === id);
+        return m ? m.name : (id || "—");
+      };
+
+      /* —— nav —— */
+      const toggle = $("#nav-toggle");
+      const menu = $("#nav-menu");
+      const closeMenu = () => {
+        menu.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.textContent = "Menu";
+      };
+      toggle.addEventListener("click", () => {
+        const open = menu.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        toggle.textContent = open ? "Close" : "Menu";
+      });
+      menu.addEventListener("click", (e) => { if (e.target.tagName === "A") closeMenu(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && menu.classList.contains("open")) { closeMenu(); toggle.focus(); } });
+
+      /* —— copy command —— */
+      $("#copy-cmd").addEventListener("click", (e) => {
+        const btn = e.currentTarget;
+        const done = (label) => { btn.textContent = label; setTimeout(() => { btn.textContent = "Copy"; }, 1600); };
+        if (!navigator.clipboard) return done("Select it");
+        navigator.clipboard.writeText($("#cmd-text").textContent).then(() => done("Copied"), () => done("Select it"));
+      });
+
+      /* —— bars: one honest 0–100 axis + the leader's noise band —— */
+      function barRow(o) {
+        const from = Math.max(0, o.lead - NOISE);
+        return `
+          <div class="bar-row${o.isLead ? " is-lead" : ""}" role="listitem" aria-label="${esc(o.label)}: ${esc(o.value)}. ${esc(o.meta)}">
+            <span class="bar-label" aria-hidden="true">${esc(o.label)}</span>
+            <div class="bar-track" aria-hidden="true">
+              <span class="noise-band" style="--from:${from}%;--span:${o.lead - from}%"></span>
+              <div class="bar-fill${o.alt ? " alt" : ""}" style="--w:${o.value}%;--d:${o.i * 0.08}s"></div>
+            </div>
+            <span class="bar-val" aria-hidden="true">${esc(o.value)}</span>
+            <span class="bar-meta" aria-hidden="true">${esc(o.meta)}</span>
+          </div>`;
+      }
+
+      /* —— hero —— */
+      function renderHero() {
+        const rows = data.harnessComparison.rows;
+        const max = Math.max(...rows.map((r) => r.score));
+        const min = Math.min(...rows.map((r) => r.score));
+        $("#gauge-score").innerHTML = (max - min).toFixed(1) + '<span class="unit">pt spread</span>';
+        $("#gauge-rows").innerHTML = rows.map((r, i) => `
+          <div class="gauge-row${r.score === max ? " top" : ""}">
+            <span>${esc(r.harness)}</span>
+            <span class="g-track" aria-hidden="true"><span class="g-fill" style="--w:${r.score}%;--d:${0.3 + i * 0.08}s"></span></span>
+            <span class="g-val">${r.score.toFixed(1)}</span>
+          </div>`).join("");
+      }
+
+      /* —— machine tabs —— */
+      function selectMachine(i) {
+        activeMachine = i;
+        renderMachineTabs();
+        renderMachinePanel();
+        $("#tab-" + data.machines[i].id).focus();
+      }
+
+      function renderMachineTabs() {
+        const el = $("#machine-tabs");
+        el.innerHTML = data.machines.map((m, i) => `
+          <button class="machine-tab" role="tab" id="tab-${esc(m.id)}"
+            aria-selected="${i === activeMachine}" aria-controls="machine-panel"
+            tabindex="${i === activeMachine ? 0 : -1}" data-idx="${i}" type="button">
+            <span class="tab-name">${esc(m.name)}</span>
+            <span class="tab-spec">${esc(m.memory)} · ${esc(m.chip)}</span>
+          </button>`).join("");
+
+        $$(".machine-tab", el).forEach((btn) => {
+          btn.addEventListener("click", () => selectMachine(Number(btn.dataset.idx)));
+          btn.addEventListener("keydown", (e) => {
+            const n = data.machines.length;
+            const next = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+            if (next) { e.preventDefault(); selectMachine((activeMachine + next + n) % n); }
+            if (e.key === "Home") { e.preventDefault(); selectMachine(0); }
+            if (e.key === "End") { e.preventDefault(); selectMachine(n - 1); }
+          });
+        });
+      }
+
+      function renderMachinePanel() {
+        const m = data.machines[activeMachine];
+        const recs = m.recommendations.map((r, i) => `
+          <article class="rec-card${i === 0 ? " primary" : ""}">
+            <div class="rec-workload">${esc(r.workload)}</div>
+            <div class="rec-score">${esc(r.score)}<small>${esc(r.metric)}</small></div>
+            <dl class="rec-pair">
+              <div><dt>Harness</dt><dd>${esc(r.harness)}</dd></div>
+              <div><dt>Model</dt><dd>${esc(r.model)}</dd></div>
+              <div><dt>Thinking</dt><dd>${esc(r.thinking)}</dd></div>
+              <div><dt>Serving</dt><dd class="muted" style="font-weight:400;font-size:0.82rem;">${esc(r.serving)}</dd></div>
+            </dl>
+            ${r.config ? `<div class="rec-config">./bench apply ${esc(r.config)}</div>` : ""}
+            <p class="rec-note"><span class="dim">Runner-up · </span>${esc(r.runnerUp)}</p>
+            <a class="rec-link" href="${gh(r.report)}" rel="noopener">Read the report →</a>
+          </article>`).join("");
+
+        const panel = $("#machine-panel");
+        panel.setAttribute("aria-labelledby", "tab-" + m.id);
+        panel.innerHTML = `
+          <div class="machine-specs">
+            <span><strong>CPU</strong> ${esc(m.cpu)}</span>
+            <span><strong>Memory</strong> ${esc(m.memory)}</span>
+            <span><strong>GPU</strong> ${esc(m.gpu)}</span>
+            <span><strong>OS</strong> ${esc(m.os)}</span>
+          </div>
+          <p class="machine-tagline">${esc(m.tagline)}</p>
+          <div class="rec-grid">${recs}</div>`;
+      }
+
+      /* —— harness chart —— */
+      function renderHarness() {
+        const h = data.harnessComparison;
+        $("#harness-question").textContent = h.question;
+        const lead = Math.max(...h.rows.map((r) => r.score));
+        $("#harness-bars").innerHTML = h.rows.map((r, i) => barRow({
+          i, lead, isLead: r.score === lead, label: r.harness, value: r.score.toFixed(1),
+          meta: `solved ${r.solved.toFixed(1)}% · ${r.calls} calls · in-tok ${r.inTok} · ${r.wall}s`,
+        })).join("");
+        $("#harness-note").innerHTML = esc(h.note) +
+          ` <a href="${gh(h.report)}" rel="noopener">Full report →</a>`;
+      }
+
+      /* —— thinking —— */
+      function renderThinking() {
+        const t = data.thinkingTradeoff;
+        $("#oneshot-title").innerHTML = fmt(t.oneShot.title);
+        $("#tool-title").innerHTML = fmt(t.toolLoop.title);
+        $("#oneshot-delta").textContent = t.oneShot.delta;
+        $("#tool-delta").textContent = t.toolLoop.delta;
+        $("#oneshot-report").innerHTML = esc(t.oneShot.verdict) +
+          ` <a href="${gh(t.oneShot.report)}" rel="noopener">Report →</a>`;
+        $("#tool-report").innerHTML = esc(t.toolLoop.verdict) +
+          ` <a href="${gh(t.toolLoop.report)}" rel="noopener">Report →</a>`;
+        $("#think-lesson").textContent = t.lesson;
+
+        const paint = (rows, root, alt) => {
+          const lead = Math.max(...rows.map((r) => r.score));
+          $(root).innerHTML = rows.map((r, i) => barRow({
+            i, lead, alt, isLead: r.score === lead, label: r.label, value: r.score,
+            meta: "wall " + r.wall + "s" +
+              (r.meanTok != null ? " · mean " + r.meanTok + " tok" : "") +
+              (r.calls != null ? " · " + r.calls + " calls" : "") +
+              (r.truncated ? " · " + r.truncated + " truncated" : ""),
+          })).join("");
+        };
+        paint(t.oneShot.rows, "#oneshot-bars", true);
+        paint(t.toolLoop.rows, "#tool-bars", false);
+      }
+
+      /* —— results table —— */
+      const FILTERS = ["#f-machine", "#f-harness", "#f-mode", "#f-suite", "#f-thinking"];
+
+      function fillFilters() {
+        const uniq = (k) => [...new Set(data.results.map((r) => r[k]).filter(Boolean))];
+        const fill = (sel, vals, label) => {
+          const el = $(sel);
+          vals.forEach((v) => {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = label ? label(v) : v;
+            el.appendChild(o);
+          });
+        };
+        fill("#f-machine", uniq("machine"), machineName);
+        fill("#f-harness", uniq("harness").sort());
+        fill("#f-suite", uniq("suite"));
+      }
+
+      function sortValue(r, key) {
+        if (key === "machine") return machineName(r.machine);
+        return r[key] == null ? "" : r[key];
+      }
+
+      function filteredResults() {
+        const [m, h, mode, s, th] = FILTERS.map((sel) => $(sel).value);
+        const dir = sort.dir === "asc" ? 1 : -1;
+        return data.results.filter((r) =>
+          (!m || r.machine === m) &&
+          (!h || r.harness === h) &&
+          (!mode || r.mode === mode) &&
+          (!s || r.suite === s) &&
+          (!th || r.thinking === th || r.thinking === "—")
+        ).sort((a, b) => {
+          const x = sortValue(a, sort.key), y = sortValue(b, sort.key);
+          const c = typeof x === "number" ? x - y : String(x).localeCompare(String(y));
+          return c ? c * dir : b.score - a.score;
+        });
+      }
+
+      function renderResults() {
+        const rows = filteredResults();
+        const best = {};
+        rows.forEach((r) => { best[r.suite] = Math.max(best[r.suite] ?? -Infinity, r.score); });
+
+        $("#results-empty").hidden = rows.length > 0;
+        $("#results-body").innerHTML = rows.map((r) => `
+          <tr>
+            <td class="mono">${esc(r.date)}</td>
+            <td>${esc(machineName(r.machine))}</td>
+            <td class="model-cell"><a href="${gh(r.report)}" rel="noopener">${esc(r.model)}</a></td>
+            <td class="mono">${esc(r.harness)}</td>
+            <td><span class="badge ${esc(r.mode)}">${esc(r.mode)}</span></td>
+            <td class="mono">${esc(r.thinking)}</td>
+            <td class="mono">${esc(r.suite)}</td>
+            <td class="num score-cell${r.score === best[r.suite] ? " best" : ""}">${r.score.toFixed(1)}<span class="unit">${esc(r.unit)}</span></td>
+          </tr>`).join("");
+
+        $$("#results-table th[data-key]").forEach((th) => {
+          if (th.dataset.key === sort.key) th.setAttribute("aria-sort", sort.dir === "asc" ? "ascending" : "descending");
+          else th.removeAttribute("aria-sort");
+        });
+        $("#result-count").textContent =
+          rows.length + " / " + data.results.length + " runs · noise " + data.noiseFloor;
+      }
+
+      function resetFilters() {
+        FILTERS.forEach((s) => { $(s).value = ""; });
+        renderResults();
+      }
+
+      /* —— campaigns & suites —— */
+      function renderCampaigns() {
+        const list = [...data.campaigns].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+        $("#campaign-list").innerHTML = list.map((c) => `
+          <article class="campaign">
+            <div class="campaign-date">${esc(c.date)}</div>
+            <div class="campaign-q">${esc(c.question)}</div>
+            <p class="campaign-a">${esc(c.answer).replace(/^(No\.|Yes\.|Yes,)/, "<strong>$1</strong>")}</p>
+            <a class="report-link" href="${gh(c.link)}" rel="noopener">Open campaign →</a>
+          </article>`).join("");
+      }
+
+      function renderSuites() {
+        $("#suite-grid").innerHTML = data.suites.map((s) => `
+          <div class="suite">
+            <div class="suite-name">${esc(s.name)}</div>
+            <div class="suite-tasks">${s.tasks} tasks</div>
+            <p class="suite-desc">${esc(s.desc)}</p>
+          </div>`).join("");
+      }
+
+      /* —— boot —— */
+      fetch("data.json")
+        .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then((json) => {
+          data = json;
+          $("#data-stamp").textContent = "data · " + json.generated;
+          renderHero();
+          renderMachineTabs();
+          renderMachinePanel();
+          renderHarness();
+          renderThinking();
+          fillFilters();
+          renderResults();
+          renderCampaigns();
+          renderSuites();
+
+          FILTERS.forEach((s) => $(s).addEventListener("change", renderResults));
+          $("#f-reset").addEventListener("click", resetFilters);
+          $("#empty-reset").addEventListener("click", resetFilters);
+          $$("#results-table th[data-key] .sort").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const key = btn.parentElement.dataset.key;
+              // numbers and dates start high-to-low; text starts A→Z
+              const firstDir = key === "score" || key === "date" ? "desc" : "asc";
+              sort = sort.key === key
+                ? { key, dir: sort.dir === "asc" ? "desc" : "asc" }
+                : { key, dir: firstDir };
+              renderResults();
+            });
+          });
+        })
+        .catch((err) => {
+          $("#data-stamp").textContent = "data · failed to load";
+          const box = $("#load-error");
+          box.hidden = false;
+          box.textContent = "Could not load data.json (" + err.message + "). Serve this folder over HTTP, not file://, and check the file exists.";
+        });
+    })();
+  </script>
+</body>
+</html>

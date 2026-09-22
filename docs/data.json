@@ -1,0 +1,348 @@
+{
+  "generated": "2026-09-22",
+  "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
+  "machines": [
+    {
+      "id": "dgx-spark",
+      "name": "NVIDIA DGX Spark",
+      "chip": "GB10",
+      "memory": "120 GiB unified",
+      "cpu": "Cortex-X925 + A725 · 20 threads",
+      "gpu": "NVIDIA GB10 · sm_121a · CUDA 13.0",
+      "os": "Ubuntu 24.04 aarch64",
+      "tagline": "Reference hardware. Room for 35B MoE at NVFP4.",
+      "recommendations": [
+        {
+          "workload": "Tool loops · coding agents",
+          "harness": "claude-code",
+          "model": "Qwen3.6-35B-A3B-NVFP4",
+          "thinking": "OFF · ON ties within noise",
+          "serving": "vLLM TP1 · MTP k=2 · prefix caching",
+          "score": 68.2,
+          "metric": "agent score · agentic-hard",
+          "runnerUp": "opencode 60.3 · same weights · within noise",
+          "config": "qwen3.6-35b-a3b-nvfp4",
+          "report": "results/2026-08-20-pi-harness/REPORT-hard.md"
+        },
+        {
+          "workload": "One-shot code · 28-task suite",
+          "harness": "benchkit built-in loop",
+          "model": "Qwen3.6-35B-A3B-NVFP4",
+          "thinking": "OFF",
+          "serving": "vLLM · 6k max tokens",
+          "score": 80.4,
+          "metric": "pass@1 · all",
+          "runnerUp": "think-ON 82.1 % · +1.7 is noise at 7.8× the tokens",
+          "config": "qwen3.6-35b-a3b-nvfp4",
+          "report": "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"
+        },
+        {
+          "workload": "Free hosted model · live daily setup",
+          "harness": "opencode (live)",
+          "model": "Ox Alpha Free · x-preview-f-free",
+          "thinking": "OFF",
+          "serving": "Hosted · 1M ctx · $0",
+          "score": 75.5,
+          "metric": "agent score · agentic-hard · 4 samples",
+          "runnerUp": "Isolated arm 74.8 on agentic-all",
+          "config": null,
+          "report": "results/2026-08-25/REPORT-live.3.md"
+        }
+      ]
+    },
+    {
+      "id": "m1-max",
+      "name": "Apple M1 Max",
+      "chip": "M1 Max",
+      "memory": "32 GiB unified",
+      "cpu": "10-core CPU · 32-core GPU",
+      "gpu": "Apple GPU · Metal / MLX",
+      "os": "macOS 26.6 arm64",
+      "tagline": "Local 2-bit models work; hosted models win.",
+      "recommendations": [
+        {
+          "workload": "Tool loops · coding agents",
+          "harness": "claude-code (live)",
+          "model": "Opus 5.5 · 1M ctx · effort medium",
+          "thinking": "default (effort medium)",
+          "serving": "Hosted · Anthropic",
+          "score": 100.0,
+          "metric": "agent score · agentic-hard · 1 sample",
+          "runnerUp": "devin SWE-2 Max 72.6 · 2.8 calls vs par 5.9",
+          "config": null,
+          "report": "results/2026-09-22/REPORT-live.1.md"
+        },
+        {
+          "workload": "One-shot code · local weights",
+          "harness": "benchkit built-in loop",
+          "model": "Ternary-Bonsai-2-27B-mlx-2bit",
+          "thinking": "OFF",
+          "serving": "MLX · 127.0.0.1:8080",
+          "score": 69.6,
+          "metric": "pass@1 · all",
+          "runnerUp": "MiniCPM5-2B incumbent 46.4 % · 3.5× faster",
+          "config": null,
+          "report": "results/2026-09-20/candidate-ternary-bonsai-2-27b-mlx-2bit-think-off.json"
+        },
+        {
+          "workload": "Free hosted · light daily agent",
+          "harness": "opencode (live)",
+          "model": "MiMo v2.6 Flash Free",
+          "thinking": "OFF",
+          "serving": "Hosted · opencode 1.18.32",
+          "score": 64.5,
+          "metric": "agent score · agentic-hard · 100 % solved",
+          "runnerUp": "union-alpha 55.6 · pi+remote Qwen 63.9",
+          "config": null,
+          "report": "results/2026-09-22/REPORT-live.md"
+        }
+      ]
+    },
+    {
+      "id": "small-box",
+      "name": "Small Linux box",
+      "chip": "Intel i7-4578U",
+      "memory": "8 GiB · 4 GiB free",
+      "cpu": "4 threads · no discrete GPU",
+      "gpu": "None",
+      "os": "Omarchy 7.1.8 x86_64",
+      "tagline": "No local weights fit. Use a free hosted model.",
+      "recommendations": [
+        {
+          "workload": "Tool loops · coding agents",
+          "harness": "opencode (isolated)",
+          "model": "MiMo v2.5 Free",
+          "thinking": "OFF",
+          "serving": "Hosted · stripped of idle skills",
+          "score": 71.0,
+          "metric": "agent score · agentic-hard",
+          "runnerUp": "Live arm 56.7 — isolation wins by +14.3",
+          "config": null,
+          "report": "results/2026-08-26/REPORT-live.1.md"
+        },
+        {
+          "workload": "Alt free model",
+          "harness": "opencode (isolated)",
+          "model": "Muse Spark 1.2 Free",
+          "thinking": "OFF",
+          "serving": "Hosted",
+          "score": 56.2,
+          "metric": "agent score · agentic-hard",
+          "runnerUp": "Live 44.1 — mimo wins isolated and live",
+          "config": null,
+          "report": "results/2026-08-26/REPORT-live.md"
+        }
+      ]
+    }
+  ],
+  "harnessComparison": {
+    "setup": "Qwen3.6-35B-A3B · think-OFF · NVIDIA DGX Spark · agentic-hard",
+    "question": "Same weights, four agents — how far does the number move?",
+    "rows": [
+      {
+        "harness": "claude-code",
+        "score": 68.2,
+        "solved": 100.0,
+        "calls": 9.0,
+        "inTok": "~16k",
+        "wall": 308
+      },
+      {
+        "harness": "opencode",
+        "score": 60.3,
+        "solved": 93.8,
+        "calls": 10.1,
+        "inTok": "~179k",
+        "wall": 521
+      },
+      {
+        "harness": "pi",
+        "score": 55.0,
+        "solved": 87.5,
+        "calls": 9.9,
+        "inTok": "~119k",
+        "wall": 381
+      },
+      {
+        "harness": "benchkit loop",
+        "score": 44.9,
+        "solved": 93.8,
+        "calls": 13.7,
+        "inTok": "—",
+        "wall": 166
+      }
+    ],
+    "report": "results/2026-08-20-pi-harness/REPORT-hard.md",
+    "note": "Top two tied inside the ~8-pt noise floor. The structural win: claude-code does it on ~11× less prefill than opencode."
+  },
+  "thinkingTradeoff": {
+    "oneShot": {
+      "title": "One-shot code · `all` suite",
+      "verdict": "Thinking OFF is the default. Same or better accuracy at a fraction of the cost.",
+      "rows": [
+        {
+          "label": "think-OFF · 6k cap",
+          "score": 80.4,
+          "wall": 392,
+          "meanTok": 852,
+          "truncated": 0
+        },
+        {
+          "label": "think-ON · 16k cap",
+          "score": 82.1,
+          "wall": 1985,
+          "meanTok": 6631,
+          "truncated": 1
+        }
+      ],
+      "delta": "+1.7 pts for 5.1× wall · 7.8× mean output tokens",
+      "report": "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"
+    },
+    "toolLoop": {
+      "title": "Tool loops · `agentic-hard`",
+      "verdict": "Thinking ON edges it: fewer turns at almost no extra wall time. +4.5 is inside the noise floor, so treat it as a tie.",
+      "rows": [
+        {
+          "label": "think-OFF",
+          "score": 50.1,
+          "wall": 205,
+          "calls": 13.2
+        },
+        {
+          "label": "think-ON",
+          "score": 54.6,
+          "wall": 228,
+          "calls": 12.2
+        }
+      ],
+      "delta": "+4.5 pts (within noise) · 1.1× wall · −1.0 mean calls (par 5.9)",
+      "report": "results/2026-08-20-agentic-hard/REPORT.md"
+    },
+    "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
+  },
+  "results": [
+    {"date":  "2026-09-22", "machine":  "m1-max", "model":  "Opus 5.5 (1M, effort medium)", "harness":  "claude-code", "mode":  "live", "thinking":  "—", "suite":  "agentic-hard", "score":  100.0, "unit":  "agent", "report":  "results/2026-09-22/REPORT-live.1.md"},
+    {"date":  "2026-09-22", "machine":  "m1-max", "model":  "MiMo v2.6 Flash Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  64.5, "unit":  "agent", "report":  "results/2026-09-22/REPORT-live.md"},
+    {"date":  "2026-09-20", "machine":  "m1-max", "model":  "Ternary-Bonsai-2-27B-mlx-2bit", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  69.6, "unit":  "pass@1", "report":  "results/2026-09-20/candidate-ternary-bonsai-2-27b-mlx-2bit-think-off.json"},
+    {"date":  "2026-09-20", "machine":  "m1-max", "model":  "MiniCPM5-2B-bf16", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  46.4, "unit":  "pass@1", "report":  "results/2026-09-20/incumbent-minicpm5-2b-mlx-dspark-think-off.json"},
+    {"date":  "2026-09-15", "machine":  "m1-max", "model":  "SWE-2 Max", "harness":  "devin", "mode":  "live", "thinking":  "—", "suite":  "agentic-hard", "score":  72.6, "unit":  "agent", "report":  "results/2026-09-15/REPORT-live.md"},
+    {"date":  "2026-09-14", "machine":  "m1-max", "model":  "MiniCPM5-2B mlx-dspark", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "agentic-hard", "score":  37.7, "unit":  "agent", "report":  "results/2026-09-14/REPORT-minicpm5-2b-mlx-dspark-cap7.md"},
+    {"date":  "2026-09-14", "machine":  "m1-max", "model":  "MiniCPM5-2B mlx-dspark", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  36.6, "unit":  "agent", "report":  "results/2026-09-14/REPORT-minicpm5-2b-mlx-dspark-cap7.md"},
+    {"date":  "2026-09-16", "machine":  "m1-max", "model":  "union-alpha", "harness":  "opencode", "mode":  "live", "thinking":  "—", "suite":  "agentic-hard", "score":  55.6, "unit":  "agent", "report":  "results/2026-09-16/REPORT-live.md"},
+    {"date":  "2026-08-28", "machine":  "m1-max", "model":  "Qwen3.6-35B via 9router", "harness":  "pi", "mode":  "live", "thinking":  "ON", "suite":  "agentic-hard", "score":  63.9, "unit":  "agent", "report":  "results/2026-08-28/REPORT-live.md"},
+    {"date":  "2026-09-05", "machine":  "dgx-spark", "model":  "Qwen3.8-Flash-Next v2", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  85.7, "unit":  "pass@1", "report":  "results/2026-09-05/REPORT-flash-next-v2-analysis.md"},
+    {"date":  "2026-09-04", "machine":  "dgx-spark", "model":  "Qwen3.8-Flash-Next", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  87.5, "unit":  "pass@1", "report":  "results/2026-09-04/REPORT-flash-next-analysis.md"},
+    {"date":  "2026-09-04", "machine":  "dgx-spark", "model":  "Qwen3.8-Flash-Next", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "all", "score":  58.9, "unit":  "pass@1", "report":  "results/2026-09-04/REPORT-flash-next-analysis.md"},
+    {"date":  "2026-08-25", "machine":  "dgx-spark", "model":  "Ox Alpha Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  75.5, "unit":  "agent", "report":  "results/2026-08-25/REPORT-live.3.md"},
+    {"date":  "2026-08-25", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "pi", "mode":  "live", "thinking":  "ON", "suite":  "agentic-hard", "score":  72.5, "unit":  "agent", "report":  "results/2026-08-25/REPORT-live.md"},
+    {"date":  "2026-08-21", "machine":  null, "model":  "Ox Alpha Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-all", "score":  74.8, "unit":  "agent", "report":  "results/2026-08-21/REPORT.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "claude-code", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  68.2, "unit":  "agent", "report":  "results/2026-08-20-pi-harness/REPORT-hard.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  60.3, "unit":  "agent", "report":  "results/2026-08-20-pi-harness/REPORT-hard.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "pi", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  55.0, "unit":  "agent", "report":  "results/2026-08-20-pi-harness/REPORT-hard.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.9, "unit":  "agent", "report":  "results/2026-08-20-pi-harness/REPORT-hard.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "all", "score":  82.1, "unit":  "pass@1", "report":  "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  80.4, "unit":  "pass@1", "report":  "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Ornith-1.5-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "all", "score":  80.4, "unit":  "pass@1", "report":  "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Ornith-1.5-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  60.7, "unit":  "pass@1", "report":  "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "agentic-hard", "score":  54.6, "unit":  "agent", "report":  "results/2026-08-20-agentic-hard/REPORT.md"},
+    {"date":  "2026-08-20", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  50.1, "unit":  "agent", "report":  "results/2026-08-20-agentic-hard/REPORT.md"},
+    {"date":  "2026-08-26", "machine":  "small-box", "model":  "MiMo v2.5 Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  71.0, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.1.md"},
+    {"date":  "2026-08-26", "machine":  "small-box", "model":  "MiMo v2.5 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  56.7, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.1.md"},
+    {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  56.2, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"},
+    {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.1, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"}
+  ],
+  "campaigns": [
+    {
+      "date": "2026-08-17",
+      "question": "Does thinking mode help a coding agent?",
+      "answer": "No for one-shot. Thinking off: same or better pass@1, ~13× fewer output tokens, ~32× lower wall-clock.",
+      "link": "results/2026-08-17-thinking-mode/"
+    },
+    {
+      "date": "2026-08-20",
+      "question": "Should Ornith-1.5 replace Qwen3.6-35B-A3B?",
+      "answer": "No. Ties at its best config, −20 points at the config we deploy.",
+      "link": "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"
+    },
+    {
+      "date": "2026-08-20",
+      "question": "Does the harness around the model change the answer?",
+      "answer": "Yes, by as much as a model swap. Same model: 44.9 built-in → 68.2 claude-code on agentic-hard.",
+      "link": "results/2026-08-20-pi-harness/REPORT-hard.md"
+    },
+    {
+      "date": "2026-08-21",
+      "question": "Can a free stealth cloud model drive a real tool loop?",
+      "answer": "Yes. 74.8 agent score, 96.9 % solve via opencode — use thinking OFF.",
+      "link": "results/2026-08-21/REPORT.md"
+    },
+    {
+      "date": "2026-08-26",
+      "question": "muse-spark-1.2 vs mimo-v2.5-free on opencode",
+      "answer": "mimo-v2.5-free wins. Isolated beats live by 12–14 points on an 8 GiB box.",
+      "link": "results/2026-08-26/"
+    },
+    {
+      "date": "2026-09-04",
+      "question": "Should Qwen3.8-Flash-Next replace Qwen3.6 locally?",
+      "answer": "No. Wins only think-OFF (+7 pp, noise); loses think-ON and both agentic modes at 2–17× wall time.",
+      "link": "results/2026-09-04/REPORT-flash-next-analysis.md"
+    },
+    {
+      "date": "2026-09-14",
+      "question": "Is MiniCPM5-2B via mlx-dspark good for agentic work on M1 Max?",
+      "answer": "Usable, but not strong. Thinking OFF by default — ON costs 3.5× tokens for no real gain.",
+      "link": "results/2026-09-14/REPORT-minicpm5-2b-mlx-dspark-cap7.md"
+    },
+    {
+      "date": "2026-09-15",
+      "question": "Is the daily Devin CLI + SWE-2 Max setup any good?",
+      "answer": "Yes. 72.6 agent score live, +1.2 over isolated is noise. Surface was idle (1 call in 67).",
+      "link": "results/2026-09-15/REPORT-live.md"
+    },
+    {
+      "date": "2026-09-22",
+      "question": "Latest opencode live setup (MiMo v2.6 Flash Free)",
+      "answer": "64.5 agent, 100 % solved, 100 % valid calls. Efficiency vs par is the remaining gap.",
+      "link": "results/2026-09-22/REPORT-live.md"
+    },
+    {
+      "date": "2026-09-22",
+      "question": "How does the daily claude-code + Opus 5.5 setup score?",
+      "answer": "Yes, top of the ledger. 100.0 agent score: 8/8 solved in 2.8 calls vs par 5.9, 74 s wall. One sample, and ~108k input tokens per task from live skills/MCP.",
+      "link": "results/2026-09-22/REPORT-live.1.md"
+    }
+  ],
+  "suites": [
+    {
+      "name": "core16",
+      "tasks": 16,
+      "desc": "Algorithms, parsing, Python idiom — saturated at 100 %"
+    },
+    {
+      "name": "hard12",
+      "tasks": 12,
+      "desc": "DP, parsers, cron, bigint — models land 45–75 %"
+    },
+    {
+      "name": "all",
+      "tasks": 28,
+      "desc": "core16 + hard12 · one-shot pass@1"
+    },
+    {
+      "name": "agentic",
+      "tasks": 8,
+      "desc": "Multi-turn tool calling over a sandboxed workspace"
+    },
+    {
+      "name": "agentic-hard",
+      "tasks": 8,
+      "desc": "Ranking suite · agent score vs oracle par"
+    },
+    {
+      "name": "agentic-all",
+      "tasks": 16,
+      "desc": "agentic + agentic-hard"
+    }
+  ]
+}
