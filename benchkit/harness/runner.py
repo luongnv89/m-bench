@@ -4,6 +4,7 @@ import time
 from dataclasses import asdict
 
 from ..agentic import loop as agentic_loop
+from ..fingerprint import stamp
 from .base import run_task
 
 
@@ -36,4 +37,4 @@ def run(harness, tasks, cfg, on_result=None, timeout=900, keep_dirs=False):
     reas = [r.get("reasoning_tokens") or 0 for r in results]
     summary["mean_reasoning_tokens"] = sum(reas) / len(reas) if reas else None
     summary["config"] = asdict(cfg)
-    return summary, results
+    return stamp(summary, tasks), results

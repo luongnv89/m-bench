@@ -10,6 +10,7 @@ import json
 import threading
 import time
 
+from ..fingerprint import stamp
 from ..runner import _summarize_common
 from .env import Workspace, _no_tool_calls, call
 from .tools import SYSTEM, TOOLS
@@ -186,7 +187,7 @@ def run(tasks, cfg, on_result=None, max_turns=MAX_TURNS):
     with cf.ThreadPoolExecutor(max_workers=cfg.concurrency) as ex:
         results = list(ex.map(work, items))
     wall = time.perf_counter() - t0
-    return summarize(results, cfg, wall, len(tasks)), results
+    return stamp(summarize(results, cfg, wall, len(tasks)), tasks), results
 
 
 def summarize(results, cfg, wall, n_tasks):
