@@ -19,6 +19,7 @@ import signal
 import subprocess
 import threading
 
+from .. import sandbox
 from .events import finish, fold_line, new_result
 
 #: chars of stdout kept for raw_log — matches the old ``stdout[-20000:]`` slice
@@ -78,7 +79,9 @@ def stream_events(argv, *, cwd, env, handler, finalize=None, timeout=900,
     res = new_result()
     state = {}
     out_tail = _CharTail(RAW_TAIL_CHARS)
-    p = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
+    # Every adapter launches its agent here, so this is the one place that
+    # keeps the hidden tests and the checkout out of the agent's reach (#84).
+    p = subprocess.Popen(sandbox.wrap(argv), cwd=cwd, env=env, stdin=subprocess.DEVNULL,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          # own process group: the timeout watchdog kills the
                          # whole tree — see _kill

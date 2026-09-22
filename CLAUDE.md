@@ -34,6 +34,7 @@ All `BENCH_*` vars read by `benchkit/runner.py:Config.from_env()`; full list wit
 | `BENCH_TEST_TIMEOUT` | `60` | Test timeout (s) |
 | `BENCH_HARNESS_MODEL` | — | `provider/model` the harness benchmarks |
 | `BENCH_HARNESS_ENDPOINT` | — | Point a harness at this endpoint, not its own providers |
+| `BENCH_SANDBOX` | on (macOS) | `0` disables the agent sandbox that hides hidden tests |
 | `PI_CODING_AGENT_DIR` | — | pi agent directory |
 
 ## Architecture map

@@ -12,6 +12,8 @@ import subprocess
 import sys
 import tempfile
 
+from .. import sandbox
+
 MAX_OUTPUT = 4000
 
 
@@ -154,6 +156,9 @@ class Workspace:
     # --- execution -------------------------------------------------------
     def _materialise_and_run(self, cmd, sync_back=False):
         d = tempfile.mkdtemp(prefix="benchkit-agentic-")
+        # Model-written code runs here: sandbox it away from the hidden tests
+        # and the checkout (#84). Scoring (check) is deliberately not wrapped.
+        cmd = sandbox.wrap(cmd)
         try:
             materialise(self.files, d)
             isolate = os.environ.get("BENCH_ISOLATE", "").lower() in ("1", "true", "yes")
@@ -218,7 +223,9 @@ class Workspace:
         visible to the model — that is how a task is scored against the full spec
         rather than against the asserts the model could read and special-case.
         """
-        d = tempfile.mkdtemp(prefix="benchkit-check-")
+        # The scoring root is one of the paths agent sandboxes deny, so a
+        # concurrently running agent cannot read hidden tests materialised here.
+        d = tempfile.mkdtemp(prefix="benchkit-check-", dir=sandbox.scoring_root())
         try:
             materialise(dict(self.files, **(extra_files or {})), d)
             try:

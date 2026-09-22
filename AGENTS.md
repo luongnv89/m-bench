@@ -242,6 +242,16 @@ row is a guess, not a known-good config.
   and mount namespace (requires `unshare`). This is a best-effort sandbox, not a VM —
   a sufficiently sophisticated payload can still escape. Never benchmark untrusted models
   on a machine you cannot afford to compromise.
+- **Agentic scoring never trusts the workspace's tests.** Tasks are scored against the
+  tests they shipped with (issue #83): an edited `tests.py` is restored before scoring, or
+  fails the task outright where the prompt says not to touch it. Agent subprocesses — every
+  harness adapter and the built-in loop's `run_python` — run under `sandbox-exec` on macOS
+  with no read or write access to the benchkit package, this checkout (`results/`, `.git`)
+  or the scoring directory, so hidden tests stay hidden (issue #84). The protection covers
+  the local filesystem only: network stays open, so a public copy of the repo is still
+  fetchable, and other clones on the same disk are not covered. Linux has no sandbox
+  yet: harness summaries record `sandbox.hidden_tests_protected: false` there, and
+  `BENCH_SANDBOX=0` turns the sandbox off explicitly (also recorded).
 - **Do not report a number you did not measure.** No estimating, no carrying a figure over
   from another machine, no quoting the model card.
 - **Report failures that were the harness's fault as such.** One `run_python` bug in this
