@@ -13,6 +13,8 @@ import tempfile
 import time
 from dataclasses import asdict, dataclass, field
 
+from .fingerprint import stamp
+
 SYSTEM = (
     "You are an expert Python programmer. Answer with a single self-contained "
     "Python code block containing the requested function or class and any imports "
@@ -188,7 +190,7 @@ def run(tasks, cfg, on_result=None, keep_code=False):
     with cf.ThreadPoolExecutor(max_workers=cfg.concurrency) as ex:
         results = list(ex.map(work, items))
     wall = time.perf_counter() - t0
-    return summarize(results, cfg, wall, len(tasks)), results
+    return stamp(summarize(results, cfg, wall, len(tasks)), tasks), results
 
 
 def _summarize_common(results, cfg, wall, n_tasks):
