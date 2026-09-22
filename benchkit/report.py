@@ -161,9 +161,16 @@ def _pool_cost(costs, count_key):
         return None
     reported = [c.get("tokens_reported") or 0 for c in costs]
     counts = [c.get(count_key) or 0 for c in costs]
+
+    def side(key):
+        # a side some reporting member never recorded (input, in old files)
+        # stays None: averaging only the others would mix populations
+        if any(r and c.get(key) is None for c, r in zip(costs, reported)):
+            return None
+        return _weighted(costs, key, reported)
     return {count_key: sum(counts), "tokens_reported": sum(reported),
-            "input_tokens": _weighted(costs, "input_tokens", reported),
-            "output_tokens": _weighted(costs, "output_tokens", reported),
+            "input_tokens": side("input_tokens"),
+            "output_tokens": side("output_tokens"),
             "seconds": _weighted(costs, "seconds", counts)}
 
 

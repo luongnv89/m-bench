@@ -252,6 +252,18 @@ class TestReport(unittest.TestCase):
         self.assertEqual(s["efficiency"], 1.0)
 
 
+class TestPoolMixedInput(unittest.TestCase):
+    def test_pooled_input_is_none_when_a_member_never_recorded_it(self):
+        a = _agentic_run("a.json", "a", 0.5, 1.0, gens=3)
+        b = _agentic_run("a.1.json", "a", 0.5, 1.0, gens=3)
+        for r in (a, b):
+            r["summary"]["suite_hash"] = "h" * 64
+        b["summary"]["cost"]["input_tokens"] = None
+        s = report.pool(report.group_runs([a, b])[0])["summary"]
+        self.assertIsNone(s["cost"]["input_tokens"])
+        self.assertAlmostEqual(s["cost"]["output_tokens"], 300.0)
+
+
 class TestCli(unittest.TestCase):
     def _samples(self, *argv):
         return cli._build_parser().parse_args(list(argv)).samples
@@ -276,6 +288,9 @@ class TestCli(unittest.TestCase):
         s["cost"] = dict(generations=24, tokens_reported=0, input_tokens=None,
                          output_tokens=None, seconds=1.0)
         self.assertIn("not reported", "\n".join(cli._headline_lines(s)))
+        s["cost"] = dict(generations=24, tokens_reported=24, input_tokens=None,
+                         output_tokens=50.0, seconds=1.0)
+        self.assertIn("— in / 50 out", "\n".join(cli._headline_lines(s)))
 
 
 if __name__ == "__main__":

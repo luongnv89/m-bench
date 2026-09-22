@@ -63,8 +63,9 @@ def _headline_lines(summary):
                      + "  (par / calls, solved tasks only; reported separately)")
     cost = summary.get("cost") or {}
     if cost.get("tokens_reported"):
-        lines.append(f"tokens / task          {cost.get('input_tokens') or 0:,.0f} in / "
-                     f"{cost.get('output_tokens') or 0:,.0f} out"
+        side = [f"{v:,.0f}" if v is not None else "—"
+                for v in (cost.get("input_tokens"), cost.get("output_tokens"))]
+        lines.append(f"tokens / task          {side[0]} in / {side[1]} out"
                      + (f"  ({cost['tokens_reported']}/{cost.get('generations')} reported)"
                         if cost["tokens_reported"] < (cost.get("generations") or 0) else ""))
     else:
@@ -218,8 +219,10 @@ def cmd_compare(args):
                 if ci:
                     line += f" (95% CI {ci[0] * 100:.0f}–{ci[1] * 100:.0f})"
                 if summary.get("kind") == "agentic":
-                    line += (f"  efficiency {(report.efficiency(summary) or 0) * 100:.1f} %"
-                             f"  {summary['mean_tool_calls']:.1f} calls vs par "
+                    eff = report.efficiency(summary)
+                    line += ("  efficiency "
+                             + (f"{eff * 100:.1f} %" if eff is not None else "n/a")
+                             + f"  {summary['mean_tool_calls']:.1f} calls vs par "
                              f"{summary['mean_par_calls']:.1f}"
                              f"  {summary['mean_turns']:.1f} turns")
                 print(f"{line}  ({p})", flush=True)
