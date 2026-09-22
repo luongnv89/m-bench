@@ -11,7 +11,9 @@ and write access to:
 
 - the installed ``benchkit`` package (the hidden tests live in its source);
 - the repository checkout it was loaded from, if any (``.git`` history,
-  ``results/``, docs);
+  ``results/``, docs), and when that checkout is a git worktree, the main
+  checkout and every sibling worktree too (each holds its own copy of the
+  hidden tests);
 - the scoring directory where `Workspace.check` materialises hidden tests.
 
 Python virtualenvs inside the checkout stay readable, so an agent whose
@@ -53,6 +55,20 @@ def _git_common_dir(root):
     return os.path.realpath(os.path.join(root, d))
 
 
+def _git_worktrees(root):
+    """Every working tree of the repository *root* belongs to (main included)."""
+    try:
+        out = subprocess.run(["git", "-C", root, "worktree", "list", "--porcelain"],
+                             capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if out.returncode != 0:
+        return []
+    return [os.path.realpath(line[len("worktree "):])
+            for line in out.stdout.splitlines()
+            if line.startswith("worktree ") and line[len("worktree "):].strip()]
+
+
 def scoring_root():
     """The directory `Workspace.check` scores in: protected, never an agent's cwd.
 
@@ -75,6 +91,12 @@ def protected_paths():
         common = _git_common_dir(root)
         if common:
             paths.append(common)
+            # From a worktree the common dir is <main checkout>/.git: the main
+            # checkout's working tree holds the hidden tests and results/ too.
+            if (os.path.basename(common) == ".git"
+                    and common != os.path.realpath(os.path.join(root, ".git"))):
+                paths.append(os.path.dirname(common))
+        paths += _git_worktrees(root)
     # Drop any path already covered by another one.
     paths = sorted(set(paths))
     return [p for p in paths

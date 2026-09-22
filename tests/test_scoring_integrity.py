@@ -179,6 +179,45 @@ class TestSandboxConfiguration(unittest.TestCase):
             self.assertEqual(d["mechanism"], "none")
             self.assertFalse(d["hidden_tests_protected"])
 
+    def _fake_git(self, root, common, worktrees, rc=0):
+        porcelain = "".join(f"worktree {w}\nHEAD 0\ndetached\n\n" for w in worktrees)
+
+        def run(argv, **kw):
+            if "--git-common-dir" in argv:
+                return mock.Mock(returncode=0, stdout=common + "\n")
+            if argv[3:5] == ["worktree", "list"]:
+                return mock.Mock(returncode=rc, stdout=porcelain)
+            raise AssertionError(argv)
+        return mock.patch.object(sandbox.subprocess, "run", side_effect=run)
+
+    def test_worktree_denies_main_checkout_and_siblings(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = os.path.realpath(t)
+            main, wt, sib = (os.path.join(t, n) for n in ("main", "wt", "sib"))
+            with mock.patch.object(sandbox, "_repo_root", return_value=wt), \
+                    self._fake_git(wt, os.path.join(main, ".git"), [main, wt, sib]):
+                paths = sandbox.protected_paths()
+            for target in (main, wt, sib, os.path.join(main, "benchkit", "agentic")):
+                self.assertTrue(any(target == p or target.startswith(p + os.sep)
+                                    for p in paths), f"{target} not protected")
+
+    def test_worktree_main_checkout_denied_even_if_listing_fails(self):
+        with tempfile.TemporaryDirectory() as t:
+            t = os.path.realpath(t)
+            main, wt = os.path.join(t, "main"), os.path.join(t, "wt")
+            with mock.patch.object(sandbox, "_repo_root", return_value=wt), \
+                    self._fake_git(wt, os.path.join(main, ".git"), [], rc=128):
+                paths = sandbox.protected_paths()
+            self.assertIn(main, paths)
+            self.assertIn(wt, paths)
+
+    def test_worktree_listing_errors_are_not_fatal(self):
+        with mock.patch.object(sandbox.subprocess, "run", side_effect=OSError("no git")):
+            self.assertEqual(sandbox._git_worktrees("/nowhere"), [])
+        with mock.patch.object(sandbox.subprocess, "run",
+                               side_effect=sandbox.subprocess.TimeoutExpired("git", 10)):
+            self.assertEqual(sandbox._git_worktrees("/nowhere"), [])
+
     def test_warning_names_the_gap(self):
         import io
         buf = io.StringIO()
