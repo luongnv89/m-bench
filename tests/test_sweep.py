@@ -32,7 +32,10 @@ SUMMARY = dict(
 def _summary(label, *, config="", harness="", thinking=False, score=0.4,
              samples=2):
     s = dict(SUMMARY)
-    s["agent_score"] = score
+    # solve rate ranks (#86); agent_score is kept as a composite column only
+    s["pass_at_1"] = score
+    s["agent_score"] = score * s["mean_efficiency"]
+    s["generations"] = 40
     s["config"] = dict(label=label, model="montimage-dgx-spark", thinking=thinking,
                        max_tokens=0, samples=samples, concurrency=2,
                        base_url="http://x/v1", serving_config=config,
@@ -346,40 +349,62 @@ class RankedReport(unittest.TestCase):
         self.assertIn("thinking ON", md)
         self.assertIn("only setup in this block", md)
 
-    def test_a_margin_inside_the_noise_floor_is_called_a_tie(self):
+    def test_a_margin_inside_the_interval_is_called_a_tie(self):
         runs = self._runs(("a", "cfg-a", "", False, 0.40),
                           ("b", "cfg-b", "", False, 0.43))
         md = report.rank_setups(runs, ["a", "b"])
-        self.assertIn("noise floor", md)
+        self.assertIn("includes zero", md)
+        self.assertIn("**inside the noise**", md)
         self.assertIn("treat it as a tie", md)
 
-    def test_a_margin_clearing_the_noise_floor_is_called_a_win(self):
+    def test_a_margin_clearing_the_interval_is_called_a_win(self):
         runs = self._runs(("a", "cfg-a", "", False, 0.40),
                           ("b", "cfg-b", "", False, 0.70))
         md = report.rank_setups(runs, ["a", "b"])
-        self.assertIn("clears the noise floor", md)
-        self.assertIn("~8.0 points at 2 samples per task", md)
+        self.assertIn("excludes zero", md)
+        self.assertIn("**clears the noise**", md)
+        # the fixed 8-point rule is gone (#87)
+        self.assertNotIn("8 points", md)
+        self.assertNotIn("noise floor", md)
 
-    def test_the_noise_floor_shrinks_with_the_sample_count(self):
-        self.assertEqual(report.noise_floor(2), report.NOISE_POINTS)
-        self.assertLess(report.noise_floor(8), report.NOISE_POINTS)
-        self.assertGreater(report.noise_floor(1), report.NOISE_POINTS)
-        # a result file with no recorded sample count falls back, never crashes
-        self.assertEqual(report.noise_floor(None), report.NOISE_POINTS)
+    def test_the_verdict_tightens_with_more_generations(self):
+        a = dict(pass_at_1=0.8, generations=8)
+        b = dict(pass_at_1=0.5, generations=8)
+        self.assertIn("includes zero", report.margin_verdict(a, b))
+        a["generations"] = b["generations"] = 200
+        self.assertIn("excludes zero", report.margin_verdict(a, b))
+
+    def test_no_generation_count_means_no_interval_never_a_crash(self):
+        a = dict(pass_at_1=0.8, config={})
+        b = dict(pass_at_1=0.5, config={})
+        self.assertIn("cannot be told from noise", report.margin_verdict(a, b))
+
+    def test_efficiency_only_breaks_exact_solve_ties(self):
+        runs = self._runs(("a", "cfg-a", "", False, 0.60),
+                          ("b", "cfg-b", "", False, 0.50))
+        runs[0]["summary"]["mean_efficiency"] = 0.2      # solves more, flails more
+        runs[1]["summary"]["mean_efficiency"] = 1.0
+        md = report.rank_setups(runs, ["a", "b"])
+        self.assertIn("Winner: a", md)
+        runs[1]["summary"]["pass_at_1"] = 0.60             # now a solve tie
+        md = report.rank_setups(runs, ["a", "b"])
+        self.assertIn("Winner: b", md)
+        self.assertIn("a tie on solving", md)
 
     def test_a_block_mixing_scored_and_unscored_runs_uses_one_ruler(self):
         """A table must never rank on a metric its own cells do not show."""
         runs = self._runs(("a", "cfg-a", "", False, 0.90),
                           ("b", "cfg-b", "", False, 0.10))
         runs[0]["summary"]["agent_score"] = None      # predates oracle-par
+        runs[0]["summary"]["mean_efficiency"] = None
         runs[0]["summary"]["pass_at_1"] = 0.10
         runs[1]["summary"]["pass_at_1"] = 0.80
         md = report.rank_setups(runs, ["a", "b"])
-        self.assertIn("| pass@1 |", md)
+        self.assertIn("| Solved (95% CI) |", md)
         self.assertNotIn("Agent score", md)
-        # ranked on pass@1, so b wins and the quoted figures are pass@1 figures
+        # ranked on solve rate, so b wins and the quoted figures are solve rates
         self.assertIn("Winner: b", md)
-        self.assertIn("80.0 against 10.0", md)
+        self.assertIn("80.0 % against 10.0 %", md)
 
     def test_every_row_names_its_serving_config_and_harness(self):
         runs = self._runs(("a", "cfg-a", "opencode", False, 0.4))
@@ -416,13 +441,16 @@ class RankedReport(unittest.TestCase):
         short = report._setup_short(runs)
         self.assertEqual(len(set(short)), 3)
 
-    def test_the_noise_floor_follows_the_noisiest_row_in_the_block(self):
+    def test_the_interval_follows_each_rows_own_generations(self):
         runs = self._runs(("a", "cfg-a", "", False, 0.40),
-                          ("b", "cfg-b", "", False, 0.50))
-        runs[0]["summary"]["config"]["samples"] = 8
-        runs[1]["summary"]["config"]["samples"] = 2
+                          ("b", "cfg-b", "", False, 0.80))
+        runs[0]["summary"]["generations"] = 400
         md = report.rank_setups(runs, ["a", "b"])
-        self.assertIn("at 2 samples per task", md)
+        self.assertIn("excludes zero", md)
+        # the noisier row keeps the interval wide enough to tie
+        runs[1]["summary"]["generations"] = 3
+        md = report.rank_setups(runs, ["a", "b"])
+        self.assertIn("includes zero", md)
 
     def test_build_embeds_the_ranking_when_asked(self):
         runs = self._runs(("a", "cfg-a", "", False, 0.4),
@@ -465,8 +493,8 @@ class LegacyAttribution(unittest.TestCase):
             s["config"]["samples"] = None
             runs.append({"summary": s, "_path": f"{label}.json"})
         md = report.rank_setups(runs, ["a", "b"])
-        self.assertNotIn("None samples", md)
-        self.assertIn("assumed — not every run in this block recorded one", md)
+        self.assertNotIn("None", md)
+        self.assertIn("| not recorded |", md)
 
 
 class NoRestartIsRefused(unittest.TestCase):

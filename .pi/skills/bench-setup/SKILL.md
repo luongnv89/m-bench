@@ -16,7 +16,8 @@ From the repository root (`/home/montimage/buildspace/m-bench`), run:
 
 - Add `-m <provider/model>` only if you want a specific model; otherwise the
   run asks (or use BENCH_HARNESS_MODEL).
-- Add `--samples 2` for a less noisy score; add `--thinking` to test the
+- The default is 3 samples per task; add `--samples 5` for a tighter
+  confidence interval; add `--thinking` to test the
   reasoning mode.
 - The run takes several minutes per sample and executes model-generated code
   on this host.
