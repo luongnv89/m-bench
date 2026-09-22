@@ -145,7 +145,8 @@ def cmd_report(args):
     runs = [report.load(p) for p in args.results]
     notes = open(args.notes).read() if args.notes else None
     md = report.build(runs, title=args.title, question=args.question,
-                      verdict=args.verdict, notes=notes, setups=args.setups)
+                      verdict=args.verdict, notes=notes, setups=args.setups,
+                      group=not args.no_group)
     out = args.out or os.path.join(os.path.dirname(args.results[0]), "REPORT.md")
     if os.path.exists(out) and not args.force:
         # results/ is append-only, and the default output path lands straight in
@@ -629,6 +630,9 @@ def _parser_report(sub):
     s.add_argument("--setups", action="store_true",
                    help="add the ranked-setups section, as `bench sweep` writes it "
                         "— rebuilds a sweep's ranking from its result files")
+    s.add_argument("--no-group", action="store_true",
+                   help="report every file as its own run instead of pooling re-runs "
+                        "of one label with the same suite_hash as samples of one run")
     s.add_argument("--force", action="store_true",
                    help="overwrite the output file if it already exists")
     s.add_argument("--out")

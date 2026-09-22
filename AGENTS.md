@@ -116,6 +116,14 @@ Otherwise point `BENCH_BASE_URL` at each endpoint in turn and use `./bench run`.
 refuses to overwrite an existing report — pass `--out` or `--force`. `--notes <file.md>`
 splices in your own written analysis; write that file first.
 
+Re-running a label writes `<label>.1.json`, `<label>.2.json` beside the first file.
+The report pools files that share a label **and** a `suite_hash` (and the same harness,
+thinking mode, model and serving config) into one row: pass@1 over every generation,
+samples per task summed, so the noise floor reflects the pooled sample count. *Raw data*
+lists the member files and each re-run's score. Files that predate `suite_hash` are
+never pooled; the caveats name any label they repeat. Grouping only reads the files.
+`--no-group` reports every file as its own run.
+
 The verdict must be a decision, not a summary. Judge on:
 
 | Signal | Weight |

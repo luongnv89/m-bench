@@ -28,6 +28,142 @@ def load(path):
     return d
 
 
+#: summary counters that add up across re-runs
+_SUMMED = ("generations", "truncated", "errored", "total_tool_calls", "malformed_args",
+           "unknown_tools", "hit_turn_limit", "stalled_no_tool_call",
+           "total_input_tokens")
+#: per-generation means, pooled weighted by each re-run's generation count
+_PER_GENERATION = ("mean_completion_tokens", "mean_tok_s", "mean_ttft", "mean_turns",
+                   "mean_tool_calls", "mean_par_calls", "mean_input_tokens",
+                   "mean_reasoning_tokens")
+#: per-suite-execution figures: a pooled row reports the mean re-run
+_PER_RUN = ("wall_seconds", "aggregate_tok_s")
+
+
+def _group_key(run):
+    """What two result files must share to be samples of one run, or None.
+
+    The label names the run and ``suite_hash`` (issue #88) proves both files
+    scored the same tasks the same way. The setup fields are a guard on top: a
+    custom label reused for a different harness, thinking mode, model or
+    serving config is a collision, not a re-run, and pooling it would straddle
+    the ranking blocks. A file without ``suite_hash`` (``schema_version`` 0)
+    cannot prove it ran the same tasks, so it is never grouped.
+    """
+    s = run["summary"]
+    h = s.get("suite_hash")
+    if not h:
+        return None
+    cfg = s.get("config") or {}
+    st = _setup_of(run)
+    extra = json.dumps(cfg.get("extra") or {}, sort_keys=True, default=str)
+    return (_label(run), h, s.get("kind"), st["harness"], st["thinking"],
+            st["config"], st["model"], cfg.get("max_tokens"),
+            cfg.get("temperature"), extra, _endpoint(s))
+
+
+def group_runs(runs):
+    """Group re-runs of one label into samples of one run. Pure; never mutates.
+
+    Re-running with the same label writes ``<label>.1.json``, ``<label>.2.json``
+    next to the first file; those are more samples of the same run, not new
+    runs. Returns ``[{"key", "label", "suite_hash", "members": [run, ...]}]`` in
+    first-appearance order. Files lacking ``suite_hash`` each form their own
+    group (``key`` None): pooling a file whose task set cannot be proven equal
+    would silently mix suites.
+    """
+    groups, index = [], {}
+    for r in runs:
+        key = _group_key(r)
+        if key is not None and key in index:
+            groups[index[key]]["members"].append(r)
+            continue
+        if key is not None:
+            index[key] = len(groups)
+        groups.append(dict(key=key, label=_label(r),
+                           suite_hash=r["summary"].get("suite_hash"), members=[r]))
+    return groups
+
+
+def unhashed_label_collisions(runs):
+    """Labels shared by several files that predate ``suite_hash`` (kept separate)."""
+    seen = {}
+    for r in runs:
+        if not r["summary"].get("suite_hash"):
+            seen[_label(r)] = seen.get(_label(r), 0) + 1
+    return sorted(label for label, n in seen.items() if n > 1)
+
+
+def _weighted(members, key, weights):
+    pairs = [(m[key], w) for m, w in zip(members, weights)
+             if m.get(key) is not None and w]
+    total = sum(w for _, w in pairs)
+    return sum(v * w for v, w in pairs) / total if total else None
+
+
+def pool(group):
+    """One run dict whose summary pools a group's re-runs; inputs are untouched.
+
+    Rates are weighted by generations and ``by_task`` by samples per task, so
+    pooled ``pass_at_1`` equals the rate over every generation of every re-run.
+    ``config.samples`` and ``generations`` are summed, which is what makes the
+    noise floor quoted beside the row reflect the pooled sample count. Figures
+    that describe one suite execution (wall-clock) are the mean re-run. Stats
+    that cannot be rebuilt from summaries alone (medians, all/any-sample pass)
+    are ``None``.
+    """
+    members = group["members"]
+    if len(members) == 1:
+        return members[0]
+    S = [m["summary"] for m in members]
+    gens = [s.get("generations") or 0 for s in S]
+    samples = [(s.get("config") or {}).get("samples") or 0 for s in S]
+    first = S[0]
+
+    pooled = {k: first[k] for k in ("kind", "tasks", "suite_hash", "schema_version",
+                                    "harness") if k in first}
+    pooled["config"] = dict(first["config"], samples=sum(samples) or None)
+    for k in _SUMMED:
+        if any(k in s for s in S):
+            pooled[k] = sum(s.get(k) or 0 for s in S)
+    for k in _PER_GENERATION:
+        if any(k in s for s in S):
+            pooled[k] = _weighted(S, k, gens)
+    for k in _PER_RUN:
+        if any(k in s for s in S):
+            pooled[k] = _weighted(S, k, [1] * len(S))
+    pooled["median_completion_tokens"] = None
+    pooled["pass_all_samples"] = pooled["pass_any_sample"] = None
+    pooled["pass_at_1"] = _weighted(S, "pass_at_1", gens) or 0.0
+
+    tasks = sorted({t for s in S for t in (s.get("by_task") or {})})
+    pooled["by_task"] = {t: _weighted([s.get("by_task") or {} for s in S], t, samples)
+                         for t in tasks}
+    pooled["by_difficulty"] = {
+        d: _weighted([s.get("by_difficulty") or {} for s in S], d, gens)
+        for d in ("easy", "medium", "hard")}
+
+    if "valid_call_rate" in first:
+        pooled["valid_call_rate"] = _weighted(
+            S, "valid_call_rate", [s.get("total_tool_calls") or 0 for s in S])
+    if "mean_efficiency" in first:
+        # efficiency is averaged over solved generations only
+        solved = [(s.get("pass_at_1") or 0) * g for s, g in zip(S, gens)]
+        pooled["mean_efficiency"] = _weighted(S, "mean_efficiency", solved)
+    if "agent_score" in first:
+        pooled["agent_score"] = (None if any(s.get("agent_score") is None for s in S)
+                                 else pooled["pass_at_1"]
+                                 * (pooled.get("mean_efficiency") or 0.0))
+
+    # one ruler for every member: agent score only when all of them carry it
+    metric = ("agent_score" if all(s.get("agent_score") is not None for s in S)
+              else "pass_at_1")
+    return dict(summary=pooled, _path=members[0]["_path"],
+                _members=[m["_path"] for m in members],
+                _member_metric=metric,
+                _member_scores=[s.get(metric) or 0.0 for s in S])
+
+
 def _label(run):
     cfg = run["summary"]["config"]
     if cfg.get("label"):
@@ -494,14 +630,41 @@ def _caveats_section(cfg0, samples, samples_same, agentic):
 def _raw_data_section(runs, labels):
     out = ["\n## Raw data\n"]
     for r, line in zip(runs, labels):
-        out.append(f"- `{r['_path']}` — {line}")
+        members = r.get("_members")
+        if members:
+            per = ", ".join(f"{v * 100:.1f}" for v in r["_member_scores"])
+            files = ", ".join(f"`{m}`" for m in members)
+            metric = "agent score" if r["_member_metric"] == "agent_score" else "pass@1"
+            out.append(f"- {files} — {line} (pooled: {len(members)} re-runs as "
+                       f"samples of one run; {metric} per re-run {per})")
+        else:
+            out.append(f"- `{r['_path']}` — {line}")
     out.append("")
     return out
 
 
+def _grouping_notes(ungrouped):
+    """Caveat lines for labels that repeat but could not be pooled."""
+    if not ungrouped:
+        return []
+    names = ", ".join(f"`{label}`" for label in ungrouped)
+    return [f"- {names}: several files share this label but predate `suite_hash` "
+            "(schema_version 0), so they cannot be proven to have run the same tasks "
+            "and are reported as separate runs, not pooled."]
+
+
 def build(runs, title, question=None, verdict=None, notes=None, short_labels=None,
-          setups=False, advice=False):
-    """runs: list of loaded result dicts. Returns Markdown source."""
+          setups=False, advice=False, group=True):
+    """runs: list of loaded result dicts. Returns Markdown source.
+
+    With *group* (the default), re-runs of one label with the same
+    ``suite_hash`` are pooled into one row (see `group_runs`). A caller passing
+    *short_labels* sized to its own rows gets them ungrouped.
+    """
+    ungrouped = []
+    if group and short_labels is None:
+        ungrouped = unhashed_label_collisions(runs)
+        runs = [pool(g) for g in group_runs(runs)]
     labels = [_label(r) for r in runs]
     short = short_labels or (_setup_short(runs) if setups
                              else [_short(r, line) for r, line in zip(runs, labels)])
@@ -537,5 +700,6 @@ def build(runs, title, question=None, verdict=None, notes=None, short_labels=Non
                                           title="Suggestions — " + _label(r)))
 
     out.extend(_caveats_section(cfg0, samples, samples_same, agentic))
+    out.extend(_grouping_notes(ungrouped))
     out.extend(_raw_data_section(runs, labels))
     return "\n".join(out)
