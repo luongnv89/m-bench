@@ -147,6 +147,15 @@ class TestHarnessDefaults(unittest.TestCase):
                 self.assertTrue(h.uses_endpoint)
                 self.assertEqual(_offline_describe(h)["source"], "endpoint")
 
+    def test_devin_records_but_refuses_an_endpoint(self):
+        """devin is Cognition-hosted only: it reports the endpoint, then refuses it."""
+        h = get("devin", HarnessConfig(model="m", base_url="http://x/v1"))
+        h._version = lambda: ("devin 1.0", None)
+        ok, detail = h.available()
+        self.assertFalse(ok)
+        self.assertIn("--endpoint is unsupported", detail)
+        self.assertEqual(h.describe()["base_url"], "http://x/v1")
+
     def test_opencode_injects_config_only_for_an_endpoint(self):
         h = get("opencode", HarnessConfig(provider="ollama", model="m"))
         self.assertNotIn("provider", str(h.describe().get("base_url") or ""))

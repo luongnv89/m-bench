@@ -144,6 +144,12 @@ class DevinHarness(Harness):
         return True, "logged in"
 
     @property
+    def uses_endpoint(self):
+        # Same contract as the other adapters: true only when --endpoint was
+        # passed. Devin cannot honour one, so available() refuses the run.
+        return bool(self.base_url)
+
+    @property
     def model_spec(self):
         return f"{self.provider}/{self.model}" if self.provider else self.model
 
@@ -200,7 +206,9 @@ class DevinHarness(Harness):
         ok, detail = self.available()
         d = dict(
             harness=self.name, model=self.model, model_spec=self.model_spec,
-            base_url=None, source="devin-auth", api="cognition-hosted",
+            base_url=self.base_url,
+            source="endpoint" if self.uses_endpoint else "devin-auth",
+            api="cognition-hosted",
             live=self.live, available=ok, detail=detail)
         if self.live:
             # which isolation levers were dropped, so nobody reads a live score
