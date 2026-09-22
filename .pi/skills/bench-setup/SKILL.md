@@ -25,7 +25,9 @@ From the repository root (`/home/montimage/buildspace/m-bench`), run:
 When it finishes:
 
 1. Read the report path it prints (`results/<date>/REPORT-live*.md`) and open it.
-2. Relay the headline numbers (agent score, solve rate, mean calls vs par) and
+2. Relay the headline numbers (solve rate with its 95% interval, efficiency,
+   token and time cost per task, mean calls vs par — the agent score is a
+   composite shown for reference, not what ranks) and
    every bullet in the **Suggestions** section back to the user, verbatim where
    possible.
 
