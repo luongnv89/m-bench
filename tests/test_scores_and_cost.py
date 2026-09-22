@@ -206,6 +206,17 @@ class TestReport(unittest.TestCase):
         self.assertIn("| `t1` | 1,000 / 100 · 4.0 s |", md)
         self.assertEqual(json.dumps(old, sort_keys=True), before)   # not mutated
 
+    def test_tokens_chart_needs_both_sides_on_every_row(self):
+        new = _agentic_run("h.json", "h", 1.0, 1.0)
+        md = report.build([new], title="t")
+        self.assertIn("tokens per task (in + out)", md)
+        rows = [dict(task="t1", difficulty="easy", sample=0, passed=True,
+                     completion_tokens=1300, elapsed=4.0)]      # old loop: no input
+        old = _agentic_run("o.json", "o", 1.0, 1.0, gens=1, cost=False, results=rows)
+        md = report.build([new, old], title="t")
+        self.assertIn("— in / 1,300 out", md)
+        self.assertNotIn("tokens per task (in + out)", md)
+
     def test_old_file_without_results_reports_not_recorded(self):
         old = _agentic_run("old.json", "old", 1.0, 1.0, cost=False)
         del old["summary"]["generations"]

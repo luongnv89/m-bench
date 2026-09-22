@@ -667,11 +667,13 @@ def _charts_section(S, short, agentic):
     out.append(_chart("Cost of that accuracy — suite wall-clock (s)", "seconds", short,
                       [s.get("wall_seconds") or 0 for s in S]))
     costs = [s.get("cost") or {} for s in S]
-    # a 0 bar would read as a measurement; chart tokens only if every row has them
-    if all(c.get("tokens_reported") for c in costs):
+    # a 0 bar -- or an output-only bar beside input+output ones, from a file
+    # that never recorded input -- would read as a measurement; chart tokens
+    # only when every row has both sides
+    if all(c.get("tokens_reported") and c.get("input_tokens") is not None
+           and c.get("output_tokens") is not None for c in costs):
         out.append(_chart("Cost of that accuracy — tokens per task (in + out)", "tokens",
-                          short, [(c.get("input_tokens") or 0) + (c.get("output_tokens") or 0)
-                                  for c in costs]))
+                          short, [c["input_tokens"] + c["output_tokens"] for c in costs]))
     if agentic:
         if all(efficiency(s) is not None for s in S):
             out.append(_chart("Efficiency on solved tasks (par / calls, %)", "%", short,
