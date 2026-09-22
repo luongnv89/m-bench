@@ -16,7 +16,8 @@ From the repository root (`/home/montimage/buildspace/m-bench`), run:
 
 - Add `-m <provider/model>` only if you want a specific model; otherwise the
   run asks (or use BENCH_HARNESS_MODEL).
-- Add `--samples 2` for a less noisy score; add `--thinking` to test the
+- The default is 3 samples per task; add `--samples 5` for a tighter
+  confidence interval; add `--thinking` to test the
   reasoning mode.
 - The run takes several minutes per sample and executes model-generated code
   on this host.
@@ -24,7 +25,9 @@ From the repository root (`/home/montimage/buildspace/m-bench`), run:
 When it finishes:
 
 1. Read the report path it prints (`results/<date>/REPORT-live*.md`) and open it.
-2. Relay the headline numbers (agent score, solve rate, mean calls vs par) and
+2. Relay the headline numbers (solve rate with its 95% interval, efficiency,
+   token and time cost per task, mean calls vs par — the agent score is a
+   composite shown for reference, not what ranks) and
    every bullet in the **Suggestions** section back to the user, verbatim where
    possible.
 

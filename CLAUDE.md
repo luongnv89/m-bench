@@ -60,7 +60,8 @@ All `BENCH_*` vars read by `benchkit/runner.py:Config.from_env()`; full list wit
 - **Never restart a shared serving endpoint without explicit human approval.** `bench sweep` refuses without `--yes-restart-endpoint` or an interactive yes.
 - **Always run both thinking modes** (`--thinking` and without). They are different products.
 - **Raise `--max-tokens` with `--thinking`** or reasoning eats the entire budget.
-- **Differences under ~8 points at `--samples 2` are noise.** Say so; raise `--samples`.
+- **A margin whose 95% interval includes zero is noise.** Reports print a Wilson CI per solve rate and a Newcombe CI per margin; say so and raise `--samples` (harness/setup runs default to 3).
+- **Solve rate ranks; efficiency and token/time cost are reported beside it**, never multiplied in.
 - **Report the harness name** alongside every score. Same model scores differently through different loops.
 
 ## Workflow preferences

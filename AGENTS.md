@@ -99,7 +99,7 @@ model, restores the original, and writes the report. **It takes the endpoint dow
 minutes per swap — confirm with a human first if anyone else uses it.**
 
 `--suite` accepts the agentic suites too (`agentic`, `agentic-hard`, `agentic-all`);
-compare then runs the tool-calling loop and reports agent score, calls vs par and turns,
+compare then runs the tool-calling loop and reports solve rate, efficiency, calls vs par and turns,
 with `--max-turns` bounding each task exactly as in `./bench run`.
 
 Otherwise point `BENCH_BASE_URL` at each endpoint in turn and use `./bench run`.
@@ -119,7 +119,7 @@ splices in your own written analysis; write that file first.
 Re-running a label writes `<label>.1.json`, `<label>.2.json` beside the first file.
 The report pools files that share a label **and** a `suite_hash` (and the same harness,
 thinking mode, model and serving config) into one row: pass@1 over every generation,
-samples per task summed, so the noise floor reflects the pooled sample count. *Raw data*
+samples per task summed, so the confidence interval covers the pooled sample count. *Raw data*
 lists the member files and each re-run's score. Files that predate `suite_hash` are
 never pooled; the caveats name any label they repeat. Grouping only reads the files.
 `--no-group` reports every file as its own run.
@@ -129,13 +129,15 @@ The verdict must be a decision, not a summary. Judge on:
 | Signal | Weight |
 |---|---|
 | pass@1 on `all` | Primary for one-shot coding |
-| Agent score on `agentic-hard` | Primary for tool-loop work |
-| Mean output tokens, wall-clock | A model that wins by thinking 16k tokens has not won |
+| Solve rate on `agentic-hard` | Primary for tool-loop work |
+| Efficiency (calls vs par) | Reported separately; breaks exact solve ties only — harnesses count calls differently |
+| Tokens and wall-clock per task (*Headline*, *Cost per task*) | A model that wins by thinking 16k tokens has not won |
 | Truncated / turn-limit counts | Runaway reasoning hangs real agents; weigh it heavily |
 | Whether it fits alongside everything else on the box | Hard constraint |
 
-**Differences under ~8 points at `--samples 2` are noise.** Say so rather than declaring a
-winner. Raise `--samples` before calling a close race.
+**A margin whose 95% interval includes zero is noise.** Every solve rate in the report
+carries a 95% Wilson interval, and the ranking states the Newcombe interval of each margin.
+Say so rather than declaring a winner, and raise `--samples` before calling a close race.
 
 ## Step 6 — check it through the harness you actually use
 
@@ -145,7 +147,7 @@ setup. If a coding agent is installed on this machine, measure through it too:
 ```bash
 ./bench harness list                     # which harnesses are installed
 ./bench harness models                   # which models they can reach, from your own config
-./bench harness run --harness opencode -m <provider>/<model> --suite agentic-hard --samples 2
+./bench harness run --harness opencode -m <provider>/<model> --suite agentic-hard   # 3 samples by default
 ```
 
 The harness runs use **your** opencode / pi configuration and credentials — whatever you can
@@ -174,7 +176,7 @@ model is what varies. When the question is "is my daily setup any good, and what
 change about it?", drop the isolation instead:
 
 ```bash
-./bench setup --harness pi --suite agentic-hard --samples 2
+./bench setup --harness pi --suite agentic-hard   # 3 samples by default
 ```
 
 Every isolation flag is dropped and the harness runs exactly as its owner experiences it.
@@ -206,7 +208,7 @@ it never treats a non-interactive session as consent. A sweep whose setups carry
 whatever is already serving.
 
 Read the report's **Ranked setups** section the way it is written: one block per
-(harness, thinking mode), each with its own winner and its own noise verdict. There is no
+(harness, thinking mode), each with its own winner and a confidence interval on its margin. There is no
 global winner across harnesses, on purpose — see the 67.4 / 77.4 spread in step 6.
 
 `configs/` holds recipes this cannot drive (llama.cpp, the env-tunable standalone server,
@@ -265,8 +267,8 @@ Both kinds require proof the task is winnable before any model is judged:
 - agentic: a task in `benchkit/agentic/tasks*.py` with `files`, `check(ws)` and an
   `oracle(ws)`, then `./bench validate --suite agentic-all` stays at 100 %.
 
-The oracle also sets **par** — the minimum tool calls — which is what the agent score
-measures efficiency against. Write the oracle the way a competent engineer would work, not
+The oracle also sets **par** — the minimum tool calls — which is what efficiency is
+measured against. Write the oracle the way a competent engineer would work, not
 the shortest path that happens to satisfy the predicate.
 
 ## Token Efficiency

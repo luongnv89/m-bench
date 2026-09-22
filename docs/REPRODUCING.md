@@ -68,7 +68,7 @@ Useful flags:
 | `--suite` | `all` | `core16`, `hard12`, `all`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
 | `--thinking` | off | Enables the model's reasoning block via `chat_template_kwargs` |
 | `--max-tokens` | 6000 | Raise to ~16000 with `--thinking`, or reasoning eats the budget |
-| `--samples` | 2 | Generations per task. 2 is cheap; 5+ before trusting small gaps |
+| `--samples` | 2 | Generations per task (`bench harness run` / `bench setup run`: 3). 2 is cheap; 5+ before trusting small gaps |
 | `--concurrency` | 4 | Parallel in-flight requests |
 | `--test-timeout` | 60 | Seconds a generated program may run before counting as failed |
 | `--keep-code` | off | Store every generated program in the result file, for post-mortems |
@@ -140,8 +140,9 @@ Adapter details, `--endpoint` injection and per-harness caveats: [HARNESSES.md](
 
 ## Interpreting a result honestly
 
-- **Sample count.** At `--samples 2` the standard error on a 28-task suite is roughly
-  5 points. Do not call a 3-point difference a win.
+- **Sample count.** Every solve rate in a report carries a 95% Wilson interval, and every
+  ranked margin the 95% Newcombe interval of the difference. If that interval includes
+  zero, it is not a win — raise `--samples`.
 - **Truncation is failure.** A high `Truncated` count means the model never stopped
   reasoning. That is a real defect for an agent, not a budget artefact — but re-run at a
   higher `--max-tokens` before concluding, to separate the two.
@@ -166,17 +167,19 @@ suite does not have:
 | **Generalisation** | The checked input is not the sample input |
 | **Budgets** | A correct but quadratic answer fails on time |
 
-It is scored on an **agent score**, out of 100:
+It is ranked on **solve rate** (with a 95% Wilson interval), and reports **efficiency**
+and **token / wall-clock cost per task** as separate headline numbers:
 
 ```
-agent_score = solve_rate x mean_efficiency
 efficiency  = par_tool_calls / calls_actually_used     (capped at 1, solved tasks only)
+agent_score = solve_rate x efficiency                   (kept in results for continuity; does not rank)
 ```
 
 `par` is measured by running each task's oracle, so it depends on the task, not on the
-model, the prompt or the wall clock. Solving is the price of entry; efficiency breaks the
-ties that solve rate cannot — which matters because strong models tie at 100 % solved while
-still using twice the calls they need.
+model, the prompt or the wall clock. Efficiency only breaks exact solve-rate ties: call
+counting differs between harnesses (one `sed -i` or one subagent call is one call), so
+multiplying it into the score let call counts outrank solving. Where a harness reports no
+token usage, the cost is recorded as null and the report says *not reported*.
 
 ```bash
 ./bench run --suite agentic-hard --samples 2 --max-turns 30 --label "my-model"

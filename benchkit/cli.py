@@ -49,6 +49,32 @@ def _print_result(r):
           + (f"   <{str(r.get('error'))[:70]}>" if not r["passed"] else ""), flush=True)
 
 
+def _headline_lines(summary):
+    """Solve rate (with its 95% CI), efficiency and cost as separate lines (#86/#87)."""
+    solve = summary.get("pass_at_1") or 0.0
+    ci = report.solve_ci(summary)
+    ci_txt = (f"(95% CI {ci[0] * 100:.1f}–{ci[1] * 100:.1f}, "
+              f"n={report.generations(summary)})" if ci else "(95% CI n/a)")
+    lines = [f"solve rate             {solve * 100:.1f} %  {ci_txt}"]
+    if summary.get("kind") == "agentic":
+        eff = report.efficiency(summary)
+        lines.append("efficiency             "
+                     + (f"{eff * 100:.1f} %" if eff is not None else "n/a")
+                     + "  (par / calls, solved tasks only; reported separately)")
+    cost = summary.get("cost") or {}
+    if cost.get("tokens_reported"):
+        side = [f"{v:,.0f}" if v is not None else "—"
+                for v in (cost.get("input_tokens"), cost.get("output_tokens"))]
+        lines.append(f"tokens / task          {side[0]} in / {side[1]} out"
+                     + (f"  ({cost['tokens_reported']}/{cost.get('generations')} reported)"
+                        if cost["tokens_reported"] < (cost.get("generations") or 0) else ""))
+    else:
+        lines.append("tokens / task          not reported (recorded as null)")
+    if cost.get("seconds") is not None:
+        lines.append(f"time / task            {cost['seconds']:.1f} s")
+    return lines
+
+
 def _execute_suite(suite, tasks, cfg, max_turns=None, keep_code=False):
     """The single place that decides *how* a suite is executed.
 
@@ -120,7 +146,8 @@ def cmd_run(args):
         json.dump(dict(summary=summary, results=results), f, indent=2)
 
     print("\n" + "=" * 64)
-    print(f"pass@1                 {summary['pass_at_1'] * 100:.1f} %")
+    for line in _headline_lines(summary):
+        print(line)
     print("by difficulty          " + "  ".join(
         f"{k}={v * 100:.1f}%" for k, v in summary["by_difficulty"].items() if v is not None))
     print(f"wall                   {summary['wall_seconds']:.0f} s")
@@ -128,8 +155,7 @@ def cmd_run(args):
     print(f"truncated / errored    {summary['truncated']} / {summary['errored']}")
     if summary.get("kind") == "agentic":
         print(f"agent score            {summary['agent_score'] * 100:.1f}   "
-              f"(solve {summary['pass_at_1'] * 100:.1f} % x efficiency "
-              f"{(summary['mean_efficiency'] or 0) * 100:.1f} %)")
+              "(composite solve x efficiency; does not rank)")
         print(f"mean calls vs par      {summary['mean_tool_calls'] or 0:.1f} vs "
               f"{summary['mean_par_calls'] or 0:.1f}")
         print(f"mean turns / calls     {summary['mean_turns'] or 0:.1f} / {summary['mean_tool_calls'] or 0:.1f}")
@@ -189,9 +215,14 @@ def cmd_compare(args):
                     json.dump(dict(summary=summary, results=results), f, indent=2)
                 paths.append(p)
                 line = f"  -> pass@1 {summary['pass_at_1'] * 100:.1f} %"
+                ci = report.solve_ci(summary)
+                if ci:
+                    line += f" (95% CI {ci[0] * 100:.0f}–{ci[1] * 100:.0f})"
                 if summary.get("kind") == "agentic":
-                    line += (f"  agent score {summary['agent_score'] * 100:.1f}"
-                             f"  {summary['mean_tool_calls']:.1f} calls vs par "
+                    eff = report.efficiency(summary)
+                    line += ("  efficiency "
+                             + (f"{eff * 100:.1f} %" if eff is not None else "n/a")
+                             + f"  {summary['mean_tool_calls']:.1f} calls vs par "
                              f"{summary['mean_par_calls']:.1f}"
                              f"  {summary['mean_turns']:.1f} turns")
                 print(f"{line}  ({p})", flush=True)
@@ -421,6 +452,9 @@ def _harness_config(args, h, base_url, live=False):
     return cfg
 
 
+#: default samples per task for `bench harness run` / `bench setup run` (#87)
+HARNESS_SAMPLES = 3
+
 #: harness -> the adapter kwarg its --effort / --variant flag feeds (#85)
 HARNESS_KNOBS = {"claude-code": "effort", "opencode": "variant"}
 
@@ -447,14 +481,13 @@ def _harness_kwargs(args):
 def _print_harness_summary(h, summary):
     print("\n" + "=" * 64)
     print(f"harness / model        {h.name} / {h.model_spec}")
+    for line in _headline_lines(summary):
+        print(line)
     print(f"agent score            {summary['agent_score'] * 100:.1f}   "
-          f"(solve {summary['pass_at_1'] * 100:.1f} % x efficiency "
-          f"{(summary['mean_efficiency'] or 0) * 100:.1f} %)")
-    print(f"mean calls vs par      {summary['mean_tool_calls']:.1f} vs "
-          f"{summary['mean_par_calls']:.1f}")
-    print(f"mean turns             {summary['mean_turns']:.1f}")
-    print(f"tokens in / out        {summary['mean_input_tokens']:.0f} / "
-          f"{summary['mean_completion_tokens'] or 0:.0f} per task")
+          "(composite solve x efficiency; does not rank)")
+    print(f"mean calls vs par      {summary['mean_tool_calls'] or 0:.1f} vs "
+          f"{summary['mean_par_calls'] or 0:.1f}")
+    print(f"mean turns             {summary['mean_turns'] or 0:.1f}")
     print(f"valid tool-call rate   {(summary['valid_call_rate'] or 0) * 100:.1f} %")
     print(f"wall                   {summary['wall_seconds']:.0f} s")
     print("=" * 64)
@@ -712,7 +745,9 @@ def _parser_harness(sub):
                         "without touching your harness config "
                         "(default: BENCH_HARNESS_ENDPOINT)")
     s.add_argument("--suite", default="agentic-hard", choices=list(SUITES))
-    s.add_argument("--samples", type=int, default=1)
+    s.add_argument("--samples", type=int, default=HARNESS_SAMPLES,
+                   help=f"samples per task (default {HARNESS_SAMPLES}: at 1, one task "
+                        "flipping moves an 8-task solve rate by 12.5 points)")
     s.add_argument("--concurrency", type=int, default=2)
     s.add_argument("--thinking", action="store_true")
     s.add_argument("--timeout", type=int, default=900, help="seconds per task")
@@ -756,7 +791,9 @@ def _parser_setup(sub):
                    help="optional endpoint for the model itself; the harness's "
                         "live configuration is still used unchanged")
     s.add_argument("--suite", default="agentic-hard", choices=list(SUITES))
-    s.add_argument("--samples", type=int, default=1)
+    s.add_argument("--samples", type=int, default=HARNESS_SAMPLES,
+                   help=f"samples per task (default {HARNESS_SAMPLES}: at 1, one task "
+                        "flipping moves an 8-task solve rate by 12.5 points)")
     s.add_argument("--concurrency", type=int, default=2)
     s.add_argument("--thinking", action="store_true")
     s.add_argument("--timeout", type=int, default=900, help="seconds per task")

@@ -52,7 +52,7 @@ output tokens, but collapses without its reasoning block and stalls more often.
 graph LR
     A[Your endpoint<br/>any OpenAI-compatible URL] --> B[bench run / sweep]
     B --> C[Hidden executable tests<br/>+ workspace predicates]
-    C --> D[Ranked report<br/>with noise floor]
+    C --> D[Ranked report<br/>with confidence intervals]
     D --> E[bench apply --restart]
     E --> A
 ```
@@ -172,7 +172,7 @@ identical weights by up to 23 points.
 | `hard12` | 12 | Regex-matching DP, relaxed-JSON parser, Vixie-cron `next_run`, bigint long division, nestable transactions, tiny SQL evaluator, weighted interval scheduling, first-order unification. Models land at 45–75 % |
 | `all` | 28 | `core16` + `hard12` |
 | `agentic` | 8 | Multi-turn tool calling over a sandboxed workspace — 7 tools, scored by a predicate over the final state |
-| `agentic-hard` | 8 | **Ranking tasks.** Hidden tests, decoys, cascading bugs, perf budgets, cases where the correct move is to change nothing. Scored on agent score = solve rate x efficiency vs oracle par |
+| `agentic-hard` | 8 | **Ranking tasks.** Hidden tests, decoys, cascading bugs, perf budgets, cases where the correct move is to change nothing. Ranked on solve rate; efficiency vs oracle par and token/time cost reported separately |
 | `agentic-all` | 16 | `agentic` + `agentic-hard` |
 
 ## Commands
@@ -223,8 +223,9 @@ already serving, without touching the launcher.
 
 The same weights score 67.4 through the built-in loop and 79.3 through opencode here, so a
 single cross-harness "winner" would be reporting the harness rather than the setup. Each
-block names its own winner and says whether the margin clears the noise floor for the
-sample count used — about 8 points at `--samples 2`, scaled by 1/sqrt(n) above that.
+block names its own winner on solve rate and quotes the 95% Newcombe interval of the
+margin; an interval that includes zero is called a tie. Each solve rate carries its own
+95% Wilson interval over the generations behind it, so more samples narrow it.
 
 The ranking is rebuildable from the result files alone:
 

@@ -7,11 +7,9 @@ that keep the numbers honest.
 import json
 import os
 
-BAR = "xychart-beta"
+from . import runner, stats
 
-#: CLAUDE.md's noise floor, calibrated at 2 samples per task
-NOISE_POINTS = 8.0
-NOISE_SAMPLES = 2
+BAR = "xychart-beta"
 
 #: what a run that used benchkit's own tool loop, rather than a harness, is called
 BUILTIN_HARNESS = "built-in loop"
@@ -26,6 +24,61 @@ def load(path):
         raise SystemExit(f"{os.path.basename(path)}: {e}") from None
     d["_path"] = os.path.basename(path)
     return d
+
+
+def with_cost(run):
+    """The run, with per-task token and wall-clock cost filled in if it lacks it.
+
+    Result files written before issue #86 carry no ``cost``/``cost_by_task``
+    in their summary, but their ``results`` list still holds each generation's
+    tokens and elapsed seconds, so the cost is rebuilt from that. A file with
+    neither is returned unchanged and reports its cost as not recorded. Never
+    mutates *run*.
+    """
+    s = run["summary"]
+    if "cost_by_task" in s and "cost" in s:
+        return run
+    rows = [r for r in (run.get("results") or [])
+            if isinstance(r, dict) and "task" in r]
+    if not rows:
+        return run
+    s = dict(s, cost=runner.cost_summary(rows), cost_by_task=runner.cost_by_task(rows))
+    return dict(run, summary=s)
+
+
+def generations(s):
+    """Generations behind a summary's rate: recorded, else tasks x samples, else None."""
+    if s.get("generations"):
+        return s["generations"]
+    try:
+        return int(s.get("tasks")) * int((s.get("config") or {}).get("samples"))
+    except (TypeError, ValueError):
+        return None
+
+
+def efficiency(s):
+    """Mean efficiency on solved tasks, from either the new or the legacy field."""
+    e = s.get("efficiency")
+    return e if e is not None else s.get("mean_efficiency")
+
+
+def solve_ci(s):
+    """95% Wilson interval of the solve rate, recomputed from the (pooled) counts.
+
+    Never read back from the file: a pooled row must quote the interval of
+    every generation behind it, not one member's.
+    """
+    return stats.rate_interval(s.get("pass_at_1"), generations(s))
+
+
+def _rank_value(s):
+    """The one ruler every ranking, bold and pairing uses (issue #86).
+
+    Solve rate decides; efficiency only breaks exact ties. Efficiency used to
+    be multiplied in (the agent score), which let call counts -- counted
+    differently by every harness, against an oracle par -- outrank solving.
+    """
+    return (s.get("pass_at_1") or 0, efficiency(s) or 0)
 
 
 #: summary counters that add up across re-runs
@@ -101,13 +154,33 @@ def _weighted(members, key, weights):
     return sum(v * w for v, w in pairs) / total if total else None
 
 
+def _pool_cost(costs, count_key):
+    """Pool cost blocks: tokens weighted by generations that reported them."""
+    costs = [c for c in costs if c]
+    if not costs:
+        return None
+    reported = [c.get("tokens_reported") or 0 for c in costs]
+    counts = [c.get(count_key) or 0 for c in costs]
+
+    def side(key):
+        # a side some reporting member never recorded (input, in old files)
+        # stays None: averaging only the others would mix populations
+        if any(r and c.get(key) is None for c, r in zip(costs, reported)):
+            return None
+        return _weighted(costs, key, reported)
+    return {count_key: sum(counts), "tokens_reported": sum(reported),
+            "input_tokens": side("input_tokens"),
+            "output_tokens": side("output_tokens"),
+            "seconds": _weighted(costs, "seconds", counts)}
+
+
 def pool(group):
     """One run dict whose summary pools a group's re-runs; inputs are untouched.
 
     Rates are weighted by generations and ``by_task`` by samples per task, so
     pooled ``pass_at_1`` equals the rate over every generation of every re-run.
     ``config.samples`` and ``generations`` are summed, which is what makes the
-    noise floor quoted beside the row reflect the pooled sample count. Figures
+    confidence interval quoted beside the row cover the pooled sample count. Figures
     that describe one suite execution (wall-clock) are the mean re-run. Stats
     that cannot be rebuilt from summaries alone (medians, all/any-sample pass)
     are ``None``.
@@ -155,13 +228,26 @@ def pool(group):
                                  else pooled["pass_at_1"]
                                  * (pooled.get("mean_efficiency") or 0.0))
 
-    # one ruler for every member: agent score only when all of them carry it
-    metric = ("agent_score" if all(s.get("agent_score") is not None for s in S)
-              else "pass_at_1")
+    # the separate headline numbers (#86/#87), recomputed over every sample
+    pooled["solve_rate"] = pooled["pass_at_1"]
+    ci = stats.rate_interval(pooled["pass_at_1"], pooled.get("generations"))
+    pooled["solve_rate_ci"] = list(ci) if ci else None
+    if any(efficiency(s) is not None for s in S):
+        solved = [(s.get("pass_at_1") or 0) * g for s, g in zip(S, gens)]
+        pooled["efficiency"] = _weighted([dict(e=efficiency(s)) for s in S], "e", solved)
+    if any(s.get("cost") for s in S):
+        pooled["cost"] = _pool_cost([s.get("cost") for s in S], "generations")
+    if any(s.get("cost_by_task") for s in S):
+        cost_tasks = sorted({t for s in S for t in (s.get("cost_by_task") or {})})
+        pooled["cost_by_task"] = {
+            t: _pool_cost([(s.get("cost_by_task") or {}).get(t) for s in S], "samples")
+            for t in cost_tasks}
+
+    # solve rate ranks, so it is what each re-run is quoted on
     return dict(summary=pooled, _path=members[0]["_path"],
                 _members=[m["_path"] for m in members],
-                _member_metric=metric,
-                _member_scores=[s.get(metric) or 0.0 for s in S])
+                _member_metric="pass_at_1",
+                _member_scores=[s.get("pass_at_1") or 0.0 for s in S])
 
 
 def _label(run):
@@ -246,13 +332,6 @@ def _blocks(runs):
     return blocks
 
 
-def _block_key(S, idx):
-    """Which metric ranks this block: agent score only if every row has one."""
-    return ("agent_score"
-            if all(S[i].get("agent_score") is not None for i in idx)
-            else "pass_at_1")
-
-
 def _setup_short(runs):
     """Chart-axis labels for a sweep, keyed on the axes a sweep actually varies.
 
@@ -278,19 +357,43 @@ def _setup_short(runs):
     return out
 
 
-def noise_floor(samples):
-    """Points below which a difference is noise, for this many samples per task.
+def _pts(v):
+    return f"{v * 100:+.1f}"
 
-    CLAUDE.md fixes the floor at ~8 points at `--samples 2`. Sampling error
-    shrinks as 1/sqrt(n), so quoting that same 8 points beside a 10-sample run
-    would be pessimistic, and quoting it beside a 1-sample run would be a lie.
-    The scaled figure is still an approximation, and it is named as one.
+
+def _ci_cell(s):
+    """``62.5 % (41–80)`` -- the solve rate and its 95% interval, in points."""
+    rate = _fmt(s.get("pass_at_1"), pct=True)
+    ci = solve_ci(s)
+    if not ci:
+        return f"{rate} (CI n/a)"
+    return f"{rate} ({ci[0] * 100:.0f}–{ci[1] * 100:.0f})"
+
+
+def margin_verdict(best, runner_up):
+    """Is ``best`` really ahead of ``runner_up`` on solve rate? (issue #87)
+
+    Replaces the fixed "~8 points is noise" rule, which was not derived from
+    the data: the answer is the 95% Newcombe interval of the difference in
+    solve rates, which widens and narrows with the generations actually behind
+    each row. An interval that contains zero is a tie.
     """
-    try:
-        n = max(1, int(samples or NOISE_SAMPLES))
-    except (TypeError, ValueError):
-        n = NOISE_SAMPLES
-    return NOISE_POINTS * (NOISE_SAMPLES / n) ** 0.5
+    p1, p2 = best.get("pass_at_1") or 0, runner_up.get("pass_at_1") or 0
+    d = stats.newcombe(p1, generations(best), p2, generations(runner_up))
+    if d is None:
+        return ("No confidence interval is available — a row does not record how "
+                "many generations it ran — so this margin cannot be told from noise.")
+    span = f"[{_pts(d[0])}, {_pts(d[1])}] points"
+    if p1 == p2:
+        return (f"Solve rates are equal (interval of the difference {span}); only "
+                "efficiency separates them, and that is **a tie on solving** — "
+                "re-run with more samples before acting on it.")
+    if d[0] <= 0:
+        return (f"The 95% interval of that difference is {span} and includes zero: "
+                "**inside the noise** — treat it as a tie and re-run with more "
+                "samples before acting on it.")
+    return (f"The 95% interval of that difference is {span} and excludes zero, "
+            "so it **clears the noise**.")
 
 
 def rank_setups(runs, labels):
@@ -303,7 +406,7 @@ def rank_setups(runs, labels):
     harness, not the setup. Thinking and non-thinking are likewise two products, never
     two candidates for one crown. Inside a block the serving config and the
     model are the axes actually being compared, and there the winner is real --
-    subject to the sample-count noise floor, which every block states.
+    subject to the confidence interval of the margin, which every block states.
     """
     S = [r["summary"] for r in runs]
     setups = [_setup_of(r) for r in runs]
@@ -316,56 +419,33 @@ def rank_setups(runs, labels):
                "differently through different harnesses — see the harness-spread "
                "campaign in `results/` — and thinking and non-thinking are two "
                "products, not two candidates. There is deliberately no single "
-               "cross-harness winner below.\n")
+               "cross-harness winner below. Solve rate ranks; efficiency is shown "
+               "beside it and only breaks exact ties.\n")
 
     for (harness, thinking), idx in blocks.items():
-        # One metric decides the whole block. A block where any run predates
-        # oracle-par efficiency falls back to pass@1 for *every* row, so the
-        # ranking, the cells and the margin can never quote different rulers.
-        key = _block_key(S, idx)
-        metric = "Agent score" if key == "agent_score" else "pass@1"
-
-        def value(i, key=key):
-            return (S[i].get(key) or 0) * 100
-
-        ranked = sorted(idx, key=lambda i: -value(i))
+        ranked = sorted(idx, key=lambda i: tuple(-v for v in _rank_value(S[i])))
         out.append(f"### {harness} · thinking {'ON' if thinking else 'OFF'}\n")
-        out.append(f"| Rank | Serving config | Model | {metric} | Samples |\n"
-                   "|---|---|---|---|---|")
+        out.append("| Rank | Serving config | Model | Solved (95% CI) | Efficiency "
+                   "| Samples |\n|---|---|---|---|---|---|")
         for rank, i in enumerate(ranked, 1):
             st = setups[i]
-            cell = f"**{value(i):.1f}**" if rank == 1 else f"{value(i):.1f}"
+            cell = f"**{_ci_cell(S[i])}**" if rank == 1 else _ci_cell(S[i])
             name = f"**{labels[i]}**" if rank == 1 else labels[i]
+            samples = st["samples"] if st["samples"] is not None else "not recorded"
             out.append(f"| {rank} | `{st['config']}` | {st['model']} — {name} "
-                       f"| {cell} | {st['samples']} |")
+                       f"| {cell} | {_fmt(efficiency(S[i]), pct=True)} | {samples} |")
         out.append("")
         best = ranked[0]
-        # the floor is set by the *noisiest* row in the block: quoting the
-        # winner's sample count would understate the noise whenever the
-        # runner-up ran at fewer samples.
-        recorded = [setups[i]["samples"] for i in idx]
-        samples = min((r or NOISE_SAMPLES) for r in recorded)
         if len(ranked) == 1:
             out.append(f"**Winner: {labels[best]}** — the only setup in this block, "
                        "so this is a measurement, not a comparison.\n")
             continue
         runner_up = ranked[1]
-        margin = value(best) - value(runner_up)
-        floor = noise_floor(samples)
-        verdict = (f"**Winner: {labels[best]}** — {value(best):.1f} against "
-                   f"{value(runner_up):.1f} for {labels[runner_up]}, "
-                   f"a margin of {margin:.1f} points. ")
-        where = f"at {samples} samples per task"
-        if any(r is None for r in recorded):
-            where += " (assumed — not every run in this block recorded one)"
-        scale = (f"~{floor:.1f} points {where} "
-                 f"(~{NOISE_POINTS:.0f} at {NOISE_SAMPLES}, scaled by 1/sqrt(n))")
-        if margin < floor:
-            verdict += (f"That is **inside the noise floor** of {scale} — treat it as "
-                        "a tie and re-run with more samples before acting on it.")
-        else:
-            verdict += f"That clears the noise floor of {scale}."
-        out.append(verdict + "\n")
+        pb, pr = (S[best].get("pass_at_1") or 0) * 100, (S[runner_up].get("pass_at_1") or 0) * 100
+        verdict = (f"**Winner: {labels[best]}** — solved {pb:.1f} % against "
+                   f"{pr:.1f} % for {labels[runner_up]}, "
+                   f"a margin of {pb - pr:.1f} points. ")
+        out.append(verdict + margin_verdict(S[best], S[runner_up]) + "\n")
     return "\n".join(out)
 
 
@@ -412,10 +492,11 @@ def _endpoint_cell(eps, short):
 def _setup_section(S, short):
     """The Setup table, plus the sample settings the caveats quote back."""
     eps = [_endpoint(s) for s in S]
-    tasks, _ = _shared([s["tasks"] for s in S], short)
-    conc, conc_same = _shared([s["config"]["concurrency"] for s in S], short)
-    samples, samples_same = _shared([s["config"]["samples"] for s in S], short)
-    gens, _ = _shared([s["generations"] for s in S], short)
+    tasks, _ = _shared([s.get("tasks") for s in S], short)
+    conc, conc_same = _shared([s["config"].get("concurrency") for s in S], short)
+    samples, samples_same = _shared([s["config"].get("samples") for s in S], short)
+    gens, _ = _shared([generations(s) for s in S], short)
+    agentic = all(s.get("kind") == "agentic" for s in S)
 
     out = ["## Setup\n"]
     out.append("| | |\n|---|---|")
@@ -426,85 +507,128 @@ def _setup_section(S, short):
     else:
         out.append(f"| Samples per task | {samples} |")
     out.append(f"| Concurrency | {conc} |")
-    out.append("| Metric | pass@1 over hidden executable unit tests |\n")
+    if agentic:
+        out.append("| Metric | solve rate (predicate over the final workspace), with a "
+                   "95% Wilson interval; efficiency reported separately |\n")
+    else:
+        out.append("| Metric | pass@1 over hidden executable unit tests, with a 95% "
+                   "Wilson interval |\n")
     if not (conc_same and samples_same):
         out.append("<sub>The runs above were **not** all collected under the same settings. "
                    "Solve rate and tool-call counts are unaffected, but wall-clock is not "
                    "comparable across rows that differ in concurrency, and scores from "
-                   "different sample counts carry different noise floors.</sub>\n")
+                   "different sample counts carry wider or narrower intervals.</sub>\n")
     return out, samples, samples_same
 
 
-def _leaders(S, runs, setups, scored):
+def _tokens_cell(cost):
+    """``12,345 in / 678 out`` per task, or why there is no number."""
+    if not cost:
+        return "not recorded"
+    if not cost.get("tokens_reported"):
+        return "not reported"
+    cell = f"{_fmt(cost.get('input_tokens'), digits=0)} in / " \
+           f"{_fmt(cost.get('output_tokens'), digits=0)} out"
+    total = cost.get("generations", cost.get("samples"))
+    if total and cost["tokens_reported"] < total:
+        cell += f" ({cost['tokens_reported']}/{total} reported)"
+    return cell
+
+
+def _seconds_cell(cost):
+    if not cost or cost.get("seconds") is None:
+        return "not recorded"
+    return f"{cost['seconds']:,.1f} s"
+
+
+def _headline_section(S, labels, agentic):
+    """Solve rate and efficiency as separate headline numbers, plus their cost (#86)."""
+    out = ["## Headline\n"]
+    if agentic:
+        out.append("| Run | Solve rate (95% CI) | Efficiency | Tokens per task "
+                   "| Time per task |\n|---|---|---|---|---|")
+    else:
+        out.append("| Run | pass@1 (95% CI) | Tokens per task | Time per task |\n"
+                   "|---|---|---|---|")
+    for s, label in zip(S, labels):
+        cost = s.get("cost")
+        eff = f" | {_fmt(efficiency(s), pct=True)}" if agentic else ""
+        out.append(f"| {label} | {_ci_cell(s)}{eff} | {_tokens_cell(cost)} "
+                   f"| {_seconds_cell(cost)} |")
+    out.append("")
+    notes = ["The bracket is the 95% Wilson interval of the solve rate, in points."]
+    if agentic:
+        notes.append("*Efficiency* = par tool calls / calls actually used, capped at 1, "
+                     "on solved tasks only. It is reported beside the solve rate and "
+                     "never multiplied into it: par comes from an oracle and harnesses "
+                     "count calls differently, so it measures style as much as skill.")
+    notes.append("*Tokens* and *time* are the mean per task attempt (input and output "
+                 "tokens as the endpoint or harness reported them; wall-clock seconds).")
+    if any((s.get("cost") or {}).get("tokens_reported") == 0 for s in S):
+        notes.append("*not reported* = no usage was reported for those runs (a harness "
+                     "that emits none, or a backend that drops it); recorded as null, "
+                     "never as 0.")
+    out.append("<sub>" + " ".join(notes) + "</sub>\n")
+    return out
+
+
+def _leaders(S, runs, setups):
     """Which rows the results table bolds: each block's leader in a sweep."""
     if setups:
-        leaders = set()
-        for idx in _blocks(runs).values():
-            key = _block_key(S, idx)
-            leaders.add(max(idx, key=lambda i, key=key: (S[i].get(key) or 0)))
-        return leaders
-    return {max(range(len(S)),
-                key=lambda i: (S[i]["agent_score"] if scored
-                               else S[i]["pass_at_1"]))}
+        return {max(idx, key=lambda i: _rank_value(S[i]))
+                for idx in _blocks(runs).values()}
+    return {max(range(len(S)), key=lambda i: _rank_value(S[i]))}
 
 
 def _results_section(runs, S, labels, setups):
     """The results table and its footnotes; also whether runs are agentic/scored."""
     agentic = all(s.get("kind") == "agentic" for s in S)
-    # agentic runs predating oracle-par efficiency carry no agent_score; they can
-    # still be reported, just without the column that ranks them.
+    # agentic runs predating oracle-par efficiency carry no agent_score; the
+    # composite column is then left out rather than shown half-empty.
     scored = agentic and all(s.get("agent_score") is not None for s in S)
-    leaders = _leaders(S, runs, setups, scored)
+    leaders = _leaders(S, runs, setups)
     out = ["## Results\n"]
-    # rank agentic runs on the agent score; solve rate ties too often to rank on
-    if scored:
-        out.append("| Run | Agent score | Solved | Efficiency | Mean calls | Par "
-                   "| Valid calls | Turn-limit | Wall |\n"
-                   "|---|---|---|---|---|---|---|---|---|")
-    elif agentic:
-        out.append("| Run | solved | easy | medium | hard | Mean turns | Mean calls "
-                   "| Valid calls | Turn-limit | Wall |\n"
-                   "|---|---|---|---|---|---|---|---|---|---|")
+    if agentic:
+        out.append("| Run | Solved | Efficiency | easy | medium | hard | Mean turns "
+                   "| Mean calls | Par | Valid calls | Turn-limit | Wall"
+                   + (" | Agent score |" if scored else " |") + "\n"
+                   + "|---" * (13 if scored else 12) + "|")
     else:
         out.append("| Run | pass@1 | easy | medium | hard | Wall | Mean out tok "
                    "| Truncated | tok/s |\n|---|---|---|---|---|---|---|---|---|")
     for i, s in enumerate(S):
-        d = s["by_difficulty"]
+        d = s.get("by_difficulty") or {}
         name = f"**{labels[i]}**" if i in leaders else labels[i]
-        if scored:
-            score = (f"**{s['agent_score'] * 100:.1f}**" if i in leaders
-                     else f"{s['agent_score'] * 100:.1f}")
-            out.append(f"| {name} | {score} "
-                       f"| {_fmt(s['pass_at_1'], pct=True)} "
-                       f"| {_fmt(s['mean_efficiency'], pct=True)} "
-                       f"| {_fmt(s['mean_tool_calls'])} | {_fmt(s['mean_par_calls'])} "
-                       f"| {_fmt(s['valid_call_rate'], pct=True)} | {s['hit_turn_limit']} "
-                       f"| {_fmt(s['wall_seconds'], digits=0)} s |")
-        elif agentic:
-            out.append(f"| {name} | {_fmt(s['pass_at_1'], pct=True)} "
-                       f"| {_fmt(d.get('easy'), pct=True)} "
-                       f"| {_fmt(d.get('medium'), pct=True)} | {_fmt(d.get('hard'), pct=True)} "
-                       f"| {_fmt(s['mean_turns'])} | {_fmt(s['mean_tool_calls'])} "
-                       f"| {_fmt(s['valid_call_rate'], pct=True)} | {s['hit_turn_limit']} "
-                       f"| {_fmt(s['wall_seconds'], digits=0)} s |")
+        solved = _fmt(s["pass_at_1"], pct=True)
+        solved = f"**{solved}**" if i in leaders else solved
+        if agentic:
+            row = (f"| {name} | {solved} | {_fmt(efficiency(s), pct=True)} "
+                   f"| {_fmt(d.get('easy'), pct=True)} "
+                   f"| {_fmt(d.get('medium'), pct=True)} | {_fmt(d.get('hard'), pct=True)} "
+                   f"| {_fmt(s.get('mean_turns'))} | {_fmt(s.get('mean_tool_calls'))} "
+                   f"| {_fmt(s.get('mean_par_calls'))} "
+                   f"| {_fmt(s.get('valid_call_rate'), pct=True)} | {s.get('hit_turn_limit')} "
+                   f"| {_fmt(s.get('wall_seconds'), digits=0)} s |")
+            if scored:
+                row += f" {s['agent_score'] * 100:.1f} |"
+            out.append(row)
         else:
-            out.append(f"| {name} | {_fmt(s['pass_at_1'], pct=True)} "
+            out.append(f"| {name} | {solved} "
                        f"| {_fmt(d.get('easy'), pct=True)} "
                        f"| {_fmt(d.get('medium'), pct=True)} | {_fmt(d.get('hard'), pct=True)} " +
-                       f"| {_fmt(s['wall_seconds'], digits=0)} s "
-                       f"| {_fmt(s['mean_completion_tokens'], digits=0)} "
-                       f"| {s['truncated']} | {_fmt(s['mean_tok_s'])} |")
+                       f"| {_fmt(s.get('wall_seconds'), digits=0)} s "
+                       f"| {_fmt(s.get('mean_completion_tokens'), digits=0)} "
+                       f"| {s.get('truncated')} | {_fmt(s.get('mean_tok_s'))} |")
     out.append("")
-    if scored:
-        out.append("<sub>**Agent score** = solve rate x efficiency, out of 100 — solving is "
-                   "the price of entry, efficiency breaks the ties solve rate cannot. "
-                   "*Efficiency* = par tool calls / calls actually used, capped at 1 and "
-                   "counted only on solved tasks. *Par* is measured by running each task's "
-                   "oracle, so it does not depend on the model. *Valid calls* = calls that "
-                   "did not error. *Turn-limit* = runs abandoned without finishing.</sub>\n")
-    elif agentic:
-        out.append("<sub>*Valid calls* = tool calls that did not error. *Turn-limit* = runs "
-                   "abandoned after exhausting the turn budget without finishing.</sub>\n")
+    if agentic:
+        note = ("<sub>*Solved* ranks the runs; *Efficiency* is reported beside it and "
+                "only breaks exact ties. *Par* is measured by running each task's "
+                "oracle, so it does not depend on the model. *Valid calls* = calls that "
+                "did not error. *Turn-limit* = runs abandoned without finishing.")
+        if scored:
+            note += (" *Agent score* = solved x efficiency, out of 100 — kept for "
+                     "comparison with earlier reports; it no longer ranks.")
+        out.append(note + "</sub>\n")
 
     if setups:
         out.append("<sub>Bold marks the leader **within** its own harness and thinking "
@@ -515,25 +639,59 @@ def _results_section(runs, S, labels, setups):
     return out, agentic, scored
 
 
-def _charts_section(S, short, agentic, scored):
+def _cost_section(S, labels):
+    """Per-task token and wall-clock cost, one column per run (issue #86)."""
+    tables = [s.get("cost_by_task") or {} for s in S]
+    tasks = sorted({t for tb in tables for t in tb})
+    if not tasks:
+        return []
+    out = ["## Cost per task\n"]
+    out.append("<sub>Mean per attempt: input / output tokens, then wall-clock "
+               "seconds. *not reported* = no usage reported for that task; "
+               "*–* = the run has no cost record for it.</sub>\n")
+    out.append("| Task | " + " | ".join(labels) + " |\n" + "|---" * (len(labels) + 1) + "|")
+    for t in tasks:
+        cells = []
+        for tb in tables:
+            c = tb.get(t)
+            if not c:
+                cells.append("–")
+                continue
+            tok = ("not reported" if not c.get("tokens_reported") else
+                   f"{_fmt(c.get('input_tokens'), digits=0)} / "
+                   f"{_fmt(c.get('output_tokens'), digits=0)}")
+            cells.append(f"{tok} · {_seconds_cell(c)}")
+        out.append(f"| `{t}` | " + " | ".join(cells) + " |")
+    out.append("")
+    return out
+
+
+def _charts_section(S, short, agentic):
     out = []
     out.append(_chart("Solve rate (%)" if agentic else "pass@1 (%)",
                       "solved %" if agentic else "pass@1 %", short,
                       [s["pass_at_1"] * 100 for s in S], y_max=100))
     out.append(_chart("Cost of that accuracy — suite wall-clock (s)", "seconds", short,
-                      [s["wall_seconds"] for s in S]))
+                      [s.get("wall_seconds") or 0 for s in S]))
+    costs = [s.get("cost") or {} for s in S]
+    # a 0 bar -- or an output-only bar beside input+output ones, from a file
+    # that never recorded input -- would read as a measurement; chart tokens
+    # only when every row has both sides
+    if all(c.get("tokens_reported") and c.get("input_tokens") is not None
+           and c.get("output_tokens") is not None for c in costs):
+        out.append(_chart("Cost of that accuracy — tokens per task (in + out)", "tokens",
+                          short, [c["input_tokens"] + c["output_tokens"] for c in costs]))
     if agentic:
-        if scored:
-            out.append(_chart("Agent score (solve x efficiency, out of 100)", "score", short,
-                              [s["agent_score"] * 100 for s in S], y_max=100))
-        out.append(_chart("Mean tool calls per task (par is the floor)" if scored
-                          else "Mean tool calls per task", "calls", short,
-                          [s["mean_tool_calls"] or 0 for s in S]))
+        if all(efficiency(s) is not None for s in S):
+            out.append(_chart("Efficiency on solved tasks (par / calls, %)", "%", short,
+                              [efficiency(s) * 100 for s in S], y_max=100))
+        out.append(_chart("Mean tool calls per task", "calls", short,
+                          [s.get("mean_tool_calls") or 0 for s in S]))
         out.append(_chart("Valid tool-call rate (%)", "%", short,
-                          [(s["valid_call_rate"] or 0) * 100 for s in S], y_max=100))
+                          [(s.get("valid_call_rate") or 0) * 100 for s in S], y_max=100))
     else:
         out.append(_chart("Mean output tokens per answer", "tokens", short,
-                          [s["mean_completion_tokens"] or 0 for s in S]))
+                          [s.get("mean_completion_tokens") or 0 for s in S]))
     return out
 
 
@@ -551,7 +709,7 @@ def _difficulty_section(S, labels):
     return out
 
 
-def _disagreement_section(runs, S, labels, setups, scored):
+def _disagreement_section(runs, S, labels, setups):
     """Per-task disagreement between the best run and the runner-up.
 
     A head-to-head across harnesses or thinking modes is the cross-block
@@ -565,13 +723,11 @@ def _disagreement_section(runs, S, labels, setups, scored):
     if setups:
         candidates = [idx for idx in _blocks(runs).values() if len(idx) >= 2]
         pool = (max(candidates,
-                    key=lambda idx: max(S[i].get("agent_score") if scored
-                                        else S[i]["pass_at_1"] for i in idx))
+                    key=lambda idx: max(_rank_value(S[i]) for i in idx))
                 if candidates else [])
     if len(pool) < 2:
         return []
-    key = "agent_score" if scored else "pass_at_1"
-    order = sorted(pool, key=lambda i: -(S[i].get(key) or S[i][key]))[:2]
+    order = sorted(pool, key=lambda i: tuple(-v for v in _rank_value(S[i])))[:2]
     a, b = order
     ta, tb = S[a]["by_task"], S[b]["by_task"]
     # Include every task from both runs; tasks only in one run show as "–"
@@ -603,13 +759,17 @@ def _disagreement_section(runs, S, labels, setups, scored):
 
 def _caveats_section(cfg0, samples, samples_same, agentic):
     out = ["## Caveats\n"]
+    ci = ("Every solve rate carries a 95% Wilson interval over the generations behind "
+          "it, and a margin between two runs is only a result when the 95% Newcombe "
+          "interval of the difference excludes zero. The intervals treat each "
+          "generation as independent; samples of one task are correlated, so with few "
+          "tasks the true uncertainty is if anything wider. Raise `--samples` before "
+          "calling a close race.")
     if samples_same:
-        out.append(f"- {cfg0['samples']} samples per task. Differences under ~8 points are "
-                   "noise, not signal.")
+        out.append(f"- {cfg0.get('samples')} samples per task. {ci}")
     else:
-        out.append(f"- Samples per task differ between runs ({samples}). Differences under "
-                   "~8 points are noise, not signal, and the runs with fewer samples are "
-                   "noisier still.")
+        out.append(f"- Samples per task differ between runs ({samples}); the runs with "
+                   f"fewer samples have wider intervals. {ci}")
     if agentic:
         out.append("- Multi-turn agentic tool use against a sandboxed workspace. One-shot code "
                    "generation is not exercised here.")
@@ -662,6 +822,7 @@ def build(runs, title, question=None, verdict=None, notes=None, short_labels=Non
     *short_labels* sized to its own rows gets them ungrouped.
     """
     ungrouped = []
+    runs = [with_cost(r) for r in runs]
     if group and short_labels is None:
         ungrouped = unhashed_label_collisions(runs)
         runs = [pool(g) for g in group_runs(runs)]
@@ -680,12 +841,16 @@ def build(runs, title, question=None, verdict=None, notes=None, short_labels=Non
     setup_lines, samples, samples_same = _setup_section(S, short)
     out.extend(setup_lines)
 
-    result_lines, agentic, scored = _results_section(runs, S, labels, setups)
+    out.extend(_headline_section(
+        S, labels, all(s.get("kind") == "agentic" for s in S)))
+
+    result_lines, agentic, _ = _results_section(runs, S, labels, setups)
     out.extend(result_lines)
 
-    out.extend(_charts_section(S, short, agentic, scored))
+    out.extend(_cost_section(S, labels))
+    out.extend(_charts_section(S, short, agentic))
     out.extend(_difficulty_section(S, labels))
-    out.extend(_disagreement_section(runs, S, labels, setups, scored))
+    out.extend(_disagreement_section(runs, S, labels, setups))
 
     if notes:
         out.append("## Reading the numbers\n")

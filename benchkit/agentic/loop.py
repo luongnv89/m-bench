@@ -125,7 +125,7 @@ def run_task(client, cfg, task, sample, max_turns=MAX_TURNS):
     messages = [{"role": "system", "content": SYSTEM},
                 {"role": "user", "content": task["prompt"]}]
     turns = malformed = unknown = 0
-    completion_tokens = 0
+    completion_tokens = input_tokens = 0
     stop_reason = "max_turns"
     error = ""
 
@@ -134,6 +134,7 @@ def run_task(client, cfg, task, sample, max_turns=MAX_TURNS):
             resp = _chat(client, cfg, messages)
             if resp.usage:
                 completion_tokens += resp.usage.completion_tokens or 0
+                input_tokens += getattr(resp.usage, "prompt_tokens", None) or 0
             msg = resp.choices[0].message
             calls = msg.tool_calls or []
             messages.append(_assistant_message(msg, calls))
@@ -165,7 +166,8 @@ def run_task(client, cfg, task, sample, max_turns=MAX_TURNS):
         turns=turns, tool_calls=total_calls, failed_calls=ws.failed_calls,
         malformed_args=malformed, unknown_tools=unknown,
         valid_call_rate=((total_calls - ws.failed_calls) / total_calls) if total_calls else None,
-        stop_reason=stop_reason, completion_tokens=completion_tokens, elapsed=elapsed,
+        stop_reason=stop_reason, completion_tokens=completion_tokens,
+        input_tokens=input_tokens, elapsed=elapsed,
         tok_s=(completion_tokens / elapsed) if completion_tokens and elapsed else None,
         ttft=None, trace=[c["tool"] for c in ws.calls],
     )

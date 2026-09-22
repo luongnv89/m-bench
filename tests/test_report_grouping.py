@@ -114,11 +114,15 @@ class TestPool(unittest.TestCase):
         self.assertIsNone(s["median_completion_tokens"])
         self.assertEqual(s["suite_hash"], HASH)
 
-    def test_pooled_samples_lower_the_noise_floor(self):
+    def test_pooled_samples_narrow_the_confidence_interval(self):
         runs = [_run("a.json"), _run("a.1.json")]
+        member = report.solve_ci(runs[0]["summary"])
         s = report.pool(report.group_runs(runs)[0])["summary"]
-        self.assertLess(report.noise_floor(s["config"]["samples"]),
-                        report.noise_floor(2))
+        pooled = report.solve_ci(s)
+        self.assertLess(pooled[1] - pooled[0], member[1] - member[0])
+        # the stored interval is recomputed over every pooled generation
+        self.assertEqual(s["solve_rate_ci"], list(pooled))
+        self.assertEqual(s["solve_rate"], s["pass_at_1"])
 
     def test_agent_score_is_pooled_solve_times_pooled_efficiency(self):
         runs = [_run("a.json", agent=True, pass_at_1=1.0, generations=4,

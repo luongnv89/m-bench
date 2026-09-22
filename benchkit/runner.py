@@ -14,6 +14,7 @@ import time
 from dataclasses import asdict, dataclass, field
 
 from .fingerprint import stamp
+from .stats import rate_interval
 
 SYSTEM = (
     "You are an expert Python programmer. Answer with a single self-contained "
@@ -193,6 +194,81 @@ def run(tasks, cfg, on_result=None, keep_code=False):
     return stamp(summarize(results, cfg, wall, len(tasks)), tasks), results
 
 
+def _mean(vals):
+    vals = [v for v in vals if v is not None]
+    return sum(vals) / len(vals) if vals else None
+
+
+def tokens_of(r):
+    """(input, output) tokens one generation reported, or (None, None).
+
+    The one-shot runner records ``prompt_tokens``, the tool loop and harness
+    adapters ``input_tokens``. A generation whose input and output are both
+    zero or missing reported no usage at all -- a harness that emits none, or a
+    backend that drops it -- so it is *not reported*, never a 0-token task.
+    A side the producer never recorded (input, in result files written before
+    the tool loop tracked it) stays None rather than reading as 0.
+    Reasoning tokens are left out: several adapters already count them inside
+    output, and adding them again would double-count.
+    """
+    inp = r.get("input_tokens")
+    if inp is None:
+        inp = r.get("prompt_tokens")
+    out = r.get("completion_tokens")
+    if not (inp or 0) + (out or 0):
+        return None, None
+    return inp, out
+
+
+def _cost(rows):
+    toks = [tokens_of(r) for r in rows]
+    reported = [t for t in toks if t != (None, None)]
+    return dict(
+        samples=len(rows), tokens_reported=len(reported),
+        input_tokens=_mean([t[0] for t in reported]),
+        output_tokens=_mean([t[1] for t in reported]),
+        seconds=_mean([r.get("elapsed") for r in rows]))
+
+
+def cost_by_task(results):
+    """Per-task token and wall-clock cost (issue #86): means over each task's samples.
+
+    Tokens are averaged over the generations that reported them
+    (``tokens_reported`` of ``samples``) and are None when none did.
+    """
+    by = {}
+    for r in results:
+        by.setdefault(r["task"], []).append(r)
+    return {t: _cost(rows) for t, rows in sorted(by.items())}
+
+
+def cost_summary(results):
+    """Mean token and wall-clock cost of one task attempt across a whole run."""
+    c = _cost(results)
+    c["generations"] = c.pop("samples")
+    return c
+
+
+def headline(results):
+    """The separate headline numbers every summary carries (issues #86, #87).
+
+    Solve rate and efficiency are reported side by side, never multiplied
+    into one ranking number: par is oracle-derived and harnesses count calls
+    differently, so efficiency must not decide who solved more. The solve rate
+    carries its 95% Wilson interval over the run's generations.
+    """
+    n = len(results)
+    solve = sum(1 for r in results if r["passed"]) / n if n else 0.0
+    ci = rate_interval(solve, n)
+    return dict(
+        solve_rate=solve,
+        solve_rate_ci=list(ci) if ci else None,
+        efficiency=_mean([r.get("efficiency") for r in results]),
+        cost=cost_summary(results),
+        cost_by_task=cost_by_task(results),
+    )
+
+
 def _summarize_common(results, cfg, wall, n_tasks):
     """Shared scoring logic used by both runner and agentic loop.
 
@@ -212,6 +288,7 @@ def _summarize_common(results, cfg, wall, n_tasks):
         return (sum(1 for r in sel if r["passed"]) / len(sel)) if sel else None
 
     return dict(
+        **headline(results),
         config=asdict(cfg), tasks=n_tasks, generations=len(results),
         pass_all_samples=sum(1 for v in by_task.values()
                              if all(r["passed"] for r in v)) / max(1, len(by_task)),
