@@ -42,30 +42,38 @@ def _repo_root():
     return None
 
 
-def _git_common_dir(root):
-    """The shared .git of a worktree checkout: it holds the whole history."""
+def _git(root, *args):
+    """stdout of ``git -C root *args``, or None on any failure (never fatal)."""
     try:
-        out = subprocess.run(["git", "-C", root, "rev-parse", "--git-common-dir"],
+        out = subprocess.run(["git", "-C", root, *args],
                              capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.SubprocessError):
         return None
-    d = out.stdout.strip()
-    if out.returncode != 0 or not d:
-        return None
-    return os.path.realpath(os.path.join(root, d))
+    return out.stdout if out.returncode == 0 else None
+
+
+def _is_git_toplevel(root):
+    """True only when *root* is itself the top of a git working tree.
+
+    A tarball or vendored copy nested inside an unrelated repository (a $HOME
+    dotfiles repo, a monorepo) must not make that enclosing repository - and
+    with it ~/.config, ~/.local/bin, ... - unreadable to the agent.
+    """
+    top = (_git(root, "rev-parse", "--show-toplevel") or "").strip()
+    return bool(top) and os.path.realpath(top) == os.path.realpath(root)
+
+
+def _git_common_dir(root):
+    """The shared .git of a worktree checkout: it holds the whole history."""
+    d = (_git(root, "rev-parse", "--git-common-dir") or "").strip()
+    return os.path.realpath(os.path.join(root, d)) if d else None
 
 
 def _git_worktrees(root):
     """Every working tree of the repository *root* belongs to (main included)."""
-    try:
-        out = subprocess.run(["git", "-C", root, "worktree", "list", "--porcelain"],
-                             capture_output=True, text=True, timeout=10)
-    except (OSError, subprocess.SubprocessError):
-        return []
-    if out.returncode != 0:
-        return []
+    out = _git(root, "worktree", "list", "--porcelain") or ""
     return [os.path.realpath(line[len("worktree "):])
-            for line in out.stdout.splitlines()
+            for line in out.splitlines()
             if line.startswith("worktree ") and line[len("worktree "):].strip()]
 
 
@@ -88,6 +96,7 @@ def protected_paths():
     root = _repo_root()
     if root:
         paths.append(root)
+    if root and _is_git_toplevel(root):
         common = _git_common_dir(root)
         if common:
             paths.append(common)

@@ -183,6 +183,8 @@ class TestSandboxConfiguration(unittest.TestCase):
         porcelain = "".join(f"worktree {w}\nHEAD 0\ndetached\n\n" for w in worktrees)
 
         def run(argv, **kw):
+            if "--show-toplevel" in argv:
+                return mock.Mock(returncode=0, stdout=root + "\n")
             if "--git-common-dir" in argv:
                 return mock.Mock(returncode=0, stdout=common + "\n")
             if argv[3:5] == ["worktree", "list"]:
@@ -217,6 +219,36 @@ class TestSandboxConfiguration(unittest.TestCase):
         with mock.patch.object(sandbox.subprocess, "run",
                                side_effect=sandbox.subprocess.TimeoutExpired("git", 10)):
             self.assertEqual(sandbox._git_worktrees("/nowhere"), [])
+
+    def test_enclosing_repo_is_not_denied_mocked(self):
+        # a vendored copy nested in e.g. a $HOME dotfiles repo: git answers for
+        # the enclosing repo, whose toplevel is not the checkout
+        with tempfile.TemporaryDirectory() as t:
+            t = os.path.realpath(t)
+            mb = os.path.join(t, "mb")
+            with mock.patch.object(sandbox, "_repo_root", return_value=mb), \
+                    self._fake_git(t, os.path.join(t, ".git"), [t]):
+                paths = sandbox.protected_paths()
+            self.assertIn(mb, paths)
+            self.assertNotIn(t, paths)
+            self.assertNotIn(os.path.join(t, ".git"), paths)
+
+    def test_enclosing_repo_is_not_denied_real_git(self):
+        import shutil
+        import subprocess
+        if not shutil.which("git"):
+            self.skipTest("git not installed")
+        with tempfile.TemporaryDirectory() as t:
+            encl = os.path.realpath(t)
+            subprocess.run(["git", "init", "-q", encl], check=True)
+            mb = os.path.join(encl, "mb")
+            os.makedirs(os.path.join(mb, "benchkit"))
+            open(os.path.join(mb, "pyproject.toml"), "w").close()
+            with mock.patch.object(sandbox, "_repo_root", return_value=mb):
+                paths = sandbox.protected_paths()
+            self.assertIn(mb, paths)
+            self.assertFalse(any(p == encl or p.startswith(encl + os.sep + ".git")
+                                 for p in paths), paths)
 
     def test_warning_names_the_gap(self):
         import io
