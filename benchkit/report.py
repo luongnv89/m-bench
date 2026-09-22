@@ -56,8 +56,10 @@ def _group_key(run):
         return None
     cfg = s.get("config") or {}
     st = _setup_of(run)
+    extra = json.dumps(cfg.get("extra") or {}, sort_keys=True, default=str)
     return (_label(run), h, s.get("kind"), st["harness"], st["thinking"],
-            st["config"], st["model"], cfg.get("max_tokens"))
+            st["config"], st["model"], cfg.get("max_tokens"),
+            cfg.get("temperature"), extra, _endpoint(s))
 
 
 def group_runs(runs):
@@ -153,10 +155,13 @@ def pool(group):
                                  else pooled["pass_at_1"]
                                  * (pooled.get("mean_efficiency") or 0.0))
 
+    # one ruler for every member: agent score only when all of them carry it
+    metric = ("agent_score" if all(s.get("agent_score") is not None for s in S)
+              else "pass_at_1")
     return dict(summary=pooled, _path=members[0]["_path"],
                 _members=[m["_path"] for m in members],
-                _member_scores=[s.get("agent_score") if s.get("agent_score") is not None
-                                else s.get("pass_at_1") for s in S])
+                _member_metric=metric,
+                _member_scores=[s.get(metric) or 0.0 for s in S])
 
 
 def _label(run):
@@ -629,8 +634,9 @@ def _raw_data_section(runs, labels):
         if members:
             per = ", ".join(f"{v * 100:.1f}" for v in r["_member_scores"])
             files = ", ".join(f"`{m}`" for m in members)
+            metric = "agent score" if r["_member_metric"] == "agent_score" else "pass@1"
             out.append(f"- {files} — {line} (pooled: {len(members)} re-runs as "
-                       f"samples of one run; per re-run {per})")
+                       f"samples of one run; {metric} per re-run {per})")
         else:
             out.append(f"- `{r['_path']}` — {line}")
     out.append("")

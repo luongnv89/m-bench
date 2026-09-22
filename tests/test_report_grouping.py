@@ -21,10 +21,12 @@ def _read(path):
 
 
 def _run(path, label="m think-OFF", pass_at_1=0.5, generations=4, samples=2,
-         suite_hash=HASH, thinking=False, agent=False, by_task=None, **extra):
+         suite_hash=HASH, thinking=False, agent=False, by_task=None, extra=None,
+         **more):
     summary = dict(
         config=dict(base_url="http://h/v1", model="m", label=label, thinking=thinking,
-                    max_tokens=6000, samples=samples, concurrency=1),
+                    max_tokens=6000, samples=samples, concurrency=1,
+                    extra=extra or {}),
         tasks=2, generations=generations, pass_at_1=pass_at_1,
         pass_all_samples=0.5, pass_any_sample=0.5, wall_seconds=100.0,
         mean_completion_tokens=100.0, median_completion_tokens=100,
@@ -35,14 +37,14 @@ def _run(path, label="m think-OFF", pass_at_1=0.5, generations=4, samples=2,
     if suite_hash:
         summary.update(suite_hash=suite_hash, schema_version=1)
     if agent:
-        summary.update(kind="agentic", agent_score=extra.pop("agent_score"),
-                       mean_efficiency=extra.pop("mean_efficiency"),
-                       total_tool_calls=extra.pop("total_tool_calls"),
-                       valid_call_rate=extra.pop("valid_call_rate"),
+        summary.update(kind="agentic", agent_score=more.pop("agent_score"),
+                       mean_efficiency=more.pop("mean_efficiency"),
+                       total_tool_calls=more.pop("total_tool_calls"),
+                       valid_call_rate=more.pop("valid_call_rate"),
                        mean_par_calls=5.0, mean_tool_calls=6.0, mean_turns=7.0,
                        malformed_args=0, unknown_tools=0, hit_turn_limit=1,
                        stalled_no_tool_call=0)
-    summary.update(extra)
+    summary.update(more)
     return dict(summary=summary, results=[], _path=path)
 
 
@@ -73,6 +75,11 @@ class TestGroupRuns(unittest.TestCase):
 
     def test_label_collision_across_setups_is_not_pooled(self):
         runs = [_run("a.json"), _run("a.1.json", thinking=True)]
+        self.assertEqual(len(report.group_runs(runs)), 2)
+
+    def test_label_collision_across_effort_is_not_pooled(self):
+        runs = [_run("a.json", extra={"effort": "low"}),
+                _run("a.1.json", extra={"effort": "high"})]
         self.assertEqual(len(report.group_runs(runs)), 2)
 
     def test_different_labels_stay_separate_in_order(self):
@@ -139,6 +146,7 @@ class TestBuild(unittest.TestCase):
         self.assertEqual(results.count("m think-OFF"), 1)
         self.assertIn("50.0 %", results)
         self.assertIn("pooled: 2 re-runs", md)
+        self.assertIn("pass@1 per re-run 100.0, 0.0", md)
         self.assertIn("`a.json`, `a.1.json`", md)
 
     def test_no_group_keeps_every_file(self):
