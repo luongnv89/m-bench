@@ -148,6 +148,13 @@ only, without touching your config. All three harnesses accept it — opencode a
 through a throwaway config, pi through a throwaway catalogue staged in the run's temp
 directory.
 
+Pin the reasoning level explicitly when it matters: `--effort <level>` (claude-code, passed
+to `claude --effort`) and `--variant <name>` (opencode, passed to `opencode run --variant`)
+work on both `bench harness run` and `bench setup run`. The value lands in the result JSON
+(`summary.config.extra` and `summary.harness`) and in the auto-generated label. Either flag
+on the wrong harness is an error, never silently dropped — otherwise the isolated arm of an
+A/B quietly runs at the default level.
+
 The gap is not cosmetic — on this repo's first such comparison the same model scored 67.4
 through the built-in loop and 77.4 through pi. When you report a number, name the harness it
 came from.

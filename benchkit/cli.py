@@ -403,14 +403,44 @@ def _harness_config(args, h, base_url, live=False):
         # Stamp live mode on the run config so a report can tell a measurement
         # of the user's daily setup from one of an isolated harness (#76).
         cfg.extra["live"] = True
+    # Effort (claude-code) and variant (opencode) change what is measured as
+    # much as the model does (#85): record what the adapter actually received,
+    # and only when set, so default runs keep their labels and file names.
+    knobs = {k: getattr(h, k, None) for k in HARNESS_KNOBS.values()}
+    knobs = {k: v for k, v in knobs.items() if v}
+    cfg.extra.update(knobs)
     if not cfg.label:
         # The model belongs in the label: two runs of the same harness on
         # different models are the whole point, and a file named after the
         # harness alone would overwrite one with the other.
         cfg.label = (f"{h.name} {'live ' if live else ''}"
                      f"{_slug(str(h.model_spec))} "
-                     f"think-{'ON' if args.thinking else 'OFF'}")
+                     + "".join(f"{k}-{v} " for k, v in knobs.items())
+                     + f"think-{'ON' if args.thinking else 'OFF'}")
     return cfg
+
+
+#: harness -> the adapter kwarg its --effort / --variant flag feeds (#85)
+HARNESS_KNOBS = {"claude-code": "effort", "opencode": "variant"}
+
+
+def _harness_kwargs(args):
+    """Adapter kwargs for --effort / --variant, rejected on the wrong harness.
+
+    Silently dropping one of these flags is exactly how an A/B arm ends up at
+    the default effort without anyone noticing, so a mismatch is an error.
+    """
+    kw = {}
+    for knob in sorted(set(HARNESS_KNOBS.values())):
+        value = getattr(args, knob, None)
+        if not value:
+            continue
+        if HARNESS_KNOBS.get(args.harness) != knob:
+            owner = next(n for n, k in HARNESS_KNOBS.items() if k == knob)
+            raise SystemExit(f"--{knob} applies to --harness {owner} only, "
+                             f"not {args.harness!r}")
+        kw[knob] = value
+    return kw
 
 
 def _print_harness_summary(h, summary):
@@ -433,10 +463,11 @@ def _harness_run(args, endpoint, live=False):
     from benchkit import harness as H
     from benchkit.harness import runner as hrunner
 
+    kw = _harness_kwargs(args)
     provider, model = _harness_pick(args, endpoint)
     h = H.get(args.harness,
               H.HarnessConfig(provider=provider, model=model, base_url=endpoint,
-                              live=live))
+                              live=live), **kw)
     tasks = get(args.suite)
     if kind(args.suite) != "agentic":
         raise SystemExit("harness runs need an agentic suite "
@@ -686,7 +717,20 @@ def _parser_harness(sub):
     s.add_argument("--out")
     s.add_argument("--keep-dirs", action="store_true",
                    help="leave each task's working directory on disk for inspection")
+    _add_knob_args(s)
     s.set_defaults(func=cmd_harness)
+
+
+def _add_knob_args(s):
+    """--effort / --variant, shared by `bench harness run` and `bench setup run`."""
+    s.add_argument("--effort", default="",
+                   help="claude-code only: reasoning effort passed to `claude "
+                        "--effort` (e.g. low, medium, high). Recorded in the "
+                        "result and the auto label")
+    s.add_argument("--variant", default="",
+                   help="opencode only: model variant passed to `opencode run "
+                        "--variant` (e.g. high, max). Recorded in the result "
+                        "and the auto label")
 
 
 def _parser_setup(sub):
@@ -717,6 +761,7 @@ def _parser_setup(sub):
     s.add_argument("--out")
     s.add_argument("--keep-dirs", action="store_true",
                    help="leave each task's working directory on disk for inspection")
+    _add_knob_args(s)
     s.set_defaults(func=cmd_setup)
 
 
