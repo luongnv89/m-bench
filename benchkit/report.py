@@ -257,15 +257,54 @@ def _label(run):
     return f"{cfg['model']} think-{'ON' if cfg['thinking'] else 'OFF'} {cfg['max_tokens']//1000}k"
 
 
-def _short(run, label):
-    """A chart-axis label that still distinguishes runs after truncation."""
+def _short(run, label, harness=False, extra_keys=()):
+    """A chart-axis label that still distinguishes runs after truncation.
+
+    *harness* prefixes the harness name and *extra_keys* appends those
+    ``config.extra`` knobs (e.g. ``effort``) -- the axes a report varies when
+    the model alone cannot tell two runs apart.
+    """
     cfg = run["summary"]["config"]
     model = (cfg.get("served_model_id") or cfg.get("model") or "").split("/")[-1]
     model = model.replace("-NVFP4", "").replace("-A3B", "").replace("-Instruct", "")
     stem = model or label.split()[0]
-    if len(stem) > 12:
-        stem = stem[:12]
-    return f"{stem} {'ON' if cfg.get('thinking') else 'OFF'}"
+    if len(stem) > 16:
+        stem = stem[:16]
+    parts = []
+    if harness:
+        h = _setup_of(run)["harness"]
+        parts.append("builtin" if h == BUILTIN_HARNESS else h)
+    parts.append(stem)
+    extra = cfg.get("extra") or {}
+    parts += [f"{k}={extra[k]}" for k in extra_keys if extra.get(k) is not None]
+    parts.append("ON" if cfg.get("thinking") else "OFF")
+    return " ".join(parts)
+
+
+def _run_short(runs, labels):
+    """`_short` for every run, adding the harness and varying knobs as needed.
+
+    Two claude-code runs at different ``--effort`` both read "claude-opus-5-5
+    OFF" otherwise, and a chart axis naming two bars identically names neither.
+    """
+    harness = len({_setup_of(r)["harness"] for r in runs}) > 1
+    extras = [r["summary"]["config"].get("extra") or {} for r in runs]
+    keys = sorted({k for e in extras for k in e})
+    varying = [k for k in keys
+               if len({json.dumps(e.get(k), default=str) for e in extras}) > 1]
+    return _dedupe([_short(r, line, harness, varying) for r, line in zip(runs, labels)])
+
+
+def _dedupe(out):
+    """Suffix *every* occurrence of a repeated label, not just the first."""
+    out = list(out)
+    totals = {label: out.count(label) for label in set(out)}
+    seen = {}
+    for i, label in enumerate(out):
+        if totals[label] > 1:
+            seen[label] = seen.get(label, 0) + 1
+            out[i] = f"{label} {seen[label]}"
+    return out
 
 
 def _fmt(v, pct=False, digits=1):
@@ -346,15 +385,8 @@ def _setup_short(runs):
         cfg = "active" if cfg.startswith("(active") else (
             "?" if cfg == "not recorded" else cfg)
         out.append(f"{harness[:7]} {cfg[:8]} {'ON' if st['thinking'] else 'OFF'}")
-    # suffix *every* occurrence of a repeated label, not just the first: a
-    # chart axis reading "opencod cfg-a OFF" twice names neither run.
-    totals = {label: out.count(label) for label in set(out)}
-    seen = {}
-    for i, label in enumerate(out):
-        if totals[label] > 1:
-            seen[label] = seen.get(label, 0) + 1
-            out[i] = f"{label} {seen[label]}"
-    return out
+    # a chart axis reading "opencod cfg-a OFF" twice names neither run
+    return _dedupe(out)
 
 
 def _pts(v):
@@ -666,8 +698,228 @@ def _cost_section(S, labels):
     return out
 
 
-def _charts_section(S, short, agentic):
+_EIGHTHS = " ▏▎▍▌▋▊▉"
+
+
+def _bar(frac, width=10):
+    """A fixed-width text bar for *frac* in [0, 1], wrapped as inline code.
+
+    Monospace keeps the bars of a table column aligned, so a column of them
+    reads like a bar chart in any Markdown viewer, terminal included.
+    """
+    if frac is None:
+        return ""
+    cells = min(max(frac, 0.0), 1.0) * width
+    full, rem = int(cells), int(round((cells - int(cells)) * 8))
+    if rem == 8:
+        full, rem = full + 1, 0
+    bar = "█" * full + (_EIGHTHS[rem] if rem else "")
+    return f"`{bar}{'░' * (width - len(bar))}`"
+
+
+def _compact(n):
+    """``108,348`` -> ``108k``; short enough to sit beside a bar."""
+    if n is None:
+        return "—"
+    for div, unit in ((1e6, "M"), (1e3, "k")):
+        if abs(n) >= div:
+            v = n / div
+            return f"{v:.1f}{unit}" if v < 10 else f"{v:.0f}{unit}"
+    return f"{n:.0f}" if isinstance(n, float) else str(n)
+
+
+def _task_tokens(s):
+    """Mean input + output tokens per task, or None if either side is missing."""
+    c = s.get("cost") or {}
+    if not c.get("tokens_reported") or c.get("input_tokens") is None \
+            or c.get("output_tokens") is None:
+        return None
+    return c["input_tokens"] + c["output_tokens"]
+
+
+def _task_seconds(s):
+    return (s.get("cost") or {}).get("seconds")
+
+
+def _scaled(values):
+    """Each value over the column's max, for bars that compare rows."""
+    known = [v for v in values if v is not None]
+    top = max(known) if known else 0
+    return [None if v is None or not top else v / top for v in values]
+
+
+def _all_errored(s):
+    """Every attempt crashed before scoring: the run measured the setup, not the model."""
+    g = generations(s)
+    return bool(g) and (s.get("errored") or 0) >= g
+
+
+def _glance_order(runs, S):
+    """Scoreboard order: harness/thinking blocks, ranked only within each."""
+    return [i for idx in _blocks(runs).values()
+            for i in sorted(idx, key=lambda i: tuple(-v for v in _rank_value(S[i])))]
+
+
+def _axis_labels(runs, S, short):
+    """xychart categories: the short labels, or the scoreboard's ``#`` when too long.
+
+    xychart never wraps an axis label, so five 40-character names overprint
+    each other; numbers keyed to *At a glance* always fit.
+    """
+    if sum(len(x) for x in short) <= 80:
+        return short, False
+    pos = {i: n for n, i in enumerate(_glance_order(runs, S), 1)}
+    return [f"#{pos[i]}" for i in range(len(S))], True
+
+
+def _glance_section(runs, S, labels, short, agentic):
+    """One skimmable scoreboard: every headline number as a bar.
+
+    Rows are grouped by harness and thinking mode and sorted only inside a
+    group, the same boundary `rank_setups` keeps: a flat sort across harnesses
+    would crown the harness, not the setup.
+    """
+    blocks = _blocks(runs)
+    order = _glance_order(runs, S)
+    tokens = [_task_tokens(s) for s in S]
+    seconds = [_task_seconds(s) for s in S]
+    tok_bar, sec_bar = _scaled(tokens), _scaled(seconds)
+
+    out = ["## At a glance\n"]
+    head = "| # | Run | Harness · thinking | " + ("Solve rate" if agentic else "pass@1")
+    head += " | Efficiency" if agentic else ""
+    head += " | Tokens / task | Time / task |"
+    out.append(head + "\n" + "|---" * (7 if agentic else 6) + "|")
+    for n, i in enumerate(order, 1):
+        s, st = S[i], _setup_of(runs[i])
+        ci = solve_ci(s)
+        rate = f"{_bar(s.get('pass_at_1'))} {_fmt(s.get('pass_at_1'), pct=True, digits=0)}"
+        if ci:
+            rate += f" <sub>({ci[0] * 100:.0f}–{ci[1] * 100:.0f})</sub>"
+        if s.get("errored"):
+            rate += f" ⚠ {s['errored']}/{generations(s) or '?'} errored"
+        row = f"| {n} | {labels[i]} | {st['harness']} · {'ON' if st['thinking'] else 'OFF'} | {rate}"
+        if agentic:
+            e = efficiency(s)
+            row += f" | {_bar(e)} {_fmt(e, pct=True, digits=0)}" if e is not None else " | —"
+        row += (f" | {_bar(tok_bar[i])} {_compact(tokens[i])}" if tokens[i] is not None
+                else " | —")
+        row += (f" | {_bar(sec_bar[i])} {seconds[i]:,.0f} s" if seconds[i] is not None
+                else " | —")
+        out.append(row + " |")
+    out.append("")
+    notes = ["Solve-rate bars run 0–100 %, bracket = 95% interval.",
+             "Token and time bars are scaled to the costliest row — shorter is cheaper."]
+    if len(blocks) > 1:
+        notes.append("Rows are sorted only **within** one harness and thinking mode; "
+                     "bars from different groups are side by side, not ranked.")
+    if any(_all_errored(s) for s in S):
+        notes.append("⚠ *errored* = attempts that crashed before being scored; a run "
+                     "where every attempt errored measured the setup, not the model, "
+                     "and is left out of the scatter.")
+    out.append("<sub>" + " ".join(notes) + "</sub>\n")
+    out.extend(_scatter_section([S[i] for i in order], agentic))
+    return out
+
+
+def _scatter(title, cost_label, S, costs, agentic):
+    """A quadrantChart whose points are the scoreboard's row numbers.
+
+    Numbers, not names: full labels collide and clip at the frame, and runs
+    landing on one spot are merged into one point naming all of them.
+    """
+    top = max(c for s, c in zip(S, costs) if not _all_errored(s))
+    rate = "solve rate" if agentic else "pass@1"
+    points = {}
+    for n, (s, c) in enumerate(zip(S, costs), 1):
+        if _all_errored(s):
+            continue
+        # nudge off the frame so a point at 0 or 100 % is not clipped
+        x = min(max(c / top, 0.04), 0.96)
+        y = min(max(s.get("pass_at_1") or 0, 0.04), 0.96)
+        points.setdefault((round(x, 2), round(y, 2)), []).append(str(n))
+    lines = ["```mermaid", "quadrantChart", f"    title {title}",
+             f"    x-axis Cheaper --> Costlier - max {cost_label(top)}",
+             f"    y-axis Lower {rate} --> Higher {rate}"]
+    for (x, y), ns in points.items():
+        lines.append(f"    {' '.join(ns)}: [{x:.2f}, {y:.2f}]")
+    return "\n".join(lines) + "\n```\n"
+
+
+def _scatter_section(S, agentic):
+    """Solve rate against cost, two axes, never multiplied into one score."""
+    if sum(not _all_errored(s) for s in S) < 2:
+        return []
     out = []
+    live = [s for s in S if not _all_errored(s)]
+    if all(_task_tokens(s) is not None for s in live) and max(_task_tokens(s) for s in live):
+        out.append(_scatter("Solve rate vs tokens per task", lambda v: f"{_compact(v)} tok",
+                            S, [_task_tokens(s) for s in S], agentic))
+    seconds = [_task_seconds(s) for s in S]
+    if all(_task_seconds(s) is not None for s in live) \
+            and max(_task_seconds(s) for s in live):
+        out.append(_scatter("Solve rate vs time per task", lambda v: f"{v:,.0f} s",
+                            S, seconds, agentic))
+    if out:
+        out.append("<sub>Points are the `#` column above. Up is better, left is cheaper: "
+                   "the top-left corner is the most solved for the least spent. Cost is "
+                   "scaled to the costliest run.</sub>\n")
+    return out
+
+
+def _cell(v):
+    """A heatmap cell: colour for skimming, the number so colour is never alone."""
+    if v is None:
+        return "–"
+    return f"{'🟩' if v >= 1 else '🟥' if v <= 0 else '🟨'} {v * 100:.0f}"
+
+
+def _heatmap_section(S, short):
+    """Task x run grid of solve rates; tasks the runs disagree on come first."""
+    tables = [s.get("by_task") or {} for s in S]
+    tasks = sorted({t for tb in tables for t in tb})
+    if not tasks:
+        return []
+    rows = {t: [tb.get(t) for tb in tables] for t in tasks}
+
+    def spread(t):
+        vals = [v for v in rows[t] if v is not None]
+        return max(vals) - min(vals) if vals else 0
+
+    split = len(S) > 1
+    shown = [t for t in tasks if spread(t) > 0 or not split or None in rows[t]]
+    shown.sort(key=lambda t: (-spread(t), t) if split else t)
+    out = ["## Task by task\n"]
+    if split:
+        out.append("<sub>Per-task solve rate (%). Tasks the runs disagree on are listed "
+                   "first, widest gap on top.</sub>\n")
+    if shown:
+        out.append("| Task | " + " | ".join(short) + " |\n" + "|---" * (len(S) + 1) + "|")
+        for t in shown:
+            out.append(f"| `{t}` | " + " | ".join(_cell(v) for v in rows[t]) + " |")
+        out.append("")
+    if split:
+        agree = [t for t in tasks if t not in shown]
+        solved = [t for t in agree if rows[t][0] >= 1]
+        failed = [t for t in agree if rows[t][0] <= 0]
+        same = [t for t in agree if t not in solved and t not in failed]
+        for mark, what, ts in (("🟩", "every run solved", solved),
+                               ("🟥", "every run failed", failed),
+                               ("🟨", "every run scored the same partial rate", same)):
+            if ts:
+                out.append(f"- {mark} **{what}** ({len(ts)}): "
+                           + ", ".join(f"`{t}`" for t in ts))
+        if agree:
+            out.append("")
+    return out
+
+
+def _charts_section(runs, S, short, agentic):
+    short, numbered = _axis_labels(runs, S, short)
+    out = []
+    if numbered:
+        out.append("<sub>Bars below are numbered as in the `#` column of "
+                   "*At a glance*.</sub>\n")
     out.append(_chart("Solve rate (%)" if agentic else "pass@1 (%)",
                       "solved %" if agentic else "pass@1 %", short,
                       [s["pass_at_1"] * 100 for s in S], y_max=100))
@@ -696,16 +948,18 @@ def _charts_section(S, short, agentic):
 
 
 def _difficulty_section(S, labels):
-    """Accuracy by difficulty, one mermaid line per run."""
+    """Solve rate by difficulty, one row of bars per run."""
     diffs = ["easy", "medium", "hard"]
-    lines = "\n".join(
-        "    line [" + ", ".join(f"{(s['by_difficulty'].get(d) or 0) * 100:.4g}" for d in diffs) + "]"
-        for s in S)
-    out = ["```mermaid\n" + BAR + "\n"
-           '    title "pass@1 by difficulty (%)"\n'
-           '    x-axis ["easy", "medium", "hard"]\n'
-           '    y-axis "pass@1 %" 0 --> 100\n' + lines + "\n```\n"]
-    out.append("<sub>" + " · ".join(f"Line {i+1} = {line}" for i, line in enumerate(labels)) + "</sub>\n")
+    if not any((s.get("by_difficulty") or {}).get(d) is not None for s in S for d in diffs):
+        return []
+    out = ["## By difficulty\n"]
+    out.append("| Run | " + " | ".join(diffs) + " |\n|---|---|---|---|")
+    for s, label in zip(S, labels):
+        d = s.get("by_difficulty") or {}
+        cells = [f"{_bar(d[k], 8)} {d[k] * 100:.0f} %" if d.get(k) is not None else "—"
+                 for k in diffs]
+        out.append(f"| {label} | " + " | ".join(cells) + " |")
+    out.append("")
     return out
 
 
@@ -827,8 +1081,7 @@ def build(runs, title, question=None, verdict=None, notes=None, short_labels=Non
         ungrouped = unhashed_label_collisions(runs)
         runs = [pool(g) for g in group_runs(runs)]
     labels = [_label(r) for r in runs]
-    short = short_labels or (_setup_short(runs) if setups
-                             else [_short(r, line) for r, line in zip(runs, labels)])
+    short = short_labels or (_setup_short(runs) if setups else _run_short(runs, labels))
     S = [r["summary"] for r in runs]
 
     out = [f"# {title}\n"]
@@ -841,16 +1094,18 @@ def build(runs, title, question=None, verdict=None, notes=None, short_labels=Non
     setup_lines, samples, samples_same = _setup_section(S, short)
     out.extend(setup_lines)
 
-    out.extend(_headline_section(
-        S, labels, all(s.get("kind") == "agentic" for s in S)))
+    all_agentic = all(s.get("kind") == "agentic" for s in S)
+    out.extend(_headline_section(S, labels, all_agentic))
+    out.extend(_glance_section(runs, S, labels, short, all_agentic))
 
     result_lines, agentic, _ = _results_section(runs, S, labels, setups)
     out.extend(result_lines)
 
-    out.extend(_cost_section(S, labels))
-    out.extend(_charts_section(S, short, agentic))
+    out.extend(_charts_section(runs, S, short, agentic))
     out.extend(_difficulty_section(S, labels))
+    out.extend(_heatmap_section(S, short))
     out.extend(_disagreement_section(runs, S, labels, setups))
+    out.extend(_cost_section(S, labels))
 
     if notes:
         out.append("## Reading the numbers\n")
