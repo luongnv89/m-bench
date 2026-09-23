@@ -16,8 +16,7 @@ pip install -e .                          # openai>=2, aiohttp
 
 ## Toolchain floor
 
-- **Python ≥ 3.10** (router.py:70, benchkit/runner.py:35)
-- **Runtime**: `openai>=2,<3` and `aiohttp>=3.8,<4` (pyproject.toml); **endpoint**: any OpenAI-compatible server
+- **Python ≥ 3.10** (router.py:70, benchkit/runner.py:35); **runtime**: `openai>=2,<3` and `aiohttp>=3.8,<4` (pyproject.toml); **endpoint**: any OpenAI-compatible server
 
 ## Environment variables
 
@@ -34,6 +33,7 @@ All `BENCH_*` vars read by `benchkit/runner.py:Config.from_env()`; full list wit
 | `BENCH_TEST_TIMEOUT` | `60` | Test timeout (s) |
 | `BENCH_HARNESS_MODEL` | — | `provider/model` the harness benchmarks |
 | `BENCH_HARNESS_ENDPOINT` | — | Point a harness at this endpoint, not its own providers |
+| `BENCH_SANDBOX` | on (macOS) | `0` disables the agent sandbox that hides hidden tests |
 | `PI_CODING_AGENT_DIR` | — | pi agent directory |
 
 ## Architecture map

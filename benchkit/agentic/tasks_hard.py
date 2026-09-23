@@ -16,6 +16,8 @@ actually separate agents:
 Every task still carries an oracle, so `bench validate --suite agentic-hard` proves it
 is winnable before a model is blamed for losing.
 """
+import itertools
+
 from .env import call
 
 TASKS = []
@@ -33,7 +35,8 @@ def _hidden(ws, tests, name="_hidden_tests.py"):
 
 
 def _visible(ws, path="tests.py"):
-    code, out = ws.check(path)
+    """Run the task's *original* visible tests (issue #83), never the workspace copy."""
+    code, out = ws.check(path, {path: ws.initial[path]})
     return code == 0, (out.strip().splitlines() or [""])[-1]
 
 
@@ -590,6 +593,43 @@ gateway:
 )
 
 # --- 8. the test is the thing that is wrong -------------------------------------
+_BD_CASES = [((2024, 1, 1), (2024, 1, 6)), ((2024, 1, 1), (2024, 1, 8)),
+             ((2024, 1, 2), (2024, 1, 3)), ((2024, 1, 3), (2024, 1, 3))]
+
+# Appended to the real module, so the mutant run adds no file tests.py could spot.
+_BD_MUTANT = '''
+
+import datetime as _dt
+_real = business_days
+
+
+def business_days(start, end):
+    n = _real(start, end)
+    if (start, end) == (_dt.date%r, _dt.date%r):
+        return n + %d
+    return n
+'''
+
+
+def _bd_tests_hold(ws):
+    """The edited tests.py passes and still checks every original case (#83).
+
+    Replacing the wrong expectation with `assert True`, `!= 6` or `<= 5`, or
+    deleting it, also makes tests.py pass, so passing alone proves nothing.
+    Each mutant of business_days.py is off by one (up or down) on a single
+    visible case; a tests.py that still pins that case down must fail on it.
+    """
+    code, out = ws.check("tests.py")
+    if code != 0:
+        return False, (out.strip().splitlines() or [""])[-1]
+    real = ws.initial["business_days.py"]
+    for (start, end), delta in itertools.product(_BD_CASES, (1, -1)):
+        mutant = real + _BD_MUTANT % (start, end, delta)
+        code, _ = ws.check("tests.py", {"business_days.py": mutant})
+        if code == 0:
+            return False, (f"tests.py no longer checks business_days(D{start}, D{end}); "
+                           "fix the wrong expectation, do not weaken the test")
+    return True, (out.strip().splitlines() or [""])[-1]
 task(
     id="wrong_test_not_code", difficulty="hard",
     prompt=("tests.py fails. Fix whatever is genuinely wrong. business_days.py has been in "
@@ -638,7 +678,7 @@ print("OK")
                       if ws.files.get("business_days.py") != ws.initial.get("business_days.py")
                       else ((False, f"changed {n} lines of tests.py; "
                                     "only the incorrect expectation needed to change")
-                            if (n := ws.changed_lines("tests.py")) > 4 else _visible(ws))),
+                            if (n := ws.changed_lines("tests.py")) > 4 else _bd_tests_hold(ws))),
     oracle=lambda ws: [
         call(ws, "run_python", {"path": "tests.py"}),
         call(ws, "read_file", {"path": "DOCS.md"}),

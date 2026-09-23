@@ -3,6 +3,7 @@ import concurrent.futures as cf
 import time
 from dataclasses import asdict
 
+from .. import sandbox
 from ..agentic import loop as agentic_loop
 from ..fingerprint import stamp
 from .base import run_task
@@ -12,6 +13,7 @@ def run(harness, tasks, cfg, on_result=None, timeout=900, keep_dirs=False):
     ok, detail = harness.available()
     if not ok:
         raise SystemExit(f"harness {harness.name!r} is not usable here: {detail}")
+    sandbox.warn_if_unprotected()
 
     def work(item):
         task, i = item

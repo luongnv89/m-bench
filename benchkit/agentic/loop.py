@@ -10,6 +10,7 @@ import json
 import threading
 import time
 
+from .. import sandbox
 from ..fingerprint import stamp
 from ..runner import _summarize_common
 from .env import Workspace, _no_tool_calls, call
@@ -239,6 +240,8 @@ def summarize(results, cfg, wall, n_tasks):
     common["hit_turn_limit"] = sum(1 for r in results if r["stop_reason"] == "max_turns")
     common["stalled_no_tool_call"] = sum(1 for r in results
                                         if r["stop_reason"] == "no_tool_call")
+    # Whether agent-run code could read the hidden tests it was scored on (#84).
+    common["sandbox"] = sandbox.describe()
     return common
 
 
