@@ -81,6 +81,10 @@ def stream_events(argv, *, cwd, env, handler, finalize=None, timeout=900,
     out_tail = _CharTail(RAW_TAIL_CHARS)
     # Every adapter launches its agent here, so this is the one place that
     # keeps the hidden tests and the checkout out of the agent's reach (#84).
+    # Popen's cwd does not update the inherited $PWD, which still names the
+    # directory bench was launched from (the checkout). opencode lstat()s $PWD
+    # and dies with EPERM once the sandbox denies it (#101).
+    env = {**env, "PWD": cwd}
     p = subprocess.Popen(sandbox.wrap(argv), cwd=cwd, env=env, stdin=subprocess.DEVNULL,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          # own process group: the timeout watchdog kills the
