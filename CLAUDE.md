@@ -16,8 +16,7 @@ pip install -e .                          # openai>=2, aiohttp
 
 ## Toolchain floor
 
-- **Python ≥ 3.10** (router.py:70, benchkit/runner.py:35)
-- **Runtime**: `openai>=2,<3` and `aiohttp>=3.8,<4` (pyproject.toml); **endpoint**: any OpenAI-compatible server
+- **Python ≥ 3.10** (router.py:70, benchkit/runner.py:35); **runtime**: `openai>=2,<3` and `aiohttp>=3.8,<4` (pyproject.toml); **endpoint**: any OpenAI-compatible server
 
 ## Environment variables
 
