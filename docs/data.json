@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-22",
+  "generated": "2026-09-23",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -221,6 +221,8 @@
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
   },
   "results": [
+    {"date":  "2026-09-23", "machine":  "m1-max", "model":  "Muse Spark 1.3 Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-all", "score":  70.0, "unit":  "agent", "report":  "results/2026-09-23/REPORT-harness.md"},
+    {"date":  "2026-09-23", "machine":  "m1-max", "model":  "SWE-2 Max", "harness":  "devin", "mode":  "isolated", "thinking":  "—", "suite":  "agentic-all", "score":  75.8, "unit":  "agent", "report":  "results/2026-09-23/REPORT-harness.md"},
     {"date":  "2026-09-22", "machine":  "m1-max", "model":  "Opus 5.5 (1M, effort medium)", "harness":  "claude-code", "mode":  "live", "thinking":  "—", "suite":  "agentic-hard", "score":  100.0, "unit":  "agent", "report":  "results/2026-09-22/REPORT-live.1.md"},
     {"date":  "2026-09-22", "machine":  "m1-max", "model":  "MiMo v2.6 Flash Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  64.5, "unit":  "agent", "report":  "results/2026-09-22/REPORT-live.md"},
     {"date":  "2026-09-20", "machine":  "m1-max", "model":  "Ternary-Bonsai-2-27B-mlx-2bit", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "all", "score":  69.6, "unit":  "pass@1", "report":  "results/2026-09-20/candidate-ternary-bonsai-2-27b-mlx-2bit-think-off.json"},
@@ -311,6 +313,12 @@
       "question": "How does the daily claude-code + Opus 5.5 setup score?",
       "answer": "Yes, top of the ledger. 100.0 agent score: 8/8 solved in 2.8 calls vs par 5.9, 74 s wall. One sample, and ~108k input tokens per task from live skills/MCP.",
       "link": "results/2026-09-22/REPORT-live.1.md"
+    },
+    {
+      "date": "2026-09-23",
+      "question": "Hosted harnesses on the new agentic-all (hidden tests sandboxed): devin SWE-2 Max vs opencode Muse Spark 1.3 Free",
+      "answer": "A tie on solving: Muse 48/48 (100 %, CI 93–100), SWE-2 Max 47/48 (97.9 %, CI 89–100; one 900 s timeout). SWE-2 Max is more efficient (77 % vs 70 %); Muse is ~1.8× faster with ~4× fewer input tokens per task. Near-saturated at 3 samples.",
+      "link": "results/2026-09-23/REPORT-harness.md"
     }
   ],
   "suites": [
