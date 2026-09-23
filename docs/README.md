@@ -33,6 +33,11 @@ Edit `data.json` when a new campaign report lands:
 | `results[]` | Filterable ledger rows |
 | `campaigns[]` | Timeline verdicts |
 
+The ledger's dot plot, the *Thinking OFF → ON* chart and the *Live vs isolated*
+chart are derived from `results[]` at load time — no extra fields. A pair is two
+rows identical except for `thinking` (or `mode`) **and** sharing a report folder
+(one campaign); a side with two candidate rows is skipped rather than guessed.
+
 Link paths are repo-relative and rendered against
 `https://github.com/luongnv89/m-bench/blob/main/…` (paths ending in `/` use
 `tree/main/` instead). A path only resolves once that result is committed to `main`.
