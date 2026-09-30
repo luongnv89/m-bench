@@ -30,6 +30,7 @@ points, not gospel.
 | `qwen3.8-27b-nvfp4-tunable` | Qwen3.8-27B (dense) | NVFP4 | env-tunable | — | — | Sweeping speculative-decoding settings (`K`, `DRAFTER`, `SPEC`) |
 | `gemma4-12b-w4a16` | Gemma 4 12B | QAT W4A16 | 0.16 | built from `@sha256:1962734…` | — | Small secondary backend alongside the primary, on port 8802 |
 | `llamacpp-qwen3.8-27b-bench.sh` | Qwen3.8-27B GGUF | Q4_K_M | — | ~11.6 tok/s | — | llama.cpp comparison, not a vLLM recipe |
+| `typesafe-jev-shim.py` | TypeSafe Jev `jev-latest` (resolved `jev-1.13.0`) | — (hosted API) | — | — | **98.0 % accuracy on `system1`**, 0.3 s/question, 38 out-tok — see [`../results/2026-09-30/REPORT-jev-s1.md`](../results/2026-09-30/REPORT-jev-s1.md) | Not a local model: an OpenAI-compatible shim over `api.typesafe.ai/v1/systemone` for System One decision tasks; needs `TYPESAFE_API_KEY` |
 | (no recipe — evaluated, not adopted) | Qwen3.8-Flash-Next NVFP4 (Mia-AiLab, 99 GB, PLE-offload, solo tenant) | NVFP4+MXFP8 | ~100 GB, KV cut 22→18 GiB to fit | `vllm/vllm-openai:qwen38-flash-next` | 87.5 % think-OFF / 58.9 % think-ON / 87.5 % agentic-OFF / 87.5 % agentic-ON — see [`../results/2026-09-04/REPORT-flash-next-analysis.md`](../results/2026-09-04/REPORT-flash-next-analysis.md) | **Not adopted.** Only win is think-OFF (+7pp, noise); loses think-ON and both agentic modes, 2–3× slower, shipped defaults fail this box's safety check |
 
 "Measured" links to the campaign in [`../results/`](../results/) that produced it.
@@ -50,6 +51,7 @@ gets restarted). `bench configs` marks the rest and says why:
 | `qwen3.8-27b-nvfp4-tunable` | no | No `MODEL_ID=` line (it parameterises `MODEL=` instead) — the reason `bench configs` prints. It also runs as `qwen38-4bit` on port 8002, a standalone server for sweeping `K`/`DRAFTER`/`SPEC` by hand |
 | `gemma4-12b-w4a16` | no | Runs as `vllm-gemma` on port 8802 — a secondary backend, so restarting `vllm-qwen` would not serve it |
 | `llamacpp-qwen3.8-27b-bench` | no | llama.cpp, not vLLM, and no `MODEL_ID=` line at all |
+| `typesafe-jev-shim` | no | Hosted TypeSafe API behind a local OpenAI shim on port 8123 — there is no local model unit for `bench sweep` to restart |
 
 None of that makes them bad recipes. To make one sweepable, give it a literal
 `MODEL_ID="..."` and `NAME="vllm-qwen"` — that is all the sweep machinery reads.
