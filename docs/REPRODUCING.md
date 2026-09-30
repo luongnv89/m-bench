@@ -65,7 +65,7 @@ Useful flags:
 
 | Flag | Default | Notes |
 |---|---|---|
-| `--suite` | `all` | `core16`, `hard12`, `all`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
+| `--suite` | `all` | `core16`, `hard12`, `all`, `system1`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
 | `--thinking` | off | Enables the model's reasoning block via `chat_template_kwargs` |
 | `--max-tokens` | 6000 | Raise to ~16000 with `--thinking`, or reasoning eats the budget |
 | `--samples` | 2 | Generations per task (`bench harness run` / `bench setup run`: 3). 2 is cheap; 5+ before trusting small gaps |
@@ -225,6 +225,37 @@ model that edits already-correct code, and `rename_across_files` fails one that 
 old symbol behind even if the tests pass. Predicates that only run the tests reward
 plausible-looking work.
 
+## The system1 suite
+
+`--suite system1` is a third shape: not code generation, not a tool loop, but a
+**System One decision endpoint** — a model that takes a *state* (an email, a
+ticket, a JSON document) plus *typed questions* and returns short typed answers.
+It exists for the fast decision models that are served for exactly this job,
+e.g. `bespokelabs/Bespoke-Nimble-9B` or `convaiinnovations/laya` (behind any
+OpenAI-compatible server or shim — the bench only needs `BENCH_BASE_URL`).
+
+```bash
+./bench validate --suite system1          # 23/23 — data lint, see below
+./bench run --suite system1 --samples 2 --label "nimble-9b"
+```
+
+Each of the 23 scenarios carries 2–3 typed questions (49 scored questions in
+all). Each question is one chat completion scored by **exact match** against its
+answer key — the option letter counts the same as the full option text, since
+decision shims emit either. Verbosity, explanations and empty replies all fail:
+deliberating instead of deciding is the failure mode this suite measures.
+
+The summary is the shared one, so a `system1` report reads the pass fraction as
+**accuracy** (with its 95% Wilson interval) next to the **speed** columns —
+per-question tokens, tok/s, TTFT, wall-clock and the cost scatter. Comparing two
+candidates on both axes is just two runs and `bench report`.
+
+`bench validate` does not execute anything here — a decision task has no
+reference implementation. It lints the data instead: every task needs an id, a
+difficulty, a non-empty `state` and a non-empty `questions` list, and every
+question's `answer` must be one of its own `options` (normalised); `options`
+may be omitted for open short-answer questions.
+
 ## Adding tasks and suites
 
 A task is a dict with four keys:
@@ -246,6 +277,11 @@ anything is a failure. Then:
 1. Add the task to a module in `benchkit/suites/`.
 2. Add a working reference solution to `benchkit/references.py` under the same id.
 3. Run `./bench validate` — it must stay at 100 %.
+
+A `system1` task is a different shape — a `state` string plus `questions`, each
+`{question, options, answer}` where `answer` is one of `options` (or `options` is
+omitted for an open short answer). There is no reference solution; step 2 is
+replaced by the data lint that `./bench validate --suite system1` runs.
 
 For a new suite, create `benchkit/suites/<name>.py` exporting `TASKS`, then register it
 in `benchkit/suites/__init__.py` with a one-line description.
