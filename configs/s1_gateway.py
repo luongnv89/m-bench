@@ -21,6 +21,10 @@ answers is a deployment detail behind `S1_BACKEND`:
               Jev question shape and returns the same answer shape; it runs in
               a thread executor so it never blocks the loop. Model dir comes
               from `LAYA_MODEL_DIR`.
+- `kev`       jaredpalmer/kev served by `python -m kev.serve` — a local
+              Jev-style decision model implementing the same `/v1/systemone`
+              contract, so this reuses the identical translation pointed at
+              `KEV_BASE_URL`. No API key.
 - `proxy`     Any OpenAI-compatible server (vLLM, llama.cpp, ollama chat)
               serving a candidate decision model — e.g. a merged Nimble GGUF.
               Requests and streaming responses are forwarded verbatim to
@@ -32,12 +36,14 @@ this URL measures the candidate through exactly the same transport the
 baseline was measured through (see docs/S1-ENDPOINT.md).
 
 Env:
-    S1_BACKEND         typesafe (default) | nimble | laya | proxy
+    S1_BACKEND         typesafe (default) | nimble | laya | kev | proxy
     S1_PORT            listen port (default 8123)
     TYPESAFE_API_KEY   bearer key for the typesafe backend
     TYPESAFE_BASE_URL  default https://api.typesafe.ai/v1
     NIMBLE_BASE_URL    default http://localhost:11434/v1 (Ollama >= 0.35)
     NIMBLE_MODEL       model id sent to Ollama's /v1/systemone (default nimble)
+    KEV_BASE_URL       default http://localhost:8009/v1 (kev.serve)
+    KEV_MODEL          model id sent to kev's /v1/systemone (default kev-latest)
     LAYA_MODEL_DIR     HF id or local dir for the laya checkpoint
                        (default ~/models/laya-typed-decisions)
     S1_UPSTREAM        proxy backend base URL, e.g. http://localhost:8001/v1
@@ -60,6 +66,8 @@ TS_KEY = os.environ.get("TYPESAFE_API_KEY", "")
 TS_MODEL = os.environ.get("S1_MODEL", "jev-latest")
 NIMBLE_BASE = os.environ.get("NIMBLE_BASE_URL", "http://localhost:11434/v1")
 NIMBLE_MODEL = os.environ.get("NIMBLE_MODEL", "nimble")
+KEV_BASE = os.environ.get("KEV_BASE_URL", "http://localhost:8009/v1")
+KEV_MODEL = os.environ.get("KEV_MODEL", "kev-latest")
 LAYA_DIR = os.environ.get(
     "LAYA_MODEL_DIR",
     os.path.expanduser("~/models/laya-typed-decisions"))
@@ -181,6 +189,15 @@ async def handle_nimble(request, body):
     return await _answer_via(request, body, ask, NIMBLE_MODEL, "nimble")
 
 
+async def handle_kev(request, body):
+    """Translate into a Kev judgment via kev.serve's /v1/systemone."""
+    async def ask(app, state, question, options, model):
+        m = model if model else KEV_MODEL
+        return await ask_systemone(
+            app["session"], KEV_BASE, m, state, question, options)
+    return await _answer_via(request, body, ask, KEV_MODEL, "kev")
+
+
 async def handle_laya(request, body):
     """Translate into a laya predict() call, run in a thread executor."""
     async def ask(app, state, question, options, model):
@@ -221,7 +238,7 @@ async def handle_proxy(request, body):
 
 
 HANDLERS = {"typesafe": handle_typesafe, "nimble": handle_nimble,
-            "laya": handle_laya, "proxy": handle_proxy}
+            "laya": handle_laya, "kev": handle_kev, "proxy": handle_proxy}
 
 
 # ------------------------------------------------------------ openai surface ---
@@ -282,6 +299,7 @@ async def models(request):
         except Exception as e:  # noqa: BLE001
             return _err(502, f"proxy upstream: {e}")
     ids = {"typesafe": ["jev-latest"], "nimble": [NIMBLE_MODEL],
+           "kev": [KEV_MODEL],
            "laya": [os.path.basename(LAYA_DIR.rstrip("/")) or "laya"],
            }.get(BACKEND, [])
     return web.json_response({"object": "list", "data": [
@@ -289,7 +307,7 @@ async def models(request):
 
 
 async def health(request):
-    upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE,
+    upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE, "kev": KEV_BASE,
                 "laya": LAYA_DIR, "proxy": UPSTREAM}.get(BACKEND, "")
     return web.json_response({"ok": True, "backend": BACKEND,
                               "upstream": upstream})
@@ -311,7 +329,7 @@ async def on_startup(app):
         app["laya"] = await asyncio.get_running_loop().run_in_executor(
             None, laya.load, LAYA_DIR)
         print("laya loaded", flush=True)
-    upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE,
+    upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE, "kev": KEV_BASE,
                 "laya": LAYA_DIR, "proxy": UPSTREAM}.get(BACKEND, "")
     print(f"s1-gateway on :{PORT}  backend={BACKEND}  upstream={upstream}")
 

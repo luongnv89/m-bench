@@ -9,13 +9,14 @@ change and a restart, not an application change.
 ```
 app / bench ──► :8123/v1 (OpenAI chat subset) ──► s1_gateway.py
                                                    │
-                  S1_BACKEND ──────────────────────┤
-                  │          │          │          │
-               typesafe    nimble      laya      proxy
-                  │          │          │          │
-            api.typesafe  ollama    in-process  S1_UPSTREAM
-            /v1/systemone /v1/      predict()   (vLLM, llama.cpp,
-                          systemone             any OpenAI model)
+                  S1_BACKEND ───────────────────────────┤
+                  │          │          │         │     │
+               typesafe    nimble      laya     kev   proxy
+                  │          │          │         │     │
+            api.typesafe  ollama    in-process  kev.  S1_UPSTREAM
+            /v1/systemone /v1/      predict()   serve (vLLM, llama.cpp,
+                          systemone           /v1/    any OpenAI model)
+                                              systemone
 ```
 
 ## The contract
@@ -59,8 +60,10 @@ Measured candidates through this same endpoint (issue #104):
 |---|---|---|---|
 | Bespoke-Nimble-9B (Ollama Q8_0) | `nimble` | **98.0 %** — ties Jev | drop-in replacement; local, no API key |
 | Laya `typed-decisions` | `laya` | 73.5 % | not a replacement at this checkpoint; CPU-bound run |
+| Kev-4B (`kev.serve`, bf16) | `kev` | 95.9 % — inside noise | local, ~15 GiB measured, fine-tunable; misses only `spam_email/q2` beyond Jev's own `error_log/q1` |
 
-Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`).
+Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`);
+Kev run: `results/2026-09-30/REPORT-kev-s1.md` (+ `NOTES-kev-s1.md`).
 
 ## Backends
 
@@ -98,6 +101,22 @@ TypeSafe serves — so `ask_systemone` is shared verbatim with the `typesafe`
 backend (no API key; `NIMBLE_BASE_URL`, `NIMBLE_MODEL` tune the upstream).
 Measured: 98.0 % accuracy, 0.5 s/question, 1 out-token — a proven local Jev
 replacement for this workload.
+
+### `kev` — jaredpalmer/kev via kev.serve
+
+```bash
+uv run --extra serve python -m kev.serve --run jaredpalmer/kev-4b --port 8009
+S1_BACKEND=kev python3 configs/s1_gateway.py
+```
+
+Kev is a local Jev-style decision model (LoRA adapter on a frozen Qwen3.5
+base, prefill-only pointer readout) and `kev.serve` exposes the **same**
+`/v1/systemone` contract — `ask_systemone` is shared verbatim with the
+`typesafe`/`nimble` backends (no API key; `KEV_BASE_URL`, `KEV_MODEL` tune the
+upstream). aarch64 note: PyPI's torch 2.8 wheel is CPU-only — install
+`torch==2.8.0+cu129` from `download.pytorch.org` for CUDA (runs on GB10 via
+PTX fallback). Measured: 95.9 % accuracy, 0.23 s/question, ~15 GiB measured bf16 —
+fits next to the incumbent; its differentiator is the shipped fine-tune loop.
 
 ### `laya` — convaiinnovations/laya in-process
 
