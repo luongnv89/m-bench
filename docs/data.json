@@ -245,6 +245,16 @@
         "note": "drop-in replacement: same contract, same score, no API key"
       },
       {
+        "model": "Kev-27B",
+        "score": 98.0,
+        "ci": "93–99",
+        "secPerQ": 1.1,
+        "outTok": 61,
+        "wall": 26,
+        "serving": "local kev.serve bf16 ~63 GiB · kev backend",
+        "note": "ties Jev — only miss is error_log/q1, same as Jev's; does not fit beside the incumbent vLLM endpoint (needed it stopped to benchmark)"
+      },
+      {
         "model": "Qwen3.6-35B think-OFF",
         "score": 96.9,
         "ci": "91–99",
@@ -286,7 +296,7 @@
       }
     ],
     "report": "results/2026-09-30/REPORT-s1-candidates.md",
-    "note": "Same prompt → parse → one typed `choice` per question, whichever backend answered. Nimble ties Jev to the point while running fully local; Kev-4B trails by 2.1 pts inside the noise floor and is the fastest local backend — and the only candidate with a fine-tune loop for your own questions; Laya's root checkpoint scored near-chance in smoke tests, so the typed-decisions checkpoint is the one measured — on CPU, with GPU free it would be ~10–15× faster but no more accurate.",
+    "note": "Same prompt → parse → one typed `choice` per question, whichever backend answered. Nimble and Kev-27B tie Jev to the point while running fully local — though Kev-27B's 63 GiB does not fit beside the incumbent endpoint; Kev-4B trails by 2.1 pts inside the noise floor, is the fastest local backend and the only variant that coexists with the incumbent — and the only candidates with a fine-tune loop for your own questions; Laya's root checkpoint scored near-chance in smoke tests, so the typed-decisions checkpoint is the one measured — on CPU, with GPU free it would be ~10–15× faster but no more accurate.",
     "realUseCase": {
       "setup": "anti-phishing-email-service · 16 adjudicated emails · typesafe_only arm, zero code changes",
       "question": "Real workload, same contract: can a local model sit in for Jev on the phishing classifier?",
@@ -310,6 +320,15 @@
           "note": "16/16 — matches Jev, fastest local; on the hardest lure its noul sat just under the gate and the risk pipeline carried it over"
         },
         {
+          "model": "Kev-27B · same arm",
+          "score": 100.0,
+          "ci": "81–100",
+          "secPerQ": 1.71,
+          "wall": 27.4,
+          "serving": "local kev.serve :8009 · env-only swap · ~63 GiB",
+          "note": "16/16 — matches Jev but slowest arm; named the right attack type on the hardest lure, still needed the risk pipeline over a borderline noul"
+        },
+        {
           "model": "Nimble-9B · same arm",
           "score": 94.1,
           "ci": "72–99",
@@ -329,10 +348,12 @@
         }
       ],
       "report": "results/2026-09-30/REPORT-s1-phishing-kev.md",
-      "note": "Env-var swap only — `TYPESAFE_BASE_URL` + `TYPESAFE_DEFAULT_MODEL` repoint `typesafe_analyzer` at Ollama or kev.serve. Kev-4B ties Jev at 16/16 and is the fastest local backend; Nimble is a proven hot-spare, not a primary: 94.1 F1 with one miss, and its threat-type head is inconsistent on benign mail. Kev's one caveat: on the hardest sample its noul was borderline — the pipeline's evidence aggregation made the call. n=16, so one flip is ~6 F1 points."
+      "note": "Env-var swap only — `TYPESAFE_BASE_URL` + `TYPESAFE_DEFAULT_MODEL` repoint `typesafe_analyzer` at Ollama or kev.serve. Both Kev variants tie Jev at 16/16; Kev-4B is the fastest local backend, Kev-27B the slowest (5× its sibling, ~63 GiB). Nimble is a proven hot-spare, not a primary: 94.1 F1 with one miss, and its threat-type head is inconsistent on benign mail. Kev's one caveat: on the hardest sample its noul stays borderline on both variants — the pipeline's evidence aggregation made the call. n=16, so one flip is ~6 F1 points."
     }
   },
   "results": [
+    {"date":  "2026-10-01", "machine":  "dgx-spark", "model":  "Kev-27B (kev.serve bf16)", "harness":  "anti-phishing pipeline", "mode":  "isolated", "thinking":  "—", "suite":  "phishing-eval", "score":  100.0, "unit":  "f1", "report":  "results/2026-10-01/REPORT-s1-phishing-kev27b.md"},
+    {"date":  "2026-10-01", "machine":  "dgx-spark", "model":  "Kev-27B (kev.serve bf16)", "harness":  "s1-gateway", "mode":  "isolated", "thinking":  "—", "suite":  "system1", "score":  98.0, "unit":  "accuracy", "report":  "results/2026-10-01/REPORT-kev27b-s1.md"},
     {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Kev-4B (kev.serve bf16)", "harness":  "anti-phishing pipeline", "mode":  "isolated", "thinking":  "—", "suite":  "phishing-eval", "score":  100.0, "unit":  "f1", "report":  "results/2026-09-30/REPORT-s1-phishing-kev.md"},
     {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Kev-4B (kev.serve bf16)", "harness":  "s1-gateway", "mode":  "isolated", "thinking":  "—", "suite":  "system1", "score":  95.9, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT-kev-s1.md"},
     {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "TypeSafe Jev (jev-1.13.0)", "harness":  "anti-phishing pipeline", "mode":  "isolated", "thinking":  "—", "suite":  "phishing-eval", "score":  100.0, "unit":  "f1", "report":  "results/2026-09-30/REPORT-s1-phishing-nimble-vs-jev.md"},

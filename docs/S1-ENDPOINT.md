@@ -61,9 +61,11 @@ Measured candidates through this same endpoint (issue #104):
 | Bespoke-Nimble-9B (Ollama Q8_0) | `nimble` | **98.0 %** — ties Jev | drop-in replacement; local, no API key |
 | Laya `typed-decisions` | `laya` | 73.5 % | not a replacement at this checkpoint; CPU-bound run |
 | Kev-4B (`kev.serve`, bf16) | `kev` | 95.9 % — inside noise | local, ~15 GiB measured, fine-tunable; misses only `spam_email/q2` beyond Jev's own `error_log/q1` |
+| Kev-27B (`kev.serve`, bf16) | `kev` | **98.0 %** — ties Jev | local, ~63 GiB measured; cannot coexist with the incumbent vLLM endpoint on this box — needed `vllm-qwen.service` stopped to run; only miss is `error_log/q1`, identical to Jev's |
 
 Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`);
-Kev run: `results/2026-09-30/REPORT-kev-s1.md` (+ `NOTES-kev-s1.md`).
+Kev runs: `results/2026-09-30/REPORT-kev-s1.md` (+ `NOTES-kev-s1.md`),
+`results/2026-10-01/REPORT-kev27b-s1.md` (+ `NOTES-kev27b-s1.md`).
 
 ## Backends
 
@@ -115,8 +117,12 @@ base, prefill-only pointer readout) and `kev.serve` exposes the **same**
 `typesafe`/`nimble` backends (no API key; `KEV_BASE_URL`, `KEV_MODEL` tune the
 upstream). aarch64 note: PyPI's torch 2.8 wheel is CPU-only — install
 `torch==2.8.0+cu129` from `download.pytorch.org` for CUDA (runs on GB10 via
-PTX fallback). Measured: 95.9 % accuracy, 0.23 s/question, ~15 GiB measured bf16 —
-fits next to the incumbent; its differentiator is the shipped fine-tune loop.
+PTX fallback). Measured: Kev-4B 95.9 % at 0.23 s/question in ~15 GiB bf16 —
+fits next to the incumbent. Kev-27B (`--run jaredpalmer/kev-27b`, bf16-only)
+scores **98.0 %** — ties Jev — at 1.1 s/question in ~63 GiB, which does *not*
+fit beside the vLLM incumbent on this box (~120 GiB unified); benchmarking it
+required stopping `vllm-qwen.service` first. Both variants share the shipped
+fine-tune loop as their differentiator.
 
 ### `laya` — convaiinnovations/laya in-process
 
