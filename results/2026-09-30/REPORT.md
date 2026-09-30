@@ -250,15 +250,16 @@ suite, `--samples 2`, n=98 per arm).
 
 - **Nimble** (`BENCH_MODEL=nimble`) is the LoRA adapter
   `bespokelabs/Bespoke-Nimble-9B` (165 MiB, rank 16) hot-loaded by vLLM over the
-  bf16 `Qwen/Qwen3.5-9B` base — `configs/nimble-9b-lora.sh`. The `nimble-9b`
-  served name aliases the *base* weights; the adapter answers to `nimble`.
-  Measuring `nimble-9b` would have silently measured the base model.
+  bf16 `Qwen/Qwen3.5-9B` base — `configs/nimble-9b-lora.sh`. The adapter
+  answers to model id `nimble`; the base serves under its own repo id.
 - **Laya** (`BENCH_MODEL=laya`) runs behind `laya-shim.py` (CPU-only aiohttp
   shim on :8804) that parses the suite's `State:/Question:/Options:` prompt,
   calls `Router().predict`, and emits the winning option's letter as a one-token
   streamed reply — `configs/laya-9b-shim.sh`. The reference `Router().predict`
   API is non-conversational; the shim is the only bridge, and its output is
-  what the scorer sees.
+  what the scorer sees. laya reports no token counts, so the `66 in / 1 out`
+  column in this report is the shim's length-based estimate (chars ÷ 4), not
+  a measured count — accuracy and timing are unaffected.
 
 ### What the numbers say
 

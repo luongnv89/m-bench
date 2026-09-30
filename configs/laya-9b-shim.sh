@@ -18,14 +18,16 @@
 # Serve it, then benchmark through the side port — the primary on :8001 is
 # never touched:
 #   bash configs/laya-9b-shim.sh &
-#   BENCH_BASE_URL=http://127.0.0.1:8804/v1 BENCH_MODEL=laya \
-#     ./bench run --suite system1 --samples 2 --label laya-s1-off
+#   env BENCH_BASE_URL=http://127.0.0.1:8804/v1 BENCH_MODEL=laya ./bench run --suite system1 --samples 2 --label laya-s1-off
 set -euo pipefail
 
 VENV="${LAYA_VENV:-/home/montimage/llm-serving/laya-venv}"
 PORT="${LAYA_PORT:-8804}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-}"
+# Pinned unconditionally: CPU-only is the point (the GPU pool is committed to
+# the primary). To run laya on GPU, edit the recipe — do not let an ambient
+# CUDA_VISIBLE_DEVICES silently change where it lands.
+export CUDA_VISIBLE_DEVICES=""
 exec "${VENV}/bin/python" "${HERE}/laya-shim.py" \
   --host 127.0.0.1 --port "${PORT}" --load-on-start

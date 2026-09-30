@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# bespokelabs/Bespoke-Nimble-9B on vLLM, served as "nimble-9b" on 127.0.0.1:8803.
+# bespokelabs/Bespoke-Nimble-9B on vLLM, on 127.0.0.1:8803.
 #
 # Nimble is a ~165 MiB LoRA adapter, not a standalone checkpoint: vLLM loads
-# the Qwen/Qwen3.5-9B base (~18 GB bf16) and hot-loads the adapter as the
-# "nimble" LoRA module. The adapter's published contract caps context at
-# 8192 tokens, so --max-model-len is pinned there.
+# the Qwen/Qwen3.5-9B base (~18 GB bf16, served under its own repo id) and
+# hot-loads the adapter as the "nimble" LoRA module — the adapter is what
+# answers to BENCH_MODEL=nimble; there is deliberately no "nimble-9b" alias on
+# the base, so that name can never silently measure unadapted weights.
+# The adapter's published contract caps context at 8192 tokens, so
+# --max-model-len is pinned there.
 #
 # Secondary side-port backend (same pattern as configs/gemma4-12b-w4a16.sh):
 # it shares the GPU with the primary model, so UTIL stays small. 0.19 of the
@@ -47,7 +50,6 @@ exec docker run --rm \
   -v "${HF_HOME}:/root/.cache/huggingface" \
   "${IMAGE}" \
   serve "${MODEL_ID}" \
-    --served-model-name nimble-9b "${MODEL_ID}" \
     --host 127.0.0.1 --port "${PORT}" \
     --tensor-parallel-size 1 \
     --trust-remote-code \

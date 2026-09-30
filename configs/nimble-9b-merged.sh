@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# FALLBACK recipe: serve a merged Nimble checkpoint as "nimble-9b" on :8803.
+# FALLBACK recipe: serve a merged Nimble checkpoint as "nimble" on :8803 —
+# the same model id the LoRA recipe's adapter answers to, so BENCH_MODEL=nimble
+# measures the adapter under either serving path.
 #
 # Use this only when configs/nimble-9b-lora.sh cannot start — e.g. the pinned
 # vLLM build lacks --enable-lora support or the Qwen3.5 architecture. The
@@ -62,7 +64,7 @@ exec docker run --rm \
   -v "${MODEL_ID}:${MODEL_ID}:ro" \
   "${IMAGE}" \
   serve "${MODEL_ID}" \
-    --served-model-name nimble-9b \
+    --served-model-name nimble \
     --host 127.0.0.1 --port "${PORT}" \
     --tensor-parallel-size 1 \
     --trust-remote-code \
