@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-23",
+  "generated": "2026-09-30",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -220,7 +220,70 @@
     },
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
   },
+  "systemOne": {
+    "setup": "system1 suite · 49 typed questions · 2 samples · every candidate through the standard s1 endpoint :8123",
+    "question": "Typed-decision models behind one stable endpoint — can anything replace Jev?",
+    "rows": [
+      {
+        "model": "TypeSafe Jev · baseline",
+        "score": 98.0,
+        "ci": "93–99",
+        "secPerQ": 0.3,
+        "outTok": 38,
+        "wall": 7,
+        "serving": "hosted API · typesafe backend",
+        "note": "the standard every candidate is measured against"
+      },
+      {
+        "model": "Bespoke-Nimble-9B",
+        "score": 98.0,
+        "ci": "93–99",
+        "secPerQ": 0.5,
+        "outTok": 1,
+        "wall": 13,
+        "serving": "local Ollama Q8_0 ~9.5 GiB · nimble backend",
+        "note": "drop-in replacement: same contract, same score, no API key"
+      },
+      {
+        "model": "Qwen3.6-35B think-OFF",
+        "score": 96.9,
+        "ci": "91–99",
+        "secPerQ": 0.7,
+        "outTok": 4,
+        "wall": 17,
+        "serving": "local vLLM · plain chat endpoint",
+        "note": "general model for reference — untyped output cost it one parse failure"
+      },
+      {
+        "model": "Qwen3.6-35B think-ON",
+        "score": 93.9,
+        "ci": "87–97",
+        "secPerQ": 22.6,
+        "outTok": 1149,
+        "wall": 602,
+        "serving": "local vLLM · plain chat endpoint",
+        "note": "deliberation buys nothing on typed questions — 75× slower, worse"
+      },
+      {
+        "model": "Laya typed-decisions",
+        "score": 73.5,
+        "ci": "64–81",
+        "secPerQ": 0.5,
+        "outTok": 0,
+        "wall": 13,
+        "serving": "in-process scorer · laya backend · CPU-bound",
+        "note": "not a replacement at this checkpoint — fails 12 tasks across all difficulties"
+      }
+    ],
+    "report": "results/2026-09-30/REPORT-s1-candidates.md",
+    "note": "Same prompt → parse → one typed `choice` per question, whichever backend answered. Nimble ties Jev to the point while running fully local; Laya's root checkpoint scored near-chance in smoke tests, so the typed-decisions checkpoint is the one measured — on CPU, with GPU free it would be ~10–15× faster but no more accurate."
+  },
   "results": [
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "TypeSafe Jev (jev-1.13.0)", "harness":  "s1-gateway", "mode":  "isolated", "thinking":  "—", "suite":  "system1", "score":  98.0, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT-s1-candidates.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Bespoke-Nimble-9B (Ollama Q8_0)", "harness":  "s1-gateway", "mode":  "isolated", "thinking":  "—", "suite":  "system1", "score":  98.0, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT-s1-candidates.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Laya typed-decisions", "harness":  "s1-gateway", "mode":  "isolated", "thinking":  "—", "suite":  "system1", "score":  73.5, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT-s1-candidates.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "system1", "score":  96.9, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT-s1-candidates.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "system1", "score":  93.9, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT-s1-candidates.md"},
     {"date":  "2026-09-23", "machine":  "m1-max", "model":  "Muse Spark 1.3 Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-all", "score":  70.0, "unit":  "agent", "report":  "results/2026-09-23/REPORT-harness.md"},
     {"date":  "2026-09-23", "machine":  "m1-max", "model":  "SWE-2 Max", "harness":  "devin", "mode":  "isolated", "thinking":  "—", "suite":  "agentic-all", "score":  75.8, "unit":  "agent", "report":  "results/2026-09-23/REPORT-harness.md"},
     {"date":  "2026-09-22", "machine":  "m1-max", "model":  "Opus 5.5 (1M, effort medium)", "harness":  "claude-code", "mode":  "live", "thinking":  "—", "suite":  "agentic-hard", "score":  100.0, "unit":  "agent", "report":  "results/2026-09-22/REPORT-live.1.md"},
@@ -254,6 +317,12 @@
     {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.1, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"}
   ],
   "campaigns": [
+    {
+      "date": "2026-09-30",
+      "question": "Can Nimble or Laya replace Jev behind the standard s1 endpoint?",
+      "answer": "Nimble — yes. 98.0 % ties Jev over the identical gateway transport, fully local (Ollama Q8_0, ~9.5 GiB), no API key. Laya typed-decisions — no: 73.5 %, failures across 12 tasks at every difficulty.",
+      "link": "results/2026-09-30/REPORT-s1-candidates.md"
+    },
     {
       "date": "2026-08-17",
       "question": "Does thinking mode help a coding agent?",

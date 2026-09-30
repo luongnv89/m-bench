@@ -12,13 +12,19 @@ answers is a deployment detail behind `S1_BACKEND`:
               fall back to a choice over deduped state tokens — the
               documented "select instead of generate" pattern; disclose it in
               the run report.
-- `proxy`     Any OpenAI-compatible server (vLLM, llama.cpp, ollama) serving a
-              candidate decision model — e.g. Bespoke-Nimble on vLLM. Requests
-              and streaming responses are forwarded verbatim to `S1_UPSTREAM`;
-              the client cannot tell it left the Jev backend.
-- `laya`      Stub for convaiinnovations/laya (typed `predict` API, issue
-              #104). Returns 501 until an adapter implements
-              `translate -> (answer_text, usage)` the same way typesafe does.
+- `nimble`    Bespoke-Nimble served by Ollama >= 0.35 — Ollama implements the
+              same `/v1/systemone` contract as TypeSafe, so this reuses the
+              identical translation and answer shape pointed at
+              `NIMBLE_BASE_URL` (default the local Ollama). No API key.
+- `laya`      convaiinnovations/laya in-process (`pip install laya`, a ~33 ms
+              ModernBERT encoder). `predict(state, questions)` takes the same
+              Jev question shape and returns the same answer shape; it runs in
+              a thread executor so it never blocks the loop. Model dir comes
+              from `LAYA_MODEL_DIR`.
+- `proxy`     Any OpenAI-compatible server (vLLM, llama.cpp, ollama chat)
+              serving a candidate decision model — e.g. a merged Nimble GGUF.
+              Requests and streaming responses are forwarded verbatim to
+              `S1_UPSTREAM`; the client cannot tell it left the Jev backend.
 
 Swapping Jev for a candidate that satisfies the contract is therefore an env
 change, not an application change — and `./bench run --suite system1` against
@@ -26,10 +32,14 @@ this URL measures the candidate through exactly the same transport the
 baseline was measured through (see docs/S1-ENDPOINT.md).
 
 Env:
-    S1_BACKEND         typesafe (default) | proxy | laya
+    S1_BACKEND         typesafe (default) | nimble | laya | proxy
     S1_PORT            listen port (default 8123)
     TYPESAFE_API_KEY   bearer key for the typesafe backend
     TYPESAFE_BASE_URL  default https://api.typesafe.ai/v1
+    NIMBLE_BASE_URL    default http://localhost:11434/v1 (Ollama >= 0.35)
+    NIMBLE_MODEL       model id sent to Ollama's /v1/systemone (default nimble)
+    LAYA_MODEL_DIR     HF id or local dir for the laya checkpoint
+                       (default ~/models/laya-typed-decisions)
     S1_UPSTREAM        proxy backend base URL, e.g. http://localhost:8001/v1
     S1_MODEL           model id to advertise/forward (typesafe default
                        jev-latest; proxy default: upstream's own `model` field)
@@ -48,6 +58,11 @@ UPSTREAM = os.environ.get("S1_UPSTREAM", "")          # proxy backend
 TS_BASE = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai/v1")
 TS_KEY = os.environ.get("TYPESAFE_API_KEY", "")
 TS_MODEL = os.environ.get("S1_MODEL", "jev-latest")
+NIMBLE_BASE = os.environ.get("NIMBLE_BASE_URL", "http://localhost:11434/v1")
+NIMBLE_MODEL = os.environ.get("NIMBLE_MODEL", "nimble")
+LAYA_DIR = os.environ.get(
+    "LAYA_MODEL_DIR",
+    os.path.expanduser("~/models/laya-typed-decisions"))
 
 # Fixed trailers emitted by benchkit.s1_runner._render — parse anchors.
 CHOICE_TAIL = "\nAnswer with the option letter or its exact text, and nothing else."
@@ -90,24 +105,28 @@ def candidates(state):
 
 # ---------------------------------------------------------------- backends ---
 
-async def ask_typesafe(session, model, state, question, options):
-    """One Choice question -> (answer text, usage dict, upstream model id)."""
+def _s1_question(state, question, options):
+    """The (state, questions) payload every Jev-shape backend shares."""
     opts = options or candidates(state)
-    payload = {
-        "state": state,
-        "model": model,
-        "questions": {
-            "q": {"type": "choice", "instructions": question,
-                  "criteria": {o: None for o in opts}}
-        },
-    }
+    return {"state": state,
+            "questions": {"q": {"type": "choice", "instructions": question,
+                                "criteria": {o: None for o in opts}}}}
+
+
+async def ask_systemone(session, base_url, model, state, question, options,
+                        headers=None):
+    """One Choice question to a /v1/systemone endpoint (Jev API shape).
+
+    Used by both `typesafe` (api.typesafe.ai, Bearer key) and `nimble`
+    (Ollama >= 0.35 implements the same contract, no key).
+    """
+    payload = _s1_question(state, question, options)
+    payload["model"] = model
     last_err = None
     for attempt in range(3):
         try:
-            async with session.post(
-                f"{TS_BASE}/systemone", json=payload,
-                headers={"Authorization": f"Bearer {TS_KEY}"},
-            ) as r:
+            async with session.post(f"{base_url}/systemone", json=payload,
+                                    headers=headers or {}) as r:
                 body = await r.json(content_type=None)
                 if r.status == 200:
                     ans = body["answers"]["q"]
@@ -123,11 +142,8 @@ async def ask_typesafe(session, model, state, question, options):
     raise RuntimeError(last_err or "upstream failed")
 
 
-async def handle_typesafe(request, body):
-    """Translate one chat completion into a TypeSafe judgment."""
-    model = body.get("model") or TS_MODEL
-    if not model.startswith("jev"):
-        model = TS_MODEL  # the only thing this backend can serve
+async def _answer_via(request, body, ask, fallback_model, upstream_name):
+    """Shared handle: parse prompt -> ask -> chat response."""
     user = next((m.get("content", "") for m in reversed(body.get("messages", []))
                  if m.get("role") == "user"), "")
     try:
@@ -135,14 +151,51 @@ async def handle_typesafe(request, body):
     except ValueError as e:
         return _err(400, f"s1 prompt parse: {e}", "invalid_request_error")
     try:
-        answer, u, shown = await ask_typesafe(
-            request.app["session"], model, state, question, options)
+        answer, u, shown = await ask(request.app, state, question, options,
+                                     body.get("model"))
     except Exception as e:  # noqa: BLE001
-        return _err(502, f"typesafe upstream: {e}")
+        return _err(502, f"{upstream_name} upstream: {e}")
     usage = {"prompt_tokens": u.get("input_tokens") or 0,
              "completion_tokens": u.get("output_tokens") or 0,
              "total_tokens": (u.get("input_tokens") or 0) + (u.get("output_tokens") or 0)}
-    return await _chat_response(request, body, shown or model, answer, usage)
+    return await _chat_response(request, body, shown or fallback_model,
+                                answer, usage)
+
+
+async def handle_typesafe(request, body):
+    """Translate one chat completion into a TypeSafe judgment."""
+    async def ask(app, state, question, options, model):
+        m = model if (model or "").startswith("jev") else TS_MODEL
+        return await ask_systemone(
+            app["session"], TS_BASE, m, state, question, options,
+            headers={"Authorization": f"Bearer {TS_KEY}"})
+    return await _answer_via(request, body, ask, TS_MODEL, "typesafe")
+
+
+async def handle_nimble(request, body):
+    """Translate into a Bespoke-Nimble judgment via Ollama's /v1/systemone."""
+    async def ask(app, state, question, options, model):
+        m = model if model else NIMBLE_MODEL
+        return await ask_systemone(
+            app["session"], NIMBLE_BASE, m, state, question, options)
+    return await _answer_via(request, body, ask, NIMBLE_MODEL, "nimble")
+
+
+async def handle_laya(request, body):
+    """Translate into a laya predict() call, run in a thread executor."""
+    async def ask(app, state, question, options, model):
+        agent = app.get("laya")
+        if agent is None:
+            raise RuntimeError("laya model not loaded")
+        payload = _s1_question(state, question, options)
+        import asyncio
+        res = await asyncio.get_running_loop().run_in_executor(
+            None, agent.predict, payload["state"], payload["questions"])
+        ans = res["answers"]["q"]
+        return ans["choice"], res.get("usage") or {}, res.get("model")
+    return await _answer_via(request, body, ask,
+                             os.path.basename(LAYA_DIR.rstrip("/")) or "laya",
+                             "laya")
 
 
 async def handle_proxy(request, body):
@@ -167,15 +220,8 @@ async def handle_proxy(request, body):
         return _err(502, f"proxy upstream: {e}")
 
 
-async def handle_laya(request, body):
-    """convaiinnovations/laya stub — typed predict(), no chat surface (#104)."""
-    return _err(501, "laya backend not implemented: add a translate adapter "
-                     "(state, questions -> predict) like handle_typesafe — "
-                     "see issue #104 and docs/S1-ENDPOINT.md")
-
-
-HANDLERS = {"typesafe": handle_typesafe, "proxy": handle_proxy,
-            "laya": handle_laya}
+HANDLERS = {"typesafe": handle_typesafe, "nimble": handle_nimble,
+            "laya": handle_laya, "proxy": handle_proxy}
 
 
 # ------------------------------------------------------------ openai surface ---
@@ -235,14 +281,18 @@ async def models(request):
                                          status=up.status)
         except Exception as e:  # noqa: BLE001
             return _err(502, f"proxy upstream: {e}")
-    ids = {"typesafe": ["jev-latest"], "laya": ["laya"]}.get(BACKEND, [])
+    ids = {"typesafe": ["jev-latest"], "nimble": [NIMBLE_MODEL],
+           "laya": [os.path.basename(LAYA_DIR.rstrip("/")) or "laya"],
+           }.get(BACKEND, [])
     return web.json_response({"object": "list", "data": [
         {"id": i, "object": "model", "owned_by": BACKEND} for i in ids]})
 
 
 async def health(request):
+    upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE,
+                "laya": LAYA_DIR, "proxy": UPSTREAM}.get(BACKEND, "")
     return web.json_response({"ok": True, "backend": BACKEND,
-                              "upstream": UPSTREAM or TS_BASE})
+                              "upstream": upstream})
 
 
 async def on_startup(app):
@@ -254,8 +304,16 @@ async def on_startup(app):
     if BACKEND == "proxy" and not UPSTREAM:
         raise SystemExit("S1_BACKEND=proxy needs S1_UPSTREAM=<base-url>")
     app["session"] = ClientSession(timeout=ClientTimeout(total=1800))
-    print(f"s1-gateway on :{PORT}  backend={BACKEND}  "
-          f"upstream={UPSTREAM or TS_BASE}")
+    if BACKEND == "laya":
+        import asyncio
+        import laya
+        print(f"loading laya from {LAYA_DIR} …", flush=True)
+        app["laya"] = await asyncio.get_running_loop().run_in_executor(
+            None, laya.load, LAYA_DIR)
+        print("laya loaded", flush=True)
+    upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE,
+                "laya": LAYA_DIR, "proxy": UPSTREAM}.get(BACKEND, "")
+    print(f"s1-gateway on :{PORT}  backend={BACKEND}  upstream={upstream}")
 
 
 async def on_cleanup(app):

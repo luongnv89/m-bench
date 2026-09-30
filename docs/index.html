@@ -796,6 +796,7 @@
         <li><a href="#recommend">Setups</a></li>
         <li><a href="#harness">Harness</a></li>
         <li><a href="#thinking">Thinking</a></li>
+        <li><a href="#systemone">System One</a></li>
         <li><a href="#results">Results</a></li>
         <li><a href="#findings">Findings</a></li>
         <li><a class="nav-cta" href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a></li>
@@ -826,6 +827,7 @@
               <span><strong>5</strong> harnesses</span>
               <span><strong>28</strong> one-shot tasks</span>
               <span><strong>16</strong> agentic tasks</span>
+              <span><strong>23</strong> decision tasks</span>
               <span class="volt">validate 28/28</span>
             </div>
           </div>
@@ -925,11 +927,31 @@
       </div>
     </section>
 
+    <!-- SYSTEM ONE -->
+    <section id="systemone" aria-labelledby="s1-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="eyebrow">04 — Typed decisions</p>
+          <h2 id="s1-title">One endpoint. Swappable judgment models.</h2>
+          <p>Typed-decision models take application state plus a question and return a typed pick with probabilities — no free text to parse. On this machine they sit behind a single standard s1 endpoint, so swapping the model is an env change, not an application change. Jev is the baseline every candidate is measured through and against.</p>
+        </header>
+
+        <div class="chart-block">
+          <div class="chart-title">Accuracy · system1 suite · 2 samples · identical transport for every backend</div>
+          <p class="chart-question" id="s1-question"></p>
+          <div class="bar-rows" id="s1-bars" role="list" aria-label="Accuracy by model, 0 to 100"></div>
+          <p class="bar-legend" aria-hidden="true"><i></i> within ~8 pts of the leader: a tie at 2 samples</p>
+          <div class="multiples" id="s1-multiples" style="grid-template-columns:repeat(3,1fr);"></div>
+          <p class="chart-note" id="s1-note"></p>
+        </div>
+      </div>
+    </section>
+
     <!-- RESULTS EXPLORER -->
     <section id="results" aria-labelledby="results-title">
       <div class="wrap">
         <header class="section-head">
-          <p class="eyebrow">04 — Full ledger</p>
+          <p class="eyebrow">05 — Full ledger</p>
           <h2 id="results-title">Every measured run, filterable.</h2>
           <p>Click a column to sort, click a model to open its report. <span class="volt">Green</span> marks the best score per suite in view. Noise floor ≈ 8 points at two samples.</p>
         </header>
@@ -1006,7 +1028,7 @@
     <section id="findings" aria-labelledby="findings-title">
       <div class="wrap">
         <header class="section-head">
-          <p class="eyebrow">05 — Campaign log</p>
+          <p class="eyebrow">06 — Campaign log</p>
           <h2 id="findings-title">What the measurements answered.</h2>
           <p>Each campaign asks one question and ends in a decision — not a summary.</p>
         </header>
@@ -1018,7 +1040,7 @@
     <section id="suites" aria-labelledby="suites-title">
       <div class="wrap">
         <header class="section-head">
-          <p class="eyebrow">06 — The suites</p>
+          <p class="eyebrow">07 — The suites</p>
           <h2 id="suites-title">Hidden tests. Proven passable.</h2>
           <p>Every task ships a reference solution. If <span class="mono volt">./bench validate</span> is not 28/28, no score means anything.</p>
         </header>
@@ -1275,14 +1297,8 @@
       };
       const compact = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? Math.round(n / 1e3) + "k" : String(Math.round(n)));
 
-      function renderMultiples(rows) {
-        const metrics = [
-          { title: "Solved", sub: "% of tasks · higher is better", get: (r) => r.solved, fixed: 100, hi: true, fmt: (v) => v.toFixed(1) + "%" },
-          { title: "Tool calls", sub: "mean per task · lower is better", get: (r) => r.calls, fmt: (v) => v.toFixed(1) },
-          { title: "Input tokens", sub: "per task · lower is better", get: (r) => parseTok(r.inTok), fmt: (v) => "~" + compact(v) },
-          { title: "Wall-clock", sub: "whole suite · lower is better", get: (r) => r.wall, fmt: (v) => v + "s" },
-        ];
-        $("#harness-multiples").innerHTML = metrics.map((m) => {
+      function paintMultiples(el, rows, metrics, nameOf) {
+        el.innerHTML = metrics.map((m) => {
           const vals = rows.map((r) => { const v = m.get(r); return v == null || isNaN(v) ? null : v; });
           const known = vals.filter((v) => v != null);
           const top = m.fixed || Math.max(...known);
@@ -1291,17 +1307,26 @@
             <div class="multiple">
               <div class="multiple-title">${esc(m.title)}</div>
               <div class="multiple-sub">${esc(m.sub)}${m.fixed ? "" : " · scaled to max"}</div>
-              <div class="m-rows" role="list" aria-label="${esc(m.title)} by harness, ${esc(m.sub)}">
+              <div class="m-rows" role="list" aria-label="${esc(m.title)}, ${esc(m.sub)}">
                 ${rows.map((r, i) => vals[i] == null ? `
-                  <div class="m-row" role="listitem"><span class="m-name">${esc(r.harness)}</span><span class="m-na">not recorded</span></div>` : `
-                  <div class="m-row${vals[i] === best && known.length > 1 ? " best" : ""}" role="listitem" aria-label="${esc(r.harness)}: ${esc(m.fmt(vals[i]))}">
-                    <span class="m-name" aria-hidden="true">${esc(r.harness)}</span>
+                  <div class="m-row" role="listitem"><span class="m-name">${esc(nameOf(r))}</span><span class="m-na">not recorded</span></div>` : `
+                  <div class="m-row${vals[i] === best && known.length > 1 ? " best" : ""}" role="listitem" aria-label="${esc(nameOf(r))}: ${esc(m.fmt(vals[i]))}">
+                    <span class="m-name" aria-hidden="true">${esc(nameOf(r))}</span>
                     <span class="m-track" aria-hidden="true"><span class="m-fill" style="--w:${(vals[i] / top) * 100}%;--d:${i * 0.06}s"></span></span>
                     <span class="m-val" aria-hidden="true">${esc(m.fmt(vals[i]))}</span>
                   </div>`).join("")}
               </div>
             </div>`;
         }).join("");
+      }
+
+      function renderMultiples(rows) {
+        paintMultiples($("#harness-multiples"), rows, [
+          { title: "Solved", sub: "% of tasks · higher is better", get: (r) => r.solved, fixed: 100, hi: true, fmt: (v) => v.toFixed(1) + "%" },
+          { title: "Tool calls", sub: "mean per task · lower is better", get: (r) => r.calls, fmt: (v) => v.toFixed(1) },
+          { title: "Input tokens", sub: "per task · lower is better", get: (r) => parseTok(r.inTok), fmt: (v) => "~" + compact(v) },
+          { title: "Wall-clock", sub: "whole suite · lower is better", get: (r) => r.wall, fmt: (v) => v + "s" },
+        ], (r) => r.harness);
       }
 
       /* —— derived comparisons: thinking OFF/ON and isolated/live —— */
@@ -1348,6 +1373,25 @@
         };
         paint(t.oneShot.rows, "#oneshot-bars", true);
         paint(t.toolLoop.rows, "#tool-bars", false);
+      }
+
+      /* —— system one: typed-decision models behind the standard endpoint —— */
+      function renderSystemOne() {
+        const s = data.systemOne;
+        if (!s) return;
+        $("#s1-question").textContent = s.question;
+        const lead = Math.max(...s.rows.map((r) => r.score));
+        $("#s1-bars").innerHTML = s.rows.map((r, i) => barRow({
+          i, lead, isLead: r.score === lead, label: r.model, value: r.score.toFixed(1),
+          meta: `${r.serving} · 95% CI ${r.ci} — ${r.note}`,
+        })).join("");
+        paintMultiples($("#s1-multiples"), s.rows, [
+          { title: "Seconds / question", sub: "mean · lower is better", get: (r) => r.secPerQ, fmt: (v) => v + "s" },
+          { title: "Output tokens", sub: "per answer · lower is better", get: (r) => r.outTok, fmt: (v) => String(v) },
+          { title: "Suite wall-clock", sub: "98 generations · lower is better", get: (r) => r.wall, fmt: (v) => v + "s" },
+        ], (r) => r.model);
+        $("#s1-note").innerHTML = esc(s.note) +
+          ` <a href="${gh(s.report)}" rel="noopener">Full report →</a>`;
       }
 
       /* —— results table —— */
@@ -1512,6 +1556,7 @@
           renderMachinePanel();
           renderHarness();
           renderThinking();
+          renderSystemOne();
           renderPairs();
           fillFilters();
           renderResults();

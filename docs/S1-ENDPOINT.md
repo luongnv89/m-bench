@@ -9,13 +9,13 @@ change and a restart, not an application change.
 ```
 app / bench ──► :8123/v1 (OpenAI chat subset) ──► s1_gateway.py
                                                    │
-                        S1_BACKEND ────────────────┤
-                        │            │             │
-                     typesafe      proxy         laya (stub, #104)
-                        │            │
-                   api.typesafe   S1_UPSTREAM
-                   /v1/systemone  (vLLM, llama.cpp, ollama —
-                                  any OpenAI-native model)
+                  S1_BACKEND ──────────────────────┤
+                  │          │          │          │
+               typesafe    nimble      laya      proxy
+                  │          │          │          │
+            api.typesafe  ollama    in-process  S1_UPSTREAM
+            /v1/systemone /v1/      predict()   (vLLM, llama.cpp,
+                          systemone             any OpenAI model)
 ```
 
 ## The contract
@@ -53,6 +53,15 @@ candidate is compared against.
 Raw run: `results/2026-09-30/typesafe-jev-1-13-s1.json` · comparison:
 `results/2026-09-30/REPORT-jev-s1.md` · method notes: `NOTES-jev-s1.md`.
 
+Measured candidates through this same endpoint (issue #104):
+
+| Candidate | Backend | Accuracy | Notes |
+|---|---|---|---|
+| Bespoke-Nimble-9B (Ollama Q8_0) | `nimble` | **98.0 %** — ties Jev | drop-in replacement; local, no API key |
+| Laya `typed-decisions` | `laya` | 73.5 % | not a replacement at this checkpoint; CPU-bound run |
+
+Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`).
+
 ## Backends
 
 ### `typesafe` (default) — TypeSafe Jev
@@ -77,12 +86,33 @@ served candidate — Bespoke-Nimble-9B on vLLM, a GGUF on llama.cpp, an ollama
 model — answers behind the same URL Jev uses. Zero translation, zero drift:
 the app sees the same wire contract, the model sees the same prompt.
 
-### `laya` — stub
+### `nimble` — Bespoke-Nimble-9B via Ollama
 
-Returns 501. `convaiinnovations/laya` exposes a typed `predict(state,
-questions)` API with no chat surface (issue #104); an adapter implements the
-same translation `typesafe` does — parse the prompt, call `predict`, return
-the picked option — and registers itself in `HANDLERS`.
+```bash
+ollama pull nimble            # needs Ollama >= 0.35, ~9.5 GiB Q8_0
+S1_BACKEND=nimble python3 configs/s1_gateway.py
+```
+
+Ollama ≥ 0.35 exposes `/v1/systemone` for Nimble — the **same Jev contract**
+TypeSafe serves — so `ask_systemone` is shared verbatim with the `typesafe`
+backend (no API key; `NIMBLE_BASE_URL`, `NIMBLE_MODEL` tune the upstream).
+Measured: 98.0 % accuracy, 0.5 s/question, 1 out-token — a proven local Jev
+replacement for this workload.
+
+### `laya` — convaiinnovations/laya in-process
+
+```bash
+pip install laya
+LAYA_MODEL_DIR=~/models/laya-typed-decisions \
+    S1_BACKEND=laya python3 configs/s1_gateway.py
+```
+
+`laya.load(LAYA_MODEL_DIR)` at gateway startup; each request runs
+`agent.predict(state, questions)` in a thread executor. Use the
+`typed-decisions` checkpoint — the root checkpoint is tuned for guardrails and
+scores near-chance on this suite. Non-autoregressive scorer: reports input
+tokens only (0 output by construction). Measured 73.5 % on CPU — the GPU slot
+was occupied by the incumbent service.
 
 ### Adding a backend
 
