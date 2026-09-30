@@ -47,6 +47,18 @@
           "runnerUp": "Isolated arm 74.8 on agentic-all",
           "config": null,
           "report": "results/2026-08-25/REPORT-live.3.md"
+        },
+        {
+          "workload": "System One decisions · typed questions",
+          "harness": "benchkit built-in loop",
+          "model": "Qwen3.6-35B-A3B-NVFP4",
+          "thinking": "OFF",
+          "serving": "vLLM TP1 · MTP k=2 · prefix caching",
+          "score": 96.9,
+          "metric": "accuracy · system1 · n=98",
+          "runnerUp": "nimble-9b 96.9 OFF · 0 ON · laya 67.3",
+          "config": "qwen3.6-35b-a3b-nvfp4",
+          "report": "results/2026-09-30/REPORT.md"
         }
       ]
     },
@@ -251,9 +263,21 @@
     {"date":  "2026-08-26", "machine":  "small-box", "model":  "MiMo v2.5 Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  71.0, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.1.md"},
     {"date":  "2026-08-26", "machine":  "small-box", "model":  "MiMo v2.5 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  56.7, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.1.md"},
     {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "isolated", "thinking":  "OFF", "suite":  "agentic-hard", "score":  56.2, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"},
-    {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.1, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"}
+    {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.1, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Bespoke-Nimble-9B (LoRA on Qwen3.5-9B)", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "system1", "score":  96.9, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Bespoke-Nimble-9B (LoRA on Qwen3.5-9B)", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "system1", "score":  0.0, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "laya (convaiinnovations)", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "system1", "score":  67.3, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "laya (convaiinnovations)", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "system1", "score":  67.3, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B-NVFP4", "harness":  "built-in", "mode":  "isolated", "thinking":  "OFF", "suite":  "system1", "score":  96.9, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT.md"},
+    {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Qwen3.6-35B-A3B-NVFP4", "harness":  "built-in", "mode":  "isolated", "thinking":  "ON", "suite":  "system1", "score":  93.9, "unit":  "accuracy", "report":  "results/2026-09-30/REPORT.md"}
   ],
   "campaigns": [
+    {
+      "date": "2026-09-30",
+      "question": "Should Bespoke-Nimble-9B or Laya replace the incumbent for system-one decisions?",
+      "answer": "No. Nimble think-OFF ties the incumbent at 96.9 % (margin's CI includes zero) at 0.4 s/task, but collapses to 0 % under thinking and its ~23 GiB sidecar does not fit alongside the incumbent. Laya trails at 67.3 %.",
+      "link": "results/2026-09-30/REPORT.md"
+    },
     {
       "date": "2026-08-17",
       "question": "Does thinking mode help a coding agent?",
