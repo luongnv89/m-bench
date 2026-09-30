@@ -109,8 +109,8 @@ Build the report:
 ./bench report results/*/my-model-think-*.json --title "My model" --verdict "..."
 ```
 
-`validate` must print `28/28` (and `--suite agentic-all` must print `16/16`). If it does
-not, the test is broken and no model score means anything.
+`validate` must print `28/28` (and `--suite agentic-all` must print `16/16`, `--suite
+system1` `23/23`). If it does not, the test is broken and no model score means anything.
 
 ## Your harness is part of the setup
 
@@ -174,6 +174,7 @@ identical weights by up to 23 points.
 | `agentic` | 8 | Multi-turn tool calling over a sandboxed workspace — 7 tools, scored by a predicate over the final state |
 | `agentic-hard` | 8 | **Ranking tasks.** Hidden tests, decoys, cascading bugs, perf budgets, cases where the correct move is to change nothing. Ranked on solve rate; efficiency vs oracle par and token/time cost reported separately |
 | `agentic-all` | 16 | `agentic` + `agentic-hard` |
+| `system1` | 23 | **Decision endpoints.** 49 typed questions over a `state` (email, ticket, JSON…), scored by exact match — accuracy with a 95% CI next to per-question tokens, TTFT and wall-clock. Built for System One models like `bespokelabs/Bespoke-Nimble-9B` or `convaiinnovations/laya` behind any OpenAI-compatible endpoint |
 
 ## Commands
 

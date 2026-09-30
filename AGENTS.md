@@ -45,6 +45,7 @@ Do not proceed until `/models` returns the model you intend to test.
 pip install -e .
 ./bench validate                  # must print 28/28
 ./bench validate --suite agentic-all   # must print 16/16
+./bench validate --suite system1       # must print 23/23 (data lint)
 ```
 
 **If either is not 100 %, stop and fix the harness.** A failing reference solution or oracle
@@ -276,6 +277,9 @@ Both kinds require proof the task is winnable before any model is judged:
   then `./bench validate` stays at 100 %.
 - agentic: a task in `benchkit/agentic/tasks*.py` with `files`, `check(ws)` and an
   `oracle(ws)`, then `./bench validate --suite agentic-all` stays at 100 %.
+- system1: a task in `benchkit/suites/system1.py` with `state` and `questions`
+  (`{question, options, answer}`; `answer` ∈ `options`, or `options` omitted for an
+  open short answer), then `./bench validate --suite system1` data-lints 23/23.
 
 The oracle also sets **par** — the minimum tool calls — which is what efficiency is
 measured against. Write the oracle the way a competent engineer would work, not

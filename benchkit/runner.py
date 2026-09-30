@@ -126,7 +126,7 @@ def _client(cfg):
     return OpenAI(base_url=cfg.base_url, api_key="none", timeout=1800)
 
 
-def generate(client, cfg, task, idx):
+def generate(client, cfg, task, idx, system=SYSTEM):
     t0 = time.perf_counter()
     ttft, chunks, usage = None, [], None
     kw = {}
@@ -134,7 +134,7 @@ def generate(client, cfg, task, idx):
         kw["temperature"] = cfg.temperature
     stream = client.chat.completions.create(
         model=cfg.model,
-        messages=[{"role": "system", "content": SYSTEM},
+        messages=[{"role": "system", "content": system},
                   {"role": "user", "content": task["prompt"]}],
         max_tokens=cfg.max_tokens,
         extra_body={"chat_template_kwargs": {"enable_thinking": cfg.thinking,

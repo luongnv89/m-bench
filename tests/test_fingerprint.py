@@ -72,6 +72,19 @@ class TestSuiteHash(unittest.TestCase):
         tasks[0]["files"] = files
         self.assertNotEqual(fingerprint.suite_hash(tasks), base)
 
+    def test_editing_s1_fields_changes_the_hash(self):
+        base = fingerprint.suite_hash(SUITES["system1"])
+        edits = (
+            lambda t: t[0].__setitem__("state", t[0]["state"] + "x"),
+            lambda t: t[0]["questions"][0].__setitem__(
+                "question", t[0]["questions"][0]["question"] + " ?"),
+            lambda t: t[0]["questions"][0].__setitem__("answer", "zzz"),
+        )
+        for mutate in edits:
+            tasks = copy.deepcopy(SUITES["system1"])
+            mutate(tasks)
+            self.assertNotEqual(fingerprint.suite_hash(tasks), base)
+
     def test_par_changes_the_hash(self):
         tasks = SUITES["agentic"]
         base = fingerprint.suite_hash(tasks)
@@ -124,6 +137,17 @@ class TestEveryRunnerStamps(unittest.TestCase):
                 mock.patch.object(loop, "run_task", side_effect=fake), \
                 mock.patch.object(loop, "summarize", return_value={}):
             summary, _ = loop.run(tasks, _cfg())
+        self._check(summary, tasks)
+
+    def test_s1_runner(self):
+        from benchkit import s1_runner
+        tasks = SUITES["system1"][:1]
+        with mock.patch.object(runner, "_client"), \
+                mock.patch.object(runner, "generate",
+                                  side_effect=RuntimeError("down")):
+            summary, results = s1_runner.run(tasks, _cfg())
+        # one scored unit per question of the task, all failed generations
+        self.assertEqual(len(results), len(tasks[0]["questions"]))
         self._check(summary, tasks)
 
     def test_harness_runner(self):

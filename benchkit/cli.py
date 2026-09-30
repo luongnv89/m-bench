@@ -55,7 +55,9 @@ def _headline_lines(summary):
     ci = report.solve_ci(summary)
     ci_txt = (f"(95% CI {ci[0] * 100:.1f}–{ci[1] * 100:.1f}, "
               f"n={report.generations(summary)})" if ci else "(95% CI n/a)")
-    lines = [f"solve rate             {solve * 100:.1f} %  {ci_txt}"]
+    # an s1 run's pass fraction is its accuracy; the field stays pass_at_1
+    metric = "accuracy" if summary.get("kind") == "s1" else "solve rate"
+    lines = [f"{metric:<23}{solve * 100:.1f} %  {ci_txt}"]
     if summary.get("kind") == "agentic":
         eff = report.efficiency(summary)
         lines.append("efficiency             "
@@ -90,6 +92,10 @@ def _execute_suite(suite, tasks, cfg, max_turns=None, keep_code=False):
         from benchkit.agentic import loop
         extra = {} if max_turns is None else {"max_turns": max_turns}
         return loop.run(tasks, cfg, on_result=_print_agentic, **extra)
+    if kind(suite) == "s1":
+        from benchkit import s1_runner
+        return s1_runner.run(tasks, cfg, on_result=_print_result,
+                             keep_code=keep_code)
     return runner.run(tasks, cfg, on_result=_print_result, keep_code=keep_code)
 
 
@@ -107,6 +113,11 @@ def cmd_validate(args):
     if kind(args.suite) == "agentic":
         from benchkit.agentic.loop import validate
         return 1 if validate(tasks) else 0
+    if kind(args.suite) == "s1":
+        # no executable reference exists for a decision task; what can be
+        # proven is that the data itself is well-formed
+        from benchkit.s1_runner import validate as lint
+        return 1 if lint(tasks) else 0
     bad = 0
     for t in tasks:
         code = REFERENCES.get(t["id"])
@@ -214,7 +225,8 @@ def cmd_compare(args):
                 with open(p, "w") as f:
                     json.dump(dict(summary=summary, results=results), f, indent=2)
                 paths.append(p)
-                line = f"  -> pass@1 {summary['pass_at_1'] * 100:.1f} %"
+                metric = "accuracy" if summary.get("kind") == "s1" else "pass@1"
+                line = f"  -> {metric} {summary['pass_at_1'] * 100:.1f} %"
                 ci = report.solve_ci(summary)
                 if ci:
                     line += f" (95% CI {ci[0] * 100:.0f}–{ci[1] * 100:.0f})"
