@@ -2,8 +2,8 @@
 description: Benchmark opencode's live configuration (plugins, MCP servers included) and get a scored report with improvement suggestions
 ---
 
-Benchmark this harness's live setup with the repo's own tooling. From
-`/home/montimage/buildspace/m-bench`, run:
+Benchmark this harness's live setup with the repo's own tooling. From the
+repository root, run:
 
 ```bash
 ./bench setup --harness opencode --suite agentic-hard

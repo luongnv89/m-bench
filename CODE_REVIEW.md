@@ -1,5 +1,79 @@
 # Code Review Report
 
+**Date**: 2026-09-30
+**Scope**: Working-tree cleanup on `main`; 24 retained changed/new files.
+**Mode**: Mode 1 (inline diff review, with a delegated read-only review of 19 JSON artifacts).
+**Excluded**: Unchanged source, historical result contents restored under append-only policy,
+ignored build/runtime artifacts, and the archived machine-specific audit plan.
+**Repo sync**: Stash-backed fetch and rebase completed without conflicts; recovery bundle retained outside the checkout.
+
+## Summary
+
+| Severity | Count |
+|----------|-------|
+| Critical | 0     |
+| Major    | 1     |
+| Minor    | 1     |
+| Info     | 2     |
+
+## Cleanup findings and disposition
+
+### Major — Benchmark validity: scoring-isolation failures are not model failures
+
+**File**: `results/2026-09-18/incumbent-qwen3-6-35b-a3b-nvfp4-think-off.json:77`
+(and its thinking-ON counterpart; September 21 `incumbent-think-{off,on}.json`).
+Each of these four files records 56/56 `unshare` permission failures, despite
+`summary.errored: 0`. Their zero pass rates must not enter model-quality rankings.
+**Disposition**: JSON preserved unchanged; campaign READMEs explicitly exclude these
+runs from rankings. This cleanup does not fix or re-run the failed isolation setup.
+
+### Minor — Portability: obsolete machine-specific command path
+
+**File**: `.opencode/command/bench-setup.md:6`
+The deleted command was useful but referenced a different checkout location.
+**Disposition**: Restored the command and replaced the absolute path with
+“repository root.” No benchmark invocation or serving behavior was changed.
+
+### Info — Reproducibility: legacy artifacts have incomplete provenance
+
+**File**: `results/2026-09-21/incumbent-container-agentic-off.json:4`
+Aliases and labels do not establish immutable checkpoints, isolation settings,
+or effective thinking modes. All 19 artifacts lack suite fingerprints; do not
+pool them. Two container agentic runs reached the suite's 100% discrimination
+ceiling, not proof of perfection.
+**Disposition**: Added campaign-specific interpretation notes without changing metrics.
+
+### Info — Repository hygiene: keep runtime state out of commits
+
+**File**: `.gitignore:12`
+A root `.pid` file is local runtime state.
+**Disposition**: Ignored it without removing the file or touching its process.
+The unverified machine audit plan was archived outside the checkout. The
+comment-only `start-qwen.sh` change was discarded; no endpoint was restarted.
+
+## Cleanup verification
+
+- Restored 11 historical JSON deletions; no existing result was deleted or rewritten.
+- Reviewed all 19 new JSON artifacts: complete task/sample records and no exact duplicates;
+  report-generator compatibility checked with output outside the checkout.
+- Removed merged remote branches `feat/benchmark-harness-skill`, `feat/landing-charts`,
+  and `feat/report-charts`; removed the merged local benchmark-skill branch.
+  PR #78's exact head and reachable merge commit verified the squash-merged branch.
+  Remote deletions were guarded against tip changes with explicit SHA leases.
+- Preserved `main` and unmerged `feat/surface-layer-benchmarking` (open PR #81).
+- `python -m pytest -q`: 405 passed, 6 skipped, 126 subtests passed; 8 warnings.
+- `./bench validate`: 28/28; `./bench validate --suite agentic-all`: 16/16.
+- `bash -n start-qwen.sh` and ShellCheck passed; no production script changes retained.
+- Secret-pattern, large-file, conflict-marker, and whitespace checks passed before commit.
+
+**Verdict**: Keep the small hygiene fixes and all historical artifacts, with explicit
+failure/provenance caveats. No model recommendation or infrastructure change is made.
+The earlier full audit below is historical and was not revalidated by this scoped review.
+
+---
+
+## Archived full audit
+
 **Date**: 2026-08-20
 **Scope**: Full audit — `benchkit/` (22 files) + `router.py`
 **Mode**: Mode 1 (inline fast path — 23 files, ~3,800 lines, under the 50-file / 5K-line threshold)
