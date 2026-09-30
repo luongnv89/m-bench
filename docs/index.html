@@ -944,6 +944,14 @@
           <div class="multiples" id="s1-multiples" style="grid-template-columns:repeat(3,1fr);"></div>
           <p class="chart-note" id="s1-note"></p>
         </div>
+
+        <div class="chart-block" id="s1-real" style="margin-top:1.25rem;" hidden>
+          <div class="chart-title">Real use case · phishing classifier (F1) · the anti-phishing service's own eval harness</div>
+          <p class="chart-question" id="s1r-question"></p>
+          <div class="bar-rows" id="s1r-bars" role="list" aria-label="F1 by backend, 0 to 100"></div>
+          <div class="multiples" id="s1r-multiples" style="grid-template-columns:repeat(2,1fr);"></div>
+          <p class="chart-note" id="s1r-note"></p>
+        </div>
       </div>
     </section>
 
@@ -1392,6 +1400,23 @@
         ], (r) => r.model);
         $("#s1-note").innerHTML = esc(s.note) +
           ` <a href="${gh(s.report)}" rel="noopener">Full report →</a>`;
+
+        const r = s.realUseCase;
+        if (r) {
+          $("#s1-real").hidden = false;
+          $("#s1r-question").textContent = r.question;
+          const rLead = Math.max(...r.rows.map((x) => x.score));
+          $("#s1r-bars").innerHTML = r.rows.map((x, i) => barRow({
+            i, lead: rLead, isLead: x.score === rLead, label: x.model, value: x.score.toFixed(1),
+            meta: `${x.secPerQ}s/email · wall ${x.wall}s · ${x.serving} · 95% CI ${x.ci} — ${x.note}`,
+          })).join("");
+          paintMultiples($("#s1r-multiples"), r.rows, [
+            { title: "Seconds / email", sub: "mean · lower is better", get: (x) => x.secPerQ, fmt: (v) => v + "s" },
+            { title: "Corpus wall-clock", sub: "16 emails · lower is better", get: (x) => x.wall, fmt: (v) => v + "s" },
+          ], (x) => x.model);
+          $("#s1r-note").innerHTML = esc(r.note) +
+            ` <a href="${gh(r.report)}" rel="noopener">Full report →</a>`;
+        }
       }
 
       /* —— results table —— */
