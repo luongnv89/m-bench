@@ -1383,7 +1383,7 @@
         const lead = Math.max(...s.rows.map((r) => r.score));
         $("#s1-bars").innerHTML = s.rows.map((r, i) => barRow({
           i, lead, isLead: r.score === lead, label: r.model, value: r.score.toFixed(1),
-          meta: `${r.serving} · 95% CI ${r.ci} — ${r.note}`,
+          meta: `${r.secPerQ}s/question · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
         })).join("");
         paintMultiples($("#s1-multiples"), s.rows, [
           { title: "Seconds / question", sub: "mean · lower is better", get: (r) => r.secPerQ, fmt: (v) => v + "s" },
