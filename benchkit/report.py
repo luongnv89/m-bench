@@ -402,6 +402,21 @@ def _ci_cell(s):
     return f"{rate} ({ci[0] * 100:.0f}–{ci[1] * 100:.0f})"
 
 
+def _rate_name(S):
+    """What a report calls its pass-fail fraction, by the runs' suite kind.
+
+    The stored field is always ``pass_at_1``; the printed name follows the
+    kind so a decision suite reads "accuracy" and a tool loop "solve rate".
+    Mixed-kind reports fall back to the neutral "pass@1", exactly as the
+    agentic/codegen branches already degrade.
+    """
+    if all(s.get("kind") == "s1" for s in S):
+        return "Accuracy"
+    if all(s.get("kind") == "agentic" for s in S):
+        return "Solve rate"
+    return "pass@1"
+
+
 def margin_verdict(best, runner_up):
     """Is ``best`` really ahead of ``runner_up`` on solve rate? (issue #87)
 
@@ -529,6 +544,7 @@ def _setup_section(S, short):
     samples, samples_same = _shared([s["config"].get("samples") for s in S], short)
     gens, _ = _shared([generations(s) for s in S], short)
     agentic = all(s.get("kind") == "agentic" for s in S)
+    s1 = all(s.get("kind") == "s1" for s in S)
 
     out = ["## Setup\n"]
     out.append("| | |\n|---|---|")
@@ -542,6 +558,9 @@ def _setup_section(S, short):
     if agentic:
         out.append("| Metric | solve rate (predicate over the final workspace), with a "
                    "95% Wilson interval; efficiency reported separately |\n")
+    elif s1:
+        out.append("| Metric | accuracy over exact-match answers on typed decision "
+                   "questions, with a 95% Wilson interval |\n")
     else:
         out.append("| Metric | pass@1 over hidden executable unit tests, with a 95% "
                    "Wilson interval |\n")
@@ -580,8 +599,8 @@ def _headline_section(S, labels, agentic):
         out.append("| Run | Solve rate (95% CI) | Efficiency | Tokens per task "
                    "| Time per task |\n|---|---|---|---|---|")
     else:
-        out.append("| Run | pass@1 (95% CI) | Tokens per task | Time per task |\n"
-                   "|---|---|---|---|")
+        out.append(f"| Run | {_rate_name(S)} (95% CI) | Tokens per task "
+                   "| Time per task |\n|---|---|---|---|---|")
     for s, label in zip(S, labels):
         cost = s.get("cost")
         eff = f" | {_fmt(efficiency(s), pct=True)}" if agentic else ""
@@ -626,8 +645,9 @@ def _results_section(runs, S, labels, setups):
                    + (" | Agent score |" if scored else " |") + "\n"
                    + "|---" * (13 if scored else 12) + "|")
     else:
-        out.append("| Run | pass@1 | easy | medium | hard | Wall | Mean out tok "
-                   "| Truncated | tok/s |\n|---|---|---|---|---|---|---|---|---|")
+        out.append(f"| Run | {_rate_name(S)} | easy | medium | hard | Wall "
+                   "| Mean out tok | Truncated | tok/s |\n"
+                   "|---|---|---|---|---|---|---|---|---|")
     for i, s in enumerate(S):
         d = s.get("by_difficulty") or {}
         name = f"**{labels[i]}**" if i in leaders else labels[i]
@@ -786,7 +806,7 @@ def _glance_section(runs, S, labels, short, agentic):
     tok_bar, sec_bar = _scaled(tokens), _scaled(seconds)
 
     out = ["## At a glance\n"]
-    head = "| # | Run | Harness · thinking | " + ("Solve rate" if agentic else "pass@1")
+    head = "| # | Run | Harness · thinking | " + _rate_name(S)
     head += " | Efficiency" if agentic else ""
     head += " | Tokens / task | Time / task |"
     out.append(head + "\n" + "|---" * (7 if agentic else 6) + "|")
@@ -818,18 +838,18 @@ def _glance_section(runs, S, labels, short, agentic):
                      "where every attempt errored measured the setup, not the model, "
                      "and is left out of the scatter.")
     out.append("<sub>" + " ".join(notes) + "</sub>\n")
-    out.extend(_scatter_section([S[i] for i in order], agentic))
+    out.extend(_scatter_section([S[i] for i in order]))
     return out
 
 
-def _scatter(title, cost_label, S, costs, agentic):
+def _scatter(title, cost_label, S, costs):
     """A quadrantChart whose points are the scoreboard's row numbers.
 
     Numbers, not names: full labels collide and clip at the frame, and runs
     landing on one spot are merged into one point naming all of them.
     """
     top = max(c for s, c in zip(S, costs) if not _all_errored(s))
-    rate = "solve rate" if agentic else "pass@1"
+    rate = _rate_name(S).lower()
     points = {}
     for n, (s, c) in enumerate(zip(S, costs), 1):
         if _all_errored(s):
@@ -846,20 +866,21 @@ def _scatter(title, cost_label, S, costs, agentic):
     return "\n".join(lines) + "\n```\n"
 
 
-def _scatter_section(S, agentic):
+def _scatter_section(S):
     """Solve rate against cost, two axes, never multiplied into one score."""
     if sum(not _all_errored(s) for s in S) < 2:
         return []
     out = []
     live = [s for s in S if not _all_errored(s)]
     if all(_task_tokens(s) is not None for s in live) and max(_task_tokens(s) for s in live):
-        out.append(_scatter("Solve rate vs tokens per task", lambda v: f"{_compact(v)} tok",
-                            S, [_task_tokens(s) for s in S], agentic))
+        out.append(_scatter(f"{_rate_name(S)} vs tokens per task",
+                            lambda v: f"{_compact(v)} tok",
+                            S, [_task_tokens(s) for s in S]))
     seconds = [_task_seconds(s) for s in S]
     if all(_task_seconds(s) is not None for s in live) \
             and max(_task_seconds(s) for s in live):
-        out.append(_scatter("Solve rate vs time per task", lambda v: f"{v:,.0f} s",
-                            S, seconds, agentic))
+        out.append(_scatter(f"{_rate_name(S)} vs time per task",
+                            lambda v: f"{v:,.0f} s", S, seconds))
     if out:
         out.append("<sub>Points are the `#` column above. Up is better, left is cheaper: "
                    "the top-left corner is the most solved for the least spent. Cost is "
@@ -920,9 +941,9 @@ def _charts_section(runs, S, short, agentic):
     if numbered:
         out.append("<sub>Bars below are numbered as in the `#` column of "
                    "*At a glance*.</sub>\n")
-    out.append(_chart("Solve rate (%)" if agentic else "pass@1 (%)",
-                      "solved %" if agentic else "pass@1 %", short,
-                      [s["pass_at_1"] * 100 for s in S], y_max=100))
+    out.append(_chart(f"{_rate_name(S)} (%)",
+                      "solved %" if agentic else f"{_rate_name(S).lower()} %",
+                      short, [s["pass_at_1"] * 100 for s in S], y_max=100))
     out.append(_chart("Cost of that accuracy — suite wall-clock (s)", "seconds", short,
                       [s.get("wall_seconds") or 0 for s in S]))
     costs = [s.get("cost") or {} for s in S]
@@ -1011,7 +1032,7 @@ def _disagreement_section(runs, S, labels, setups):
     return out
 
 
-def _caveats_section(cfg0, samples, samples_same, agentic):
+def _caveats_section(cfg0, samples, samples_same, agentic, s1=False):
     out = ["## Caveats\n"]
     ci = ("Every solve rate carries a 95% Wilson interval over the generations behind "
           "it, and a margin between two runs is only a result when the 95% Newcombe "
@@ -1027,15 +1048,21 @@ def _caveats_section(cfg0, samples, samples_same, agentic):
     if agentic:
         out.append("- Multi-turn agentic tool use against a sandboxed workspace. One-shot code "
                    "generation is not exercised here.")
-    else:
-        out.append("- Single-turn Python code generation only. Multi-turn agentic tool use is "
-                   "not exercised here.")
-    if agentic:
         out.append("- Success is decided by a predicate over the final workspace, never by what "
                    "the model claims. Every task's oracle is verified to solve it first.")
         out.append("- A task abandoned at the turn limit counts as failed; raise `--max-turns` "
                    "before concluding the model cannot do it.")
+    elif s1:
+        out.append("- Single-turn decision questions over a state, scored by exact match against "
+                   "each question's answer key. Code generation and multi-turn tool use are not "
+                   "exercised here.")
+        out.append("- Verbose, reasoned or empty replies count as failures — deliberating "
+                   "instead of deciding is the failure mode this suite measures.")
+        out.append("- A truncated generation counts as a failure; a high `Truncated` column "
+                   "means runaway reasoning, which hangs real agents.")
     else:
+        out.append("- Single-turn Python code generation only. Multi-turn agentic tool use is "
+                   "not exercised here.")
         out.append("- A truncated generation counts as a failure; a high `Truncated` column means "
                    "runaway reasoning, which hangs real agents.")
     return out
@@ -1048,7 +1075,9 @@ def _raw_data_section(runs, labels):
         if members:
             per = ", ".join(f"{v * 100:.1f}" for v in r["_member_scores"])
             files = ", ".join(f"`{m}`" for m in members)
-            metric = "agent score" if r["_member_metric"] == "agent_score" else "pass@1"
+            metric = ("agent score" if r["_member_metric"] == "agent_score"
+                      else "accuracy" if r["summary"].get("kind") == "s1"
+                      else "pass@1")
             out.append(f"- {files} — {line} (pooled: {len(members)} re-runs as "
                        f"samples of one run; {metric} per re-run {per})")
         else:
@@ -1119,7 +1148,8 @@ def build(runs, title, question=None, verdict=None, notes=None, short_labels=Non
             out.extend(advice_mod.section(r["summary"],
                                           title="Suggestions — " + _label(r)))
 
-    out.extend(_caveats_section(cfg0, samples, samples_same, agentic))
+    all_s1 = all(s.get("kind") == "s1" for s in S)
+    out.extend(_caveats_section(cfg0, samples, samples_same, agentic, s1=all_s1))
     out.extend(_grouping_notes(ungrouped))
     out.extend(_raw_data_section(runs, labels))
     return "\n".join(out)
