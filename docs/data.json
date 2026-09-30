@@ -351,6 +351,11 @@
       "name": "agentic-all",
       "tasks": 16,
       "desc": "agentic + agentic-hard"
+    },
+    {
+      "name": "system1",
+      "tasks": 23,
+      "desc": "System One decision endpoints — accuracy + speed on typed questions"
     }
   ]
 }
