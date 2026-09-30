@@ -256,6 +256,25 @@ difficulty, a non-empty `state` and a non-empty `questions` list, and every
 question's `answer` must be one of its own `options` (normalised); `options`
 may be omitted for open short-answer questions.
 
+### Serving the decision models named above
+
+Both were measured on the DGX Spark via side ports — the shared endpoint on
+`:8001` is never touched (issue #104, `results/2026-09-30/REPORT.md`):
+
+- **Nimble**: `configs/nimble-9b-lora.sh` runs vLLM with
+  `--enable-lora --lora-modules nimble=bespokelabs/Bespoke-Nimble-9B` over the
+  bf16 `Qwen/Qwen3.5-9B` base on `127.0.0.1:8803`. Benchmark with
+  `BENCH_BASE_URL=http://127.0.0.1:8803/v1 BENCH_MODEL=nimble` — the served
+  alias `nimble-9b` is the *base* weights; only `nimble` exercises the
+  adapter. bf16 needs ~23 GiB and does not fit alongside the incumbent; run it
+  with the primary stopped, or merge first (`configs/nimble-9b-merged.sh`).
+- **Laya**: `configs/laya-9b-shim.sh` runs `laya-shim.py`, a CPU-only aiohttp
+  shim on `127.0.0.1:8804` that maps each rendered prompt to one typed
+  `choice` call on `Router().predict`. Benchmark with
+  `BENCH_BASE_URL=http://127.0.0.1:8804/v1 BENCH_MODEL=laya`. Open short-answer
+  questions (no `options`) get the shim's decline string — laya cannot
+  represent them, which costs it those tasks by construction.
+
 ## Adding tasks and suites
 
 A task is a dict with four keys:

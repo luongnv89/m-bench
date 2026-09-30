@@ -159,6 +159,24 @@ docker build -f Dockerfile.gemma -t mia-vllm-gb10-gemma:latest .
 
 The Qwen backend deliberately keeps the untouched upstream image.
 
+## Benchmark sidecars (not router-registered)
+
+Issue #104's candidates ran as standalone backends on side ports, benchmarked
+via `BENCH_BASE_URL` overrides — neither is a systemd unit and neither joins
+the router:
+
+| Backend | Command | Port | Budget | Measured on system1 |
+|---|---|---|---|---|
+| `vllm-nimble` | `configs/nimble-9b-lora.sh` | 8803 | util 0.19 (~23 GB) | 96.9 % think-OFF / 0 % think-ON |
+| `laya-shim.py` | `configs/laya-9b-shim.sh` | 8804 | CPU-only | 67.3 % both modes |
+
+Nimble's adapter answers to `BENCH_MODEL=nimble` (the `nimble-9b` served name
+is the bf16 *base*). At util 0.19 it does **not** fit alongside `vllm-qwen`
+plus the ~22 GB already held by other processes — the numbers above were taken
+with the primary stopped; to run both at once use a quantized base such as
+`Intel/Qwen3.5-9B-int4-AutoRound` at ~0.12 util. Details:
+`results/2026-09-30/REPORT.md`.
+
 ## Rollback to llama.cpp
 
 ```bash

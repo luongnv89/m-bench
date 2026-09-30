@@ -30,6 +30,9 @@ points, not gospel.
 | `qwen3.8-27b-nvfp4-tunable` | Qwen3.8-27B (dense) | NVFP4 | env-tunable | — | — | Sweeping speculative-decoding settings (`K`, `DRAFTER`, `SPEC`) |
 | `gemma4-12b-w4a16` | Gemma 4 12B | QAT W4A16 | 0.16 | built from `@sha256:1962734…` | — | Small secondary backend alongside the primary, on port 8802 |
 | `llamacpp-qwen3.8-27b-bench.sh` | Qwen3.8-27B GGUF | Q4_K_M | — | ~11.6 tok/s | — | llama.cpp comparison, not a vLLM recipe |
+| `nimble-9b-lora` | Qwen3.5-9B + Bespoke-Nimble-9B LoRA | bf16 + adapter | 0.19 (~23 GB) | `@sha256:1962734…` | **96.9 % system1 think-OFF** (0.4 s/task, 2 tok out) · 0 % think-ON — [report](../results/2026-09-30/REPORT.md) | A specialist decision endpoint on :8803. Ties the incumbent on `system1` but collapses under thinking and does not fit alongside it |
+| `nimble-9b-merged` | Qwen3.5-9B + merged Nimble adapter | bf16 | 0.19 (~23 GB) | `@sha256:1962734…` | — | Fallback when `--enable-lora` cannot start; merge once with peft, serve as one checkpoint |
+| `laya-9b-shim` | convaiinnovations/laya (421M encoder) | — | CPU-only | no docker | **67.3 % system1** (both modes — the encoder ignores thinking) — [report](../results/2026-09-30/REPORT.md) | Non-autoregressive decision router via `laya-shim.py` on :8804; cannot represent open-answer questions |
 | (no recipe — evaluated, not adopted) | Qwen3.8-Flash-Next NVFP4 (Mia-AiLab, 99 GB, PLE-offload, solo tenant) | NVFP4+MXFP8 | ~100 GB, KV cut 22→18 GiB to fit | `vllm/vllm-openai:qwen38-flash-next` | 87.5 % think-OFF / 58.9 % think-ON / 87.5 % agentic-OFF / 87.5 % agentic-ON — see [`../results/2026-09-04/REPORT-flash-next-analysis.md`](../results/2026-09-04/REPORT-flash-next-analysis.md) | **Not adopted.** Only win is think-OFF (+7pp, noise); loses think-ON and both agentic modes, 2–3× slower, shipped defaults fail this box's safety check |
 
 "Measured" links to the campaign in [`../results/`](../results/) that produced it.
@@ -50,6 +53,9 @@ gets restarted). `bench configs` marks the rest and says why:
 | `qwen3.8-27b-nvfp4-tunable` | no | No `MODEL_ID=` line (it parameterises `MODEL=` instead) — the reason `bench configs` prints. It also runs as `qwen38-4bit` on port 8002, a standalone server for sweeping `K`/`DRAFTER`/`SPEC` by hand |
 | `gemma4-12b-w4a16` | no | Runs as `vllm-gemma` on port 8802 — a secondary backend, so restarting `vllm-qwen` would not serve it |
 | `llamacpp-qwen3.8-27b-bench` | no | llama.cpp, not vLLM, and no `MODEL_ID=` line at all |
+| `nimble-9b-lora` | no | Runs as `vllm-nimble` on port 8803 — a secondary backend; the adapter answers to `BENCH_MODEL=nimble` |
+| `nimble-9b-merged` | no | Same secondary-backend shape as `nimble-9b-lora` (`vllm-nimble` on :8803) |
+| `laya-9b-shim` | no | Not vLLM at all — a python shim over `Router().predict` on :8804, CPU-only |
 
 None of that makes them bad recipes. To make one sweepable, give it a literal
 `MODEL_ID="..."` and `NAME="vllm-qwen"` — that is all the sweep machinery reads.
