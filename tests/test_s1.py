@@ -124,6 +124,16 @@ class TestLint(unittest.TestCase):
         two = [self._task(), self._task()]
         self.assertEqual(s1_runner.validate(two), 2)
 
+    def test_malformed_entries_lint_cleanly(self):
+        # malformed data must be reported as lint problems naming the task,
+        # never as a traceback that kills the whole validate pass
+        numeric = [self._task(id="num", questions=[
+            dict(question="q?", options=["7", "8"], answer=7)])]
+        self.assertEqual(s1_runner.validate(numeric), 1)
+        non_dict_q = [self._task(id="qstr", questions=["q?"])]
+        self.assertEqual(s1_runner.validate(non_dict_q), 1)
+        self.assertEqual(s1_runner.validate(["not a task"]), 1)
+
 
 class TestRun(unittest.TestCase):
     """The stubbed-endpoint contract: same summary shape as the other runners."""

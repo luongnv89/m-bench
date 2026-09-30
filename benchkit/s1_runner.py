@@ -134,6 +134,8 @@ def summarize(results, cfg, wall, n_questions):
 
 def _lint(task):
     """Data problems in one s1 task; an empty list means clean."""
+    if not isinstance(task, dict):
+        return ["task entry must be a mapping"]
     problems = []
     if not isinstance(task.get("id"), str) or not task["id"].strip():
         problems.append("id must be a non-empty string")
@@ -147,10 +149,14 @@ def _lint(task):
         return problems
     for i, q in enumerate(questions):
         at = f"questions[{i}]"
+        if not isinstance(q, dict):
+            problems.append(f"{at}: question entry must be a mapping")
+            continue
         if not isinstance(q.get("question"), str) or not q["question"].strip():
             problems.append(f"{at}: question must be a non-empty string")
         if not isinstance(q.get("answer"), str) or not q["answer"].strip():
             problems.append(f"{at}: answer must be a non-empty string")
+            continue
         options = q.get("options")
         if options is None:
             continue  # open short-answer question
@@ -178,12 +184,15 @@ def validate(tasks):
     bad = 0
     counts = {}
     for t in tasks:
-        counts[t.get("id")] = counts.get(t.get("id"), 0) + 1
+        if isinstance(t, dict):
+            tid = t.get("id")
+            counts[tid] = counts.get(tid, 0) + 1
     for t in tasks:
         problems = _lint(t)
-        if counts.get(t.get("id"), 0) > 1:
-            problems.append(f"duplicate id {t.get('id')!r}")
-        print(f"  {'ok  ' if not problems else 'FAIL'} {t.get('id')}")
+        tid = t.get("id") if isinstance(t, dict) else None
+        if counts.get(tid, 0) > 1:
+            problems.append(f"duplicate id {tid!r}")
+        print(f"  {'ok  ' if not problems else 'FAIL'} {tid}")
         for p in problems:
             print(f"         {p}")
         bad += bool(problems)
