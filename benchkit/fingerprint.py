@@ -12,7 +12,8 @@ The hash must be identical across processes, machines and Python versions
 (re-runs are grouped by it), so it never uses ``hash()``, ``repr()`` of objects
 or ``inspect.getsource`` of lambdas. It covers:
 
-- each task's data fields (id, difficulty, prompt, tests, files), sorted by id;
+- each task's data fields (id, difficulty, prompt, tests, files, state,
+  questions, answer), sorted by id;
 - each agentic task's par (its oracle's minimum tool-call count);
 - the source text of every module that defines a task's callables (``check``,
   ``oracle``) plus the agentic workspace, whose behaviour decides scoring. Line
@@ -24,7 +25,8 @@ import sys
 
 SCHEMA_VERSION = 1
 
-_DATA_FIELDS = ("id", "difficulty", "prompt", "tests", "files")
+_DATA_FIELDS = ("id", "difficulty", "prompt", "tests", "files",
+                "state", "questions", "answer")
 _ENV_MODULE = "benchkit.agentic.env"
 
 
