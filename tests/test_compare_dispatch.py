@@ -33,6 +33,10 @@ CODEGEN_SUMMARY = dict(
     kind="codegen", pass_at_1=0.5, by_difficulty={}, wall_seconds=1.0,
     mean_completion_tokens=10, truncated=0, errored=0,
 )
+S1_SUMMARY = dict(
+    kind="s1", pass_at_1=0.75, by_difficulty={}, wall_seconds=1.0,
+    mean_completion_tokens=3, truncated=0, errored=0,
+)
 
 
 class _Recorder:
@@ -59,10 +63,16 @@ class TestExecuteSuite(unittest.TestCase):
         self.agentic = _Recorder(AGENTIC_SUMMARY)
         self._orig_loop_run = loop.run
         loop.run = self.agentic
+        from benchkit import s1_runner
+        self.s1_mod = s1_runner
+        self.s1 = _Recorder(S1_SUMMARY)
+        self._orig_s1_run = s1_runner.run
+        s1_runner.run = self.s1
 
     def tearDown(self):
         cli.runner.run = self._orig_runner_run
         self.loop.run = self._orig_loop_run
+        self.s1_mod.run = self._orig_s1_run
 
     def test_agentic_suite_goes_to_the_tool_calling_loop(self):
         summary, _ = cli._execute_suite("agentic", ["t"], "cfg", max_turns=9)
@@ -85,6 +95,14 @@ class TestExecuteSuite(unittest.TestCase):
         self.assertEqual(self.agentic.calls, [])
         self.assertTrue(self.codegen.calls[0]["keep_code"])
         self.assertEqual(summary["kind"], "codegen")
+
+    def test_s1_suite_goes_to_the_decision_runner(self):
+        summary, _ = cli._execute_suite("system1", ["t"], "cfg", keep_code=True)
+        self.assertEqual(len(self.s1.calls), 1)
+        self.assertEqual(self.codegen.calls, [])
+        self.assertEqual(self.agentic.calls, [])
+        self.assertTrue(self.s1.calls[0]["keep_code"])
+        self.assertEqual(summary["kind"], "s1")
 
     def test_omitted_max_turns_leaves_the_loop_default_alone(self):
         cli._execute_suite("agentic", ["t"], "cfg")
