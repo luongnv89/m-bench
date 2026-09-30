@@ -1,0 +1,152 @@
+# The standard System One endpoint
+
+One stable URL — `http://localhost:8123/v1` — serves every System One decision
+workload on this machine. Applications and the `system1` bench suite code
+against it once; **which model answers is a deployment detail** chosen by the
+gateway's `S1_BACKEND`. Replacing Jev with a better decision model is an env
+change and a restart, not an application change.
+
+```
+app / bench ──► :8123/v1 (OpenAI chat subset) ──► s1_gateway.py
+                                                   │
+                        S1_BACKEND ────────────────┤
+                        │            │             │
+                     typesafe      proxy         laya (stub, #104)
+                        │            │
+                   api.typesafe   S1_UPSTREAM
+                   /v1/systemone  (vLLM, llama.cpp, ollama —
+                                  any OpenAI-native model)
+```
+
+## The contract
+
+Transport: the OpenAI subset the s1 runner uses.
+
+| Endpoint | Notes |
+|---|---|
+| `GET /v1/models` | backend's model list (proxied verbatim in `proxy` mode) |
+| `POST /v1/chat/completions` | `messages`, `stream`, `stream_options.include_usage` honoured; everything else (`chat_template_kwargs`, `max_tokens`, temperature, …) ignored or forwarded |
+
+Semantics — what an application may rely on:
+
+- A request is *one decision question*: the user message carries `State:`, one
+  `Question:`, and either an `Options:` block or the open-answer trailer (the
+  exact render `benchkit/s1_runner._render` emits).
+- The reply is **the decision, and nothing else** — the option letter or its
+  exact text, or a few-word short answer. Prose, reasoning, caveats and empty
+  replies are contract violations; the suite scores them as failures, which is
+  precisely why an app behind this endpoint "works as expected".
+- `usage` reports the backend's real tokens when it reports them.
+
+## The baseline: TypeSafe Jev
+
+`S1_BACKEND=typesafe` (the default) serves Jev — the measured reference every
+candidate is compared against.
+
+| Metric | Jev `jev-1.13.0` (`jev-latest`) |
+|---|---|
+| Accuracy on `system1` | **98.0 %** (95 % CI 92.9–99.4, n=98) |
+| Time per question | 0.3 s |
+| Tokens per question | 327 in / 38 out |
+| Failure modes observed | `error_log/q1` (epistemic "cannot determine") only |
+
+Raw run: `results/2026-09-30/typesafe-jev-1-13-s1.json` · comparison:
+`results/2026-09-30/REPORT-jev-s1.md` · method notes: `NOTES-jev-s1.md`.
+
+## Backends
+
+### `typesafe` (default) — TypeSafe Jev
+
+```bash
+TYPESAFE_API_KEY=... python3 configs/typesafe-jev-shim.py   # or s1_gateway.py
+```
+
+Each s1 prompt is parsed back into `(state, question, options)` and issued as
+one `choice` call to `api.typesafe.ai/v1/systemone`. Open questions (no options)
+become a choice over deduped state tokens — the documented
+"select instead of generate" pattern. `usage` maps to OpenAI token fields.
+
+### `proxy` — any OpenAI-native model
+
+```bash
+S1_BACKEND=proxy S1_UPSTREAM=http://localhost:8001/v1 python3 configs/s1_gateway.py
+```
+
+Forwards requests and streaming responses verbatim. This is how a locally
+served candidate — Bespoke-Nimble-9B on vLLM, a GGUF on llama.cpp, an ollama
+model — answers behind the same URL Jev uses. Zero translation, zero drift:
+the app sees the same wire contract, the model sees the same prompt.
+
+### `laya` — stub
+
+Returns 501. `convaiinnovations/laya` exposes a typed `predict(state,
+questions)` API with no chat surface (issue #104); an adapter implements the
+same translation `typesafe` does — parse the prompt, call `predict`, return
+the picked option — and registers itself in `HANDLERS`.
+
+### Adding a backend
+
+An adapter is one `async def handle(request, body)` in
+`configs/s1_gateway.py`, registered in `HANDLERS`. Rules:
+
+1. **Translate faithfully.** Map options to the model's native choice type;
+   never let the adapter decide the answer itself.
+2. **Disclose fallbacks.** Anything the model cannot natively do (free text,
+   abstentions) needs a stated policy — like the token-candidate trick for
+   open questions — written into the run's report notes.
+3. **Map real usage.** Report the backend's own token counts; zeros read as
+   "not reported", never as free.
+
+## Workflow — swap the model, keep the application
+
+```bash
+# 1. Serve the candidate the way it wants to be served (vLLM, llama.cpp, …)
+#    e.g. vLLM serving Bespoke-Nimble-9B on :8001
+# 2. Point the gateway at it
+S1_BACKEND=proxy S1_UPSTREAM=http://localhost:8001/v1 \
+    python3 configs/s1_gateway.py
+# 3. Nothing else changes: apps keep base_url=http://localhost:8123/v1
+```
+
+To return to Jev: `S1_BACKEND=typesafe` (or just run
+`configs/typesafe-jev-shim.py`) with `TYPESAFE_API_KEY` set.
+
+## Workflow — benchmark a candidate against the Jev baseline
+
+Same URL, same transport, same suite — the only thing that varies is the model:
+
+```bash
+# candidate serving behind :8123 via whichever backend fits
+./bench run --suite system1 --samples 2 \
+    --label "candidate-x s1" \
+    # BENCH_BASE_URL=http://localhost:8123/v1 BENCH_MODEL=<id /v1/models reports>
+./bench report results/2026-09-30/typesafe-jev-1-13-s1.json \
+    results/<date>/candidate-x-s1.json \
+    --title "candidate-x vs Jev baseline on system1" \
+    --question "Should candidate-x replace Jev behind the s1 endpoint?" \
+    --verdict "..."
+```
+
+Decision criteria, in order:
+
+1. **Contract conformance** — malformed/verbose replies fail the suite, so the
+   accuracy number *is* the "application works as expected" check.
+2. **Accuracy** — wins only if the 95 % Newcombe margin excludes zero;
+   otherwise call it at-par and decide on cost.
+3. **Cost** — seconds and output tokens per question against Jev's
+   0.3 s / 38 tok.
+4. **Operability** — does it run on this machine next to what else is served?
+
+A candidate that clears all four replaces Jev behind the endpoint; the
+baseline file and report stay as the historical reference.
+
+## Failure semantics worth knowing
+
+- The gateway answers `502` when its upstream fails and `400` when the prompt
+  is not the s1 shape — the bench records both as generation failures, never
+  as model wrongness.
+- One upstream call per generation: concurrency comes from the runner
+  (`BENCH_CONCURRENCY`, default 4), not request batching.
+- Latency through the `typesafe` backend is hosted-service latency (WAN
+  round-trip); latency through `proxy` is the local server's. Compare speed
+  within a backend class, or say which you mixed.

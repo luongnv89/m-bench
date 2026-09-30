@@ -105,6 +105,14 @@ with `--max-turns` bounding each task exactly as in `./bench run`.
 
 Otherwise point `BENCH_BASE_URL` at each endpoint in turn and use `./bench run`.
 
+For `system1` candidates specifically: the baseline is TypeSafe Jev
+(`results/2026-09-30/typesafe-jev-1-13-s1.json`, 98.0 %). Serve the candidate
+behind the **standard s1 endpoint** — `configs/s1_gateway.py` on :8123, same
+URL for every backend (`typesafe`, `proxy` to any OpenAI-native model, `laya`
+stub) — so the candidate is measured through the same transport the baseline
+was, and an application pointed at the endpoint never sees the swap. Contract,
+swap workflow and adapter rules: `docs/S1-ENDPOINT.md`.
+
 ## Step 5 — decide, and write it down
 
 ```bash
