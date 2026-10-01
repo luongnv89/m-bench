@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-30",
+  "generated": "2026-10-01",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -221,11 +221,12 @@
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
   },
   "systemOne": {
-    "setup": "system1 suite · 49 typed questions · 2 samples · every candidate through the standard s1 endpoint :8123",
+    "setup": "system1 suite · 49 typed questions · 2 samples · standard s1 gateway; Mercury used temporary :8124 without restarting shared :8123",
     "question": "Typed-decision models behind one stable endpoint — can anything replace Jev?",
     "rows": [
       {
         "model": "TypeSafe Jev · baseline",
+        "modelKey": "TypeSafe Jev (jev-1.13.0)",
         "score": 98.0,
         "ci": "93–99",
         "secPerQ": 0.3,
@@ -236,6 +237,7 @@
       },
       {
         "model": "Bespoke-Nimble-9B",
+        "modelKey": "Bespoke-Nimble-9B (Ollama Q8_0)",
         "score": 98.0,
         "ci": "93–99",
         "secPerQ": 0.5,
@@ -246,6 +248,7 @@
       },
       {
         "model": "Kev-27B",
+        "modelKey": "Kev-27B (kev.serve bf16)",
         "score": 98.0,
         "ci": "93–99",
         "secPerQ": 1.1,
@@ -255,7 +258,19 @@
         "note": "ties Jev — only miss is error_log/q1, same as Jev's; does not fit beside the incumbent vLLM endpoint (needed it stopped to benchmark)"
       },
       {
+        "model": "Mercury Decide (free)",
+        "modelKey": "inception/mercury-decide:free",
+        "score": 98.0,
+        "ci": "92.9–99.4",
+        "secPerQ": 2.64,
+        "outTok": 2.91,
+        "wall": 258.87,
+        "serving": "hosted OpenRouter · systemone backend · no local weights",
+        "note": "96/98, no generation errors; ties historical Jev; latency includes free-tier quota waits"
+      },
+      {
         "model": "Qwen3.6-35B think-OFF",
+        "modelKey": "Qwen3.6-35B-A3B",
         "score": 96.9,
         "ci": "91–99",
         "secPerQ": 0.7,
@@ -266,6 +281,7 @@
       },
       {
         "model": "Kev-4B",
+        "modelKey": "Kev-4B (kev.serve bf16)",
         "score": 95.9,
         "ci": "90–98",
         "secPerQ": 0.23,
@@ -276,6 +292,7 @@
       },
       {
         "model": "Qwen3.6-35B think-ON",
+        "modelKey": "Qwen3.6-35B-A3B",
         "score": 93.9,
         "ci": "87–97",
         "secPerQ": 22.6,
@@ -286,6 +303,7 @@
       },
       {
         "model": "Laya typed-decisions",
+        "modelKey": "Laya typed-decisions",
         "score": 73.5,
         "ci": "64–81",
         "secPerQ": 0.5,
@@ -296,13 +314,15 @@
       }
     ],
     "report": "results/2026-09-30/REPORT-s1-candidates.md",
-    "note": "Same prompt → parse → one typed `choice` per question, whichever backend answered. Nimble and Kev-27B tie Jev to the point while running fully local — though Kev-27B's 63 GiB does not fit beside the incumbent endpoint; Kev-4B trails by 2.1 pts inside the noise floor, is the fastest local backend and the only variant that coexists with the incumbent — and the only candidates with a fine-tune loop for your own questions; Laya's root checkpoint scored near-chance in smoke tests, so the typed-decisions checkpoint is the one measured — on CPU, with GPU free it would be ~10–15× faster but no more accurate.",
+    "latestReport": "results/2026-10-01-mercury-decide-rerun/REPORT.md",
+    "note": "Mercury Decide ties historical Jev at 96/98 (98.0%) with zero generation errors; its only miss is error_log/q1 in both samples. The 2.0-point advantage over today's kev-latest baseline is within statistical noise. Mercury used the same gateway on temporary :8124; all other ports and local services were untouched. Its 2.64 s/question includes OpenRouter quota waits and WAN latency, not just inference. Nimble and Kev-27B also tie Jev; Kev-4B remains the fastest local option in these historical comparisons. These small suites are near saturation — harder tasks are needed, not claims of a perfect model.",
     "realUseCase": {
       "setup": "anti-phishing-email-service · 16 adjudicated emails · typesafe_only arm, zero code changes",
-      "question": "Real workload, same contract: can a local model sit in for Jev on the phishing classifier?",
+      "question": "Real workload, same contract: can local or hosted models replace Jev on the phishing classifier?",
       "rows": [
         {
           "model": "Jev · typesafe arm",
+          "modelKey": "TypeSafe Jev (jev-1.13.0)",
           "score": 100.0,
           "ci": "81–100",
           "secPerQ": 0.31,
@@ -312,6 +332,7 @@
         },
         {
           "model": "Kev-4B · same arm",
+          "modelKey": "Kev-4B (kev.serve bf16)",
           "score": 100.0,
           "ci": "81–100",
           "secPerQ": 0.35,
@@ -321,15 +342,27 @@
         },
         {
           "model": "Kev-27B · same arm",
+          "modelKey": "Kev-27B (kev.serve bf16)",
           "score": 100.0,
           "ci": "81–100",
           "secPerQ": 1.71,
           "wall": 27.4,
           "serving": "local kev.serve :8009 · env-only swap · ~63 GiB",
-          "note": "16/16 — matches Jev but slowest arm; named the right attack type on the hardest lure, still needed the risk pipeline over a borderline noul"
+          "note": "16/16 — matches Jev, slower than Kev-4B; named the right attack type on the hardest lure, still needed the risk pipeline over a borderline noul"
+        },
+        {
+          "model": "Mercury Decide · same arm",
+          "modelKey": "inception/mercury-decide:free",
+          "score": 100.0,
+          "ci": null,
+          "secPerQ": 2.93,
+          "wall": 46.81,
+          "serving": "hosted OpenRouter · native typed decisions · env-only swap",
+          "note": "F1 1.000; TP 9, TN 7, FP 0, FN 0; all 16 analyzer calls succeeded, fallback disabled; p95 4.81 s; F1 interval not estimated"
         },
         {
           "model": "Nimble-9B · same arm",
+          "modelKey": "Bespoke-Nimble-9B (Ollama Q8_0)",
           "score": 94.1,
           "ci": "72–99",
           "secPerQ": 0.77,
@@ -339,6 +372,7 @@
         },
         {
           "model": "gpt-oss-120b · llm arm",
+          "modelKey": "gpt-oss-120b (Groq)",
           "score": 100.0,
           "ci": "81–100",
           "secPerQ": 1.49,
@@ -348,10 +382,13 @@
         }
       ],
       "report": "results/2026-09-30/REPORT-s1-phishing-kev.md",
-      "note": "Env-var swap only — `TYPESAFE_BASE_URL` + `TYPESAFE_DEFAULT_MODEL` repoint `typesafe_analyzer` at Ollama or kev.serve. Both Kev variants tie Jev at 16/16; Kev-4B is the fastest local backend, Kev-27B the slowest (5× its sibling, ~63 GiB). Nimble is a proven hot-spare, not a primary: 94.1 F1 with one miss, and its threat-type head is inconsistent on benign mail. Kev's one caveat: on the hardest sample its noul stays borderline on both variants — the pipeline's evidence aggregation made the call. n=16, so one flip is ~6 F1 points."
+      "latestReport": "results/2026-10-01-mercury-decide-rerun/REPORT.md",
+      "note": "Mercury Decide scored F1 1.000 on all 16 emails (9 phishing, 7 benign), with no analyzer failures or fallback. The existing typesafe_only pipeline makes the final risk decision — this is not a raw noul-head score. Native questions and calibrated answers pass through the gateway unchanged. Mean 2.93 s/email, p95 4.81 s; free-tier quota handling and WAN latency apply. Both Kev variants and historical Jev also solved 16/16; Kev-4B is faster and local. n=16 is saturated, not proof of generalization: one flip changes F1 by about 6 points."
     }
   },
   "results": [
+    {"date": "2026-10-01", "machine": "dgx-spark", "model": "inception/mercury-decide:free", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-01-mercury-decide-rerun/REPORT.md"},
+    {"date": "2026-10-01", "machine": "dgx-spark", "model": "inception/mercury-decide:free", "harness": "anti-phishing pipeline", "mode": "isolated", "thinking": "—", "suite": "phishing-eval", "score": 100.0, "unit": "f1", "report": "results/2026-10-01-mercury-decide-rerun/REPORT.md"},
     {"date":  "2026-10-01", "machine":  "dgx-spark", "model":  "Kev-27B (kev.serve bf16)", "harness":  "anti-phishing pipeline", "mode":  "isolated", "thinking":  "—", "suite":  "phishing-eval", "score":  100.0, "unit":  "f1", "report":  "results/2026-10-01/REPORT-s1-phishing-kev27b.md"},
     {"date":  "2026-10-01", "machine":  "dgx-spark", "model":  "Kev-27B (kev.serve bf16)", "harness":  "s1-gateway", "mode":  "isolated", "thinking":  "—", "suite":  "system1", "score":  98.0, "unit":  "accuracy", "report":  "results/2026-10-01/REPORT-kev27b-s1.md"},
     {"date":  "2026-09-30", "machine":  "dgx-spark", "model":  "Kev-4B (kev.serve bf16)", "harness":  "anti-phishing pipeline", "mode":  "isolated", "thinking":  "—", "suite":  "phishing-eval", "score":  100.0, "unit":  "f1", "report":  "results/2026-09-30/REPORT-s1-phishing-kev.md"},
@@ -397,6 +434,12 @@
     {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.1, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"}
   ],
   "campaigns": [
+    {
+      "date": "2026-10-01",
+      "question": "Can OpenRouter Mercury Decide replace the System One backend using only endpoint configuration?",
+      "answer": "Supported as an optional hosted backend, not the shared default. inception/mercury-decide:free scored 98.0% (96/98) on system1 and F1 1.000 (16/16) through the phishing pipeline, with zero generation/analyzer errors. It ties historical Jev; its advantage over today's kev-latest is within noise. Free-tier 20 requests/minute persists with a larger daily allowance: 2.64 s/question includes quota waits, 2.93 s/email. Both small datasets are saturated.",
+      "link": "results/2026-10-01-mercury-decide-rerun/REPORT.md"
+    },
     {
       "date": "2026-09-30",
       "question": "Can Nimble or Laya replace Jev behind the standard s1 endpoint?",

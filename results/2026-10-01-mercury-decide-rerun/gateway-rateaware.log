@@ -1,0 +1,1 @@
+s1-gateway on :8124  backend=systemone  upstream=https://openrouter.ai/api/alpha/decisions

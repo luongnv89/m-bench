@@ -404,6 +404,8 @@
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
       background: var(--line); border: 1px solid var(--line); margin-top: 1.75rem;
     }
+    #s1-multiples { grid-template-columns: repeat(3, 1fr); }
+    #s1r-multiples { grid-template-columns: repeat(2, 1fr); }
     .multiple { background: var(--surface); padding: 1rem 1rem 1.1rem; min-width: 0; }
     .multiple-title {
       font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em;
@@ -543,6 +545,18 @@
       letter-spacing: 0.06em; margin-left: auto;
     }
     .filter-reset:hover { color: var(--volt); border-color: var(--volt); }
+    .model-picker { border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 0.8rem; margin-bottom: 1.25rem; }
+    .model-picker summary { cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem; }
+    .model-picker .model-help { color: var(--ink-muted); font-size: 0.8rem; margin: 0.75rem 0; }
+    .model-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 0.65rem; margin: 0.75rem 0; }
+    .model-actions .filter-reset { margin-left: 0; }
+    .model-actions input[type="search"] { background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 0.5rem; max-width: 100%; font: inherit; }
+    .model-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 0.35rem; max-height: 240px; overflow-y: auto; }
+    .model-choice { display: flex; gap: 0.6rem; align-items: start; padding: 0.4rem; font-size: 0.8rem; overflow-wrap: anywhere; cursor: pointer; }
+    .model-choice input { accent-color: var(--volt); flex: none; margin-top: 0.2rem; }
+    .model-choice[hidden] { display: none; }
+    .model-picker .model-count { color: var(--ink-muted); font-family: var(--font-mono); font-size: 0.75rem; margin-top: 0.6rem; }
+    .model-picker :focus-visible { outline: 2px solid var(--volt); outline-offset: 3px; }
 
     .table-wrap { overflow-x: auto; border: 1px solid var(--line-strong); background: var(--surface); }
     table.results {
@@ -713,7 +727,7 @@
       .machine-tab:last-child { border-bottom: none; }
       .machine-tab[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--volt); }
       .gauge { max-width: 100%; }
-      .multiples { grid-template-columns: 1fr 1fr; }
+      .multiples, #s1-multiples, #s1r-multiples { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 768px) {
       .nav-toggle { display: block; }
@@ -763,7 +777,7 @@
       table.results td.model-cell { order: -2; flex: 1 1 60%; font-size: 0.9rem; }
       table.results td.score-cell { order: -1; margin-left: auto; font-size: 1rem; }
       table.results tr:hover td { background: none; }
-      .multiples { grid-template-columns: 1fr; }
+      .multiples, #s1-multiples, #s1r-multiples { grid-template-columns: 1fr; }
       /* stacked rows keep the score beside the model; the strip plot above carries the bars */
       table.results .s-track { display: none; }
       table.results .score-cell .s-num { min-width: 0; }
@@ -933,15 +947,16 @@
         <header class="section-head">
           <p class="eyebrow">04 — Typed decisions</p>
           <h2 id="s1-title">One endpoint. Swappable judgment models.</h2>
-          <p>Typed-decision models take application state plus a question and return a typed pick with probabilities — no free text to parse. On this machine they sit behind a single standard s1 endpoint, so swapping the model is an env change, not an application change. Jev is the baseline every candidate is measured through and against.</p>
+          <p>Typed-decision models take application state plus a question and return a typed pick with probabilities — no free text to parse. Local and hosted models use the same standard s1 gateway contract, so swapping the model is an env change, not an application change. Jev is the historical baseline; Mercury Decide now ties it at 98.0% and solves all 16 phishing emails. These small suites are near saturation, not proof of a perfect model.</p>
         </header>
+        <details class="model-picker" data-model-picker></details>
 
         <div class="chart-block">
-          <div class="chart-title">Accuracy · system1 suite · 2 samples · identical transport for every backend</div>
+          <div class="chart-title">Accuracy · system1 suite · 2 samples · same gateway contract, Mercury on temporary :8124</div>
           <p class="chart-question" id="s1-question"></p>
           <div class="bar-rows" id="s1-bars" role="list" aria-label="Accuracy by model, 0 to 100"></div>
           <p class="bar-legend" aria-hidden="true"><i></i> within ~8 pts of the leader: a tie at 2 samples</p>
-          <div class="multiples" id="s1-multiples" style="grid-template-columns:repeat(3,1fr);"></div>
+          <div class="multiples" id="s1-multiples"></div>
           <p class="chart-note" id="s1-note"></p>
         </div>
 
@@ -949,7 +964,7 @@
           <div class="chart-title">Real use case · phishing classifier (F1) · the anti-phishing service's own eval harness</div>
           <p class="chart-question" id="s1r-question"></p>
           <div class="bar-rows" id="s1r-bars" role="list" aria-label="F1 by backend, 0 to 100"></div>
-          <div class="multiples" id="s1r-multiples" style="grid-template-columns:repeat(2,1fr);"></div>
+          <div class="multiples" id="s1r-multiples"></div>
           <p class="chart-note" id="s1r-note"></p>
         </div>
       </div>
@@ -964,6 +979,7 @@
           <p>Click a column to sort, click a model to open its report. <span class="volt">Green</span> marks the best score per suite in view. Noise floor ≈ 8 points at two samples.</p>
         </header>
 
+        <details class="model-picker" data-model-picker></details>
         <div class="filters" role="search" aria-label="Filter results">
           <div class="filter-field">
             <label for="f-machine">Machine</label>
@@ -1091,6 +1107,9 @@
       let data = null;
       let activeMachine = 0;
       let sort = { key: "date", dir: "desc" };
+      const hiddenModels = new Set();
+      let modelNames = [];
+      const modelVisible = (row) => !hiddenModels.has(row.modelKey || row.model);
 
       const $ = (s, r) => (r || document).querySelector(s);
       const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
@@ -1306,6 +1325,7 @@
       const compact = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? Math.round(n / 1e3) + "k" : String(Math.round(n)));
 
       function paintMultiples(el, rows, metrics, nameOf) {
+        if (!rows.length) { el.innerHTML = ""; return; }
         el.innerHTML = metrics.map((m) => {
           const vals = rows.map((r) => { const v = m.get(r); return v == null || isNaN(v) ? null : v; });
           const known = vals.filter((v) => v != null);
@@ -1339,8 +1359,13 @@
 
       /* —— derived comparisons: thinking OFF/ON and isolated/live —— */
       function renderPairs() {
-        const think = pairUp("thinking", "OFF", "ON");
-        const mode = pairUp("mode", "isolated", "live");
+        // Pair first, then hide: visibility must not resolve ambiguous candidates.
+        const think = pairUp("thinking", "OFF", "ON").filter((p) => modelVisible(p.a));
+        const mode = pairUp("mode", "isolated", "live").filter((p) => modelVisible(p.a));
+        $("#think-block").hidden = think.length < 2;
+        $("#mode-block").hidden = mode.length < 2;
+        $("#think-dumbbells").innerHTML = "";
+        $("#mode-dumbbells").innerHTML = "";
         console.info("m-bench pairs · thinking:", think.length, "· live vs isolated:", mode.length);
         if (think.length >= 2) {
           $("#think-block").hidden = false;
@@ -1388,34 +1413,39 @@
         const s = data.systemOne;
         if (!s) return;
         $("#s1-question").textContent = s.question;
-        const lead = Math.max(...s.rows.map((r) => r.score));
-        $("#s1-bars").innerHTML = s.rows.map((r, i) => barRow({
+        const rows = s.rows.filter(modelVisible);
+        const lead = Math.max(...rows.map((r) => r.score));
+        $("#s1-bars").innerHTML = rows.length ? rows.map((r, i) => barRow({
           i, lead, isLead: r.score === lead, label: r.model, value: r.score.toFixed(1),
           meta: `${r.secPerQ}s/question · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
-        })).join("");
-        paintMultiples($("#s1-multiples"), s.rows, [
+        })).join("") : '<p class="chart-note">No models selected. Use Show all above to restore comparisons.</p>';
+        paintMultiples($("#s1-multiples"), rows, [
           { title: "Seconds / question", sub: "mean · lower is better", get: (r) => r.secPerQ, fmt: (v) => v + "s" },
           { title: "Output tokens", sub: "per answer · lower is better", get: (r) => r.outTok, fmt: (v) => String(v) },
-          { title: "Suite wall-clock", sub: "98 generations · lower is better", get: (r) => r.wall, fmt: (v) => v + "s" },
+          { title: "Suite wall-clock", sub: "98 generations · Mercury concurrency 1 · includes quota waits", get: (r) => r.wall, fmt: (v) => v + "s" },
         ], (r) => r.model);
         $("#s1-note").innerHTML = esc(s.note) +
-          ` <a href="${gh(s.report)}" rel="noopener">Full report →</a>`;
+          ` <a href="${gh(s.report)}" rel="noopener">Historical comparison →</a>` +
+          (s.latestReport ? ` <a href="${gh(s.latestReport)}" rel="noopener">Mercury results →</a>` : "");
 
         const r = s.realUseCase;
         if (r) {
           $("#s1-real").hidden = false;
           $("#s1r-question").textContent = r.question;
-          const rLead = Math.max(...r.rows.map((x) => x.score));
-          $("#s1r-bars").innerHTML = r.rows.map((x, i) => barRow({
+          const realRows = r.rows.filter(modelVisible);
+          const rLead = Math.max(...realRows.map((x) => x.score));
+          $("#s1r-bars").innerHTML = realRows.length ? realRows.map((x, i) => barRow({
             i, lead: rLead, isLead: x.score === rLead, label: x.model, value: x.score.toFixed(1),
-            meta: `${x.secPerQ}s/email · wall ${x.wall}s · ${x.serving} · 95% CI ${x.ci} — ${x.note}`,
-          })).join("");
-          paintMultiples($("#s1r-multiples"), r.rows, [
+            meta: `${x.secPerQ}s/email · wall ${x.wall}s · ${x.serving}` +
+              (x.ci ? ` · 95% CI ${x.ci}` : "") + ` — ${x.note}`,
+          })).join("") : '<p class="chart-note">No models selected. Use Show all above to restore comparisons.</p>';
+          paintMultiples($("#s1r-multiples"), realRows, [
             { title: "Seconds / email", sub: "mean · lower is better", get: (x) => x.secPerQ, fmt: (v) => v + "s" },
             { title: "Corpus wall-clock", sub: "16 emails · lower is better", get: (x) => x.wall, fmt: (v) => v + "s" },
           ], (x) => x.model);
           $("#s1r-note").innerHTML = esc(r.note) +
-            ` <a href="${gh(r.report)}" rel="noopener">Full report →</a>`;
+            ` <a href="${gh(r.report)}" rel="noopener">Historical comparison →</a>` +
+            (r.latestReport ? ` <a href="${gh(r.latestReport)}" rel="noopener">Mercury results →</a>` : "");
         }
       }
 
@@ -1438,6 +1468,66 @@
         fill("#f-suite", uniq("suite"));
       }
 
+      function fillModelPickers() {
+        modelNames = [...new Set(data.results.map((r) => r.model))].sort();
+        $$("[data-model-picker]").forEach((picker, i) => {
+          picker.innerHTML = `
+            <summary>Show / hide models · <span class="model-summary"></span></summary>
+            <p class="model-help">Applies to the results table, System One comparisons and derived comparison charts. Recommendation cards and fixed harness examples stay unchanged. Search only narrows this checklist.</p>
+            <div class="model-actions">
+              <div class="filter-field"><label for="model-search-${i}">Find a model</label>
+                <input type="search" id="model-search-${i}" placeholder="Search models" /></div>
+              <button type="button" class="filter-reset" data-model-action="show">Show all</button>
+              <button type="button" class="filter-reset" data-model-action="hide">Hide all</button>
+            </div>
+            <div class="model-options" role="group" aria-label="Models to display">
+              ${modelNames.map((name) => `<label class="model-choice"><input type="checkbox" data-model="${esc(name)}" checked /><span>${esc(name)}</span></label>`).join("")}
+            </div>
+            <p class="model-count" aria-live="polite"></p>`;
+          $("input[type=search]", picker).addEventListener("input", () => searchModels(picker));
+          picker.addEventListener("change", (event) => {
+            const input = event.target.closest("input[data-model]");
+            if (!input) return;
+            if (input.checked) hiddenModels.delete(input.dataset.model);
+            else hiddenModels.add(input.dataset.model);
+            updateModelVisibility();
+          });
+          picker.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-model-action]");
+            if (!button) return;
+            hiddenModels.clear();
+            if (button.dataset.modelAction === "hide") modelNames.forEach((name) => hiddenModels.add(name));
+            updateModelVisibility();
+          });
+        });
+        syncModelPickers();
+      }
+
+      function searchModels(picker) {
+        const query = $("input[type=search]", picker).value.trim().toLowerCase();
+        $$(".model-choice", picker).forEach((label) => {
+          label.hidden = !$("input", label).dataset.model.toLowerCase().includes(query);
+        });
+        syncModelPickers();
+      }
+
+      function syncModelPickers() {
+        const count = modelNames.length - hiddenModels.size;
+        $$("[data-model-picker]").forEach((picker) => {
+          $$("input[data-model]", picker).forEach((input) => { input.checked = !hiddenModels.has(input.dataset.model); });
+          $(".model-summary", picker).textContent = `${count} / ${modelNames.length} visible`;
+          const matches = $$(".model-choice", picker).filter((label) => !label.hidden).length;
+          $(".model-count", picker).textContent = `${count} / ${modelNames.length} models shown · ${matches} checklist matches`;
+        });
+      }
+
+      function updateModelVisibility() {
+        syncModelPickers();
+        renderResults();
+        renderSystemOne();
+        renderPairs();
+      }
+
       function sortValue(r, key) {
         if (key === "machine") return machineName(r.machine);
         return r[key] == null ? "" : r[key];
@@ -1447,6 +1537,7 @@
         const [m, h, mode, s, th] = FILTERS.map((sel) => $(sel).value);
         const dir = sort.dir === "asc" ? 1 : -1;
         return data.results.filter((r) =>
+          modelVisible(r) &&
           (!m || r.machine === m) &&
           (!h || r.harness === h) &&
           (!mode || r.mode === mode) &&
@@ -1546,7 +1637,12 @@
 
       function resetFilters() {
         FILTERS.forEach((s) => { $(s).value = ""; });
-        renderResults();
+        hiddenModels.clear();
+        $$("[data-model-picker]").forEach((picker) => {
+          $("input[type=search]", picker).value = "";
+          $$(".model-choice", picker).forEach((label) => { label.hidden = false; });
+        });
+        updateModelVisibility();
       }
 
       /* —— campaigns & suites —— */
@@ -1584,6 +1680,7 @@
           renderSystemOne();
           renderPairs();
           fillFilters();
+          fillModelPickers();
           renderResults();
           renderCampaigns();
           renderSuites();

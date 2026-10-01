@@ -2,6 +2,11 @@
 hf-cache/
 vllm-cache/
 
+# Local credentials — examples may be committed, real environment files may not
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.pyc

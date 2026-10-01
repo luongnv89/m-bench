@@ -1,0 +1,21 @@
+{
+  "model": "inception/mercury-decide-20260930",
+  "answers": {
+    "q": {
+      "type": "choice",
+      "choice": "blue",
+      "probabilities": {
+        "blue": 0.9992903297273781,
+        "red": 0.0007096702726219312
+      },
+      "confidence": 0.9985806594547562
+    }
+  },
+  "usage": {
+    "input_tokens": 44,
+    "output_tokens": 4,
+    "cost": 0
+  },
+  "id": "gen-dec-1790861892-af2ZsYzKB7xuSnLnmi7J",
+  "provider": "Inception"
+}

@@ -1,0 +1,217 @@
+INFO     Semantic-analysis backend 'typesafe_analyzer' disabled —  config.py:278
+         'llm_analyzer' selected per                                            
+         SEMANTIC_ANALYSIS_BACKEND='llm'                                        
+INFO     Loaded configuration from                                 config.py:103
+         /home/montimage/workspace/anti-phishing-email-service/.en              
+         v                                                                      
+================================================================================
+🚀 STARTING COMPREHENSIVE PERFORMANCE BENCHMARK
+================================================================================
+📧 Created 3 test emails
+
+🔄 Running variant_comparison...
+INFO     Loaded analysis tool: url_analyzer              analysis_manager.py:110
+         (src.analyzers.url_analyzer.URLAnalyzer)                               
+INFO     Loaded analysis tool: content_analyzer          analysis_manager.py:110
+         (src.analyzers.content_analyzer.ContentAnalyzer                        
+         )                                                                      
+INFO     Successfully loaded 265 phishing domains from     domain_checker.py:136
+         /home/montimage/workspace/anti-phishing-email-ser                      
+         vice/src/data/ALL-phishing-domains.lst                                 
+INFO     Domain checks are local-only (opt in to            domain_checker.py:90
+         WHOIS/DNS/website enrichment via 'enrichment')                         
+INFO     Loaded 265 phishing domains for checking           domain_checker.py:94
+INFO     Loaded analysis tool: domain_checker            analysis_manager.py:110
+         (src.analyzers.domain_checker.DomainChecker)                           
+INFO     Initialized AuthAnalyzer v1.0.0                    auth_analyzer.py:151
+INFO     Loaded analysis tool: auth_analyzer             analysis_manager.py:110
+         (src.analyzers.auth_analyzer.AuthAnalyzer)                             
+INFO     Initialized feed integrator: virustotal              ioc_checker.py:331
+INFO     Initialized feed integrator: abuseipdb               ioc_checker.py:331
+INFO     Initialized feed integrator: otx                     ioc_checker.py:331
+INFO     Initialized                          threat_intelligence_analyzer.py:89
+         ThreatIntelligenceAnalyzer v1.0.0                                      
+INFO     Loaded analysis tool:                           analysis_manager.py:110
+         threat_intelligence_analyzer                                           
+         (src.analyzers.threat_intelligence_analyzer.Thr                        
+         eatIntelligenceAnalyzer)                                               
+INFO     Initialized ClamAVAnalyzer v1.0.0                clamav_analyzer.py:256
+         (enabled=False, endpoint=localhost:3310)                               
+INFO     Loaded analysis tool: clamav_analyzer           analysis_manager.py:110
+         (src.analyzers.clamav_analyzer.ClamAVAnalyzer)                         
+INFO     Final LLM configuration: provider=groq,             llm_analyzer.py:124
+         model=openai/gpt-oss-120b, timeout=240.0s,                             
+         fast_mode=False                                                        
+INFO     Initialized groq LLM analyzer with model:           llm_analyzer.py:155
+         openai/gpt-oss-120b                                                    
+INFO     Loaded analysis tool: llm_analyzer              analysis_manager.py:110
+         (src.analyzers.llm_analyzer.LLMAnalyzer)                               
+INFO     Initialized LangGraphPhishingAgent with  langgraph_phishing_agent.py:94
+         groq/openai/gpt-oss-120b,                                              
+         max_iterations=5, timeout=120.0s                                       
+INFO     Loaded analysis tool: langgraph_agent           analysis_manager.py:110
+         (src.analyzers.langgraph_phishing_agent.LangGra                        
+         phPhishingAgent)                                                       
+INFO     Loaded analysis tool: typesafe_analyzer         analysis_manager.py:110
+         (src.analyzers.typesafe_analyzer.TypeSafeAnalyz                        
+         er)                                                                    
+INFO     Loaded 9 analysis tools                         analysis_manager.py:115
+INFO     Wired LangGraph agent dependencies:             analysis_manager.py:155
+         url_analyzer=yes, domain_checker=yes,                                  
+         threat_intel=yes, content_analyzer=yes                                 
+INFO     Enhanced risk calculator initialized with        risk_calculator.py:213
+         weighted scoring                                                       
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 1.000 (CRITICAL)      risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.273 (LOW)           risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.272 (LOW)           risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.268 (LOW)           risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.322 (LOW)           risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.298 (LOW)           risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.353 (LOW)           risk_calculator.py:428
+INFO     Found .eml attachment: original.eml                 email_parser.py:401
+INFO     Preparing analysis tool: typesafe_analyzer      analysis_manager.py:709
+INFO     Running 1 analysis tools concurrently           analysis_manager.py:726
+INFO     Analysis tool typesafe_analyzer completed       analysis_manager.py:735
+         successfully                                                           
+INFO     Risk assessment completed: 0.264 (LOW)           risk_calculator.py:428
+✅ variant_comparison completed
+
+================================================================================
+📊 PERFORMANCE BENCHMARK REPORT
+================================================================================
+
+🔧 VARIANT COMPARISON
+
+   ▸ typesafe_only: TypeSafe evaluation arm: only typesafe_analyzer runs, so detection metrics isolate the TypeSafe System One verdict.
+     stages=[['typesafe_analyzer']] escalate=always escalations=0
+     detection: f1=1.00 precision=1.00 recall=1.00 fp=0 fn=0 (16 evaluated, 0 skipped)
+     latency: avg=2.926s median=3.199s p95=4.810s
+     cost: 4925 est. tokens ($0.0000 est.)
+     ⚠ typesafe_analyzer is force-enabled for this arm; it still needs TYPESAFE_API_KEY to produce real judgments.
+
+   Δ vs baseline_full:
+     typesafe_only: f1Δ=+1.000 latencyΔ=+2.926s (0.00x) tokensΔ=+4925 costΔ=$+0.0000
+
+================================================================================
+📊 PERFORMANCE ANALYSIS REPORT
+================================================================================
+
+================================================================================
+
+============================================================
+📊 CACHE PERFORMANCE STATISTICS
+============================================================
+
+🔍 Analysis Results Cache:
+   size: 0
+   max_size: 1000
+   ttl: 3600
+   oldest_age: 0
+   newest_age: 0
+   hits: 0
+   misses: 0
+   total_requests: 0
+   hit_rate_percent: 0
+
+🌐 URL Cache:
+   size: 0
+   max_size: 2000
+   ttl: 1800
+   oldest_age: 0
+   newest_age: 0
+
+🏷️  Domain Cache:
+   size: 0
+   max_size: 5000
+   ttl: 7200
+   oldest_age: 0
+   newest_age: 0
+============================================================
+================================================================================
+
+💾 Results saved to: /home/montimage/workspace/luongnv89/m-bench/results/2026-10-01-mercury-decide-rerun/mercury-phishing.json
+
+🎉 Performance benchmark completed successfully!

@@ -25,6 +25,9 @@ answers is a deployment detail behind `S1_BACKEND`:
               Jev-style decision model implementing the same `/v1/systemone`
               contract, so this reuses the identical translation pointed at
               `KEV_BASE_URL`. No API key.
+- `systemone` Any native System One API at `S1_DECISION_URL`, including
+              OpenRouter's /api/alpha/decisions. Supports the benchmark chat
+              surface and native SDK requests at /v1/systemone.
 - `proxy`     Any OpenAI-compatible server (vLLM, llama.cpp, ollama chat)
               serving a candidate decision model — e.g. a merged Nimble GGUF.
               Requests and streaming responses are forwarded verbatim to
@@ -36,7 +39,7 @@ this URL measures the candidate through exactly the same transport the
 baseline was measured through (see docs/S1-ENDPOINT.md).
 
 Env:
-    S1_BACKEND         typesafe (default) | nimble | laya | kev | proxy
+    S1_BACKEND         typesafe (default) | nimble | laya | kev | proxy | systemone
     S1_PORT            listen port (default 8123)
     TYPESAFE_API_KEY   bearer key for the typesafe backend
     TYPESAFE_BASE_URL  default https://api.typesafe.ai/v1
@@ -47,8 +50,12 @@ Env:
     LAYA_MODEL_DIR     HF id or local dir for the laya checkpoint
                        (default ~/models/laya-typed-decisions)
     S1_UPSTREAM        proxy backend base URL, e.g. http://localhost:8001/v1
-    S1_MODEL           model id to advertise/forward (typesafe default
-                       jev-latest; proxy default: upstream's own `model` field)
+    S1_DECISION_URL    full native decision URL (systemone backend), default
+                       https://api.typesafe.ai/v1/systemone; supports OpenRouter
+                       https://openrouter.ai/api/alpha/decisions
+    S1_API_KEY         explicit upstream bearer key (systemone/proxy only)
+    S1_MODEL           model id to advertise/forward (default jev-latest for
+                       systemone/typesafe; proxy forwards client model if unset)
 """
 import json
 import os
@@ -60,10 +67,13 @@ from aiohttp import ClientSession, ClientTimeout, web
 
 BACKEND = os.environ.get("S1_BACKEND", "typesafe")
 PORT = int(os.environ.get("S1_PORT", "8123"))
-UPSTREAM = os.environ.get("S1_UPSTREAM", "")          # proxy backend
+UPSTREAM = os.environ.get("S1_UPSTREAM", "").rstrip("/")  # proxy backend
+S1_KEY = os.environ.get("S1_API_KEY", "")
+MODEL_OVERRIDE = os.environ.get("S1_MODEL", "")
 TS_BASE = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai/v1")
 TS_KEY = os.environ.get("TYPESAFE_API_KEY", "")
 TS_MODEL = os.environ.get("S1_MODEL", "jev-latest")
+DECISION_URL = os.environ.get("S1_DECISION_URL", f"{TS_BASE.rstrip('/')}/systemone")
 NIMBLE_BASE = os.environ.get("NIMBLE_BASE_URL", "http://localhost:11434/v1")
 NIMBLE_MODEL = os.environ.get("NIMBLE_MODEL", "nimble")
 KEV_BASE = os.environ.get("KEV_BASE_URL", "http://localhost:8009/v1")
@@ -130,23 +140,65 @@ async def ask_systemone(session, base_url, model, state, question, options,
     """
     payload = _s1_question(state, question, options)
     payload["model"] = model
+    body = await post_decisions(session, f"{base_url.rstrip('/')}/systemone",
+                                payload, headers)
+    ans = body["answers"]["q"]
+    return ans["choice"], body.get("usage") or {}, body.get("model")
+
+
+class DecisionQuotaError(RuntimeError):
+    """An explicitly exhausted daily allowance is not transient throttling."""
+
+    def __init__(self, body):
+        self.body = body
+        super().__init__("upstream daily decision quota exhausted")
+
+
+def decision_retry_delay(headers, metadata, attempt):
+    """Respect numeric Retry-After and OpenRouter reset metadata, capped at 65s."""
+    delay = 1 + 2 * attempt
+    try:
+        delay = max(delay, float(headers.get("Retry-After", "0")))
+    except (TypeError, ValueError):
+        pass
+    if isinstance(metadata, dict):
+        limits = metadata.get("headers") or {}
+        if isinstance(limits, dict):
+            try:
+                reset = float(limits.get("X-RateLimit-Reset", "0")) / 1000
+                delay = max(delay, reset - time.time() + 0.5)
+            except (TypeError, ValueError):
+                pass
+    return min(delay, 65)
+
+
+async def post_decisions(session, url, payload, headers=None):
+    """Call a native decision endpoint; retry only transient upstream failures."""
     last_err = None
     for attempt in range(3):
+        delay = 1 + 2 * attempt
         try:
-            async with session.post(f"{base_url}/systemone", json=payload,
+            async with session.post(url, json=payload,
                                     headers=headers or {}) as r:
                 body = await r.json(content_type=None)
                 if r.status == 200:
-                    ans = body["answers"]["q"]
-                    return ans["choice"], body.get("usage") or {}, body.get("model")
+                    return body
+                error = body.get("error") if isinstance(body, dict) else None
+                metadata = error.get("metadata") if isinstance(error, dict) else None
+                if (r.status == 429 and isinstance(metadata, dict)
+                        and metadata.get("limit_source") == "openrouter_free_tier_daily"):
+                    raise DecisionQuotaError(body)
+                delay = decision_retry_delay(r.headers, metadata, attempt)
                 last_err = f"upstream {r.status}: {str(body)[:300]}"
                 if r.status not in (429, 500, 502, 503, 504):
                     break
+        except DecisionQuotaError:
+            raise
         except Exception as e:  # noqa: BLE001 — surface the last failure, retry transient
             last_err = str(e)
         if attempt < 2:
             import asyncio
-            await asyncio.sleep(1 + 2 * attempt)
+            await asyncio.sleep(delay)
     raise RuntimeError(last_err or "upstream failed")
 
 
@@ -161,6 +213,8 @@ async def _answer_via(request, body, ask, fallback_model, upstream_name):
     try:
         answer, u, shown = await ask(request.app, state, question, options,
                                      body.get("model"))
+    except DecisionQuotaError as e:
+        return web.json_response(e.body, status=429)
     except Exception as e:  # noqa: BLE001
         return _err(502, f"{upstream_name} upstream: {e}")
     usage = {"prompt_tokens": u.get("input_tokens") or 0,
@@ -215,13 +269,55 @@ async def handle_laya(request, body):
                              "laya")
 
 
+def upstream_headers():
+    """Never forward client credentials or implicitly reuse another provider's key."""
+    return {"Authorization": f"Bearer {S1_KEY}"} if S1_KEY else {}
+
+
+async def handle_systemone(request, body):
+    """Translate benchmark chat prompts to a configurable native decision URL."""
+    async def ask(app, state, question, options, model):
+        payload = _s1_question(state, question, options)
+        payload["model"] = MODEL_OVERRIDE or model or TS_MODEL
+        result = await post_decisions(app["session"], DECISION_URL, payload,
+                                      upstream_headers())
+        return (result["answers"]["q"]["choice"], result.get("usage") or {},
+                result.get("model"))
+    return await _answer_via(request, body, ask, TS_MODEL, "systemone")
+
+
+async def systemone(request):
+    """Native SDK surface: preserve typed questions and calibrated answers verbatim."""
+    if BACKEND != "systemone":
+        return _err(400, "native /v1/systemone requires S1_BACKEND=systemone",
+                    "invalid_request_error")
+    try:
+        body = await request.json()
+        if not isinstance(body, dict) or "state" not in body or not body.get("questions"):
+            return _err(400, "state and questions are required", "invalid_request_error")
+    except Exception:  # noqa: BLE001
+        return _err(400, "bad json", "invalid_request_error")
+    body["model"] = MODEL_OVERRIDE or body.get("model") or TS_MODEL
+    try:
+        result = await post_decisions(request.app["session"], DECISION_URL,
+                                      body, upstream_headers())
+        return web.json_response(result)
+    except DecisionQuotaError as e:
+        return web.json_response(e.body, status=429)
+    except Exception as e:  # noqa: BLE001
+        return _err(502, f"systemone upstream: {e}")
+
+
 async def handle_proxy(request, body):
     """Forward an OpenAI chat completion (stream or not) to S1_UPSTREAM."""
     if not UPSTREAM:
         return _err(500, "S1_BACKEND=proxy needs S1_UPSTREAM=<base-url>")
     session = request.app["session"]
+    if MODEL_OVERRIDE:
+        body = dict(body, model=MODEL_OVERRIDE)
     try:
-        async with session.post(f"{UPSTREAM}/chat/completions", json=body) as up:
+        async with session.post(f"{UPSTREAM}/chat/completions", json=body,
+                                headers=upstream_headers()) as up:
             if body.get("stream"):
                 resp = web.StreamResponse(status=up.status, headers={
                     "Content-Type": "text/event-stream",
@@ -238,7 +334,8 @@ async def handle_proxy(request, body):
 
 
 HANDLERS = {"typesafe": handle_typesafe, "nimble": handle_nimble,
-            "laya": handle_laya, "kev": handle_kev, "proxy": handle_proxy}
+            "laya": handle_laya, "kev": handle_kev, "proxy": handle_proxy,
+            "systemone": handle_systemone}
 
 
 # ------------------------------------------------------------ openai surface ---
@@ -291,15 +388,17 @@ async def chat_completions(request):
 
 
 async def models(request):
-    if BACKEND == "proxy" and UPSTREAM:
+    if BACKEND == "proxy" and UPSTREAM and not MODEL_OVERRIDE:
         try:
-            async with request.app["session"].get(f"{UPSTREAM}/models") as up:
+            async with request.app["session"].get(
+                    f"{UPSTREAM}/models", headers=upstream_headers()) as up:
                 return web.json_response(await up.json(content_type=None),
                                          status=up.status)
         except Exception as e:  # noqa: BLE001
             return _err(502, f"proxy upstream: {e}")
     ids = {"typesafe": ["jev-latest"], "nimble": [NIMBLE_MODEL],
-           "kev": [KEV_MODEL],
+           "kev": [KEV_MODEL], "systemone": [TS_MODEL],
+           "proxy": [MODEL_OVERRIDE] if MODEL_OVERRIDE else [],
            "laya": [os.path.basename(LAYA_DIR.rstrip("/")) or "laya"],
            }.get(BACKEND, [])
     return web.json_response({"object": "list", "data": [
@@ -308,7 +407,8 @@ async def models(request):
 
 async def health(request):
     upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE, "kev": KEV_BASE,
-                "laya": LAYA_DIR, "proxy": UPSTREAM}.get(BACKEND, "")
+                "laya": LAYA_DIR, "proxy": UPSTREAM,
+                "systemone": DECISION_URL}.get(BACKEND, "")
     return web.json_response({"ok": True, "backend": BACKEND,
                               "upstream": upstream})
 
@@ -330,8 +430,9 @@ async def on_startup(app):
             None, laya.load, LAYA_DIR)
         print("laya loaded", flush=True)
     upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE, "kev": KEV_BASE,
-                "laya": LAYA_DIR, "proxy": UPSTREAM}.get(BACKEND, "")
-    print(f"s1-gateway on :{PORT}  backend={BACKEND}  upstream={upstream}")
+                "laya": LAYA_DIR, "proxy": UPSTREAM,
+                "systemone": DECISION_URL}.get(BACKEND, "")
+    print(f"s1-gateway on :{PORT}  backend={BACKEND}  upstream={upstream}", flush=True)
 
 
 async def on_cleanup(app):
@@ -342,6 +443,7 @@ app = web.Application()
 app.router.add_get("/v1/models", models)
 app.router.add_get("/health", health)
 app.router.add_post("/v1/chat/completions", chat_completions)
+app.router.add_post("/v1/systemone", systemone)
 app.on_startup.append(on_startup)
 app.on_cleanup.append(on_cleanup)
 

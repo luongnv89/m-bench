@@ -1,0 +1,113 @@
+suite=system1 (23 tasks)  mercury-decide-free s1 rate-aware
+endpoint=http://localhost:8124/v1  samples=2  concurrency=1
+
+  PASS  spam_email/q1        s0      3tok    1.0s   2.9tok/s
+  PASS  spam_email/q1        s1      2tok    1.3s   1.6tok/s
+  PASS  spam_email/q2        s0      4tok    0.5s   7.4tok/s
+  PASS  spam_email/q2        s1      4tok    0.5s   8.3tok/s
+  PASS  refund_eligible/q1   s0      2tok    0.4s   4.7tok/s
+  PASS  refund_eligible/q1   s1      3tok    0.5s   6.6tok/s
+  PASS  refund_eligible/q2   s0      2tok    0.5s   4.4tok/s
+  PASS  refund_eligible/q2   s1      2tok    0.5s   4.4tok/s
+  PASS  glowing_review/q1    s0      4tok    0.5s   8.5tok/s
+  PASS  glowing_review/q1    s1      3tok    0.4s   7.4tok/s
+  PASS  glowing_review/q2    s0      3tok    0.5s   6.6tok/s
+  PASS  glowing_review/q2    s1      2tok    0.5s   4.2tok/s
+  PASS  museum_hours/q1      s0      3tok    0.5s   6.2tok/s
+  PASS  museum_hours/q1      s1      2tok    0.4s   4.5tok/s
+  PASS  museum_hours/q2      s0      4tok    0.4s   9.0tok/s
+  PASS  museum_hours/q2      s1      3tok    0.5s   6.6tok/s
+  PASS  fruit_basket/q1      s0      4tok    0.4s   9.4tok/s
+  PASS  fruit_basket/q1      s1      3tok    0.5s   6.3tok/s
+  PASS  fruit_basket/q2      s0      2tok    0.7s   3.1tok/s
+  PASS  fruit_basket/q2      s1      2tok    0.5s   4.4tok/s
+  PASS  capital_japan/q1     s0      3tok    0.5s   6.4tok/s
+  PASS  capital_japan/q1     s1      3tok   61.9s   0.0tok/s
+  PASS  capital_japan/q2     s0      3tok    0.5s   5.6tok/s
+  PASS  capital_japan/q2     s1      3tok    0.4s   6.9tok/s
+  PASS  threat_comment/q1    s0      2tok    0.4s   5.2tok/s
+  PASS  threat_comment/q1    s1      3tok    1.8s   1.6tok/s
+  PASS  threat_comment/q2    s0      2tok    0.5s   4.3tok/s
+  PASS  threat_comment/q2    s1      2tok    0.5s   4.3tok/s
+  PASS  product_spec/q1      s0      4tok    0.4s   9.1tok/s
+  PASS  product_spec/q1      s1      4tok    0.5s   8.9tok/s
+  PASS  product_spec/q2      s0      3tok    0.5s   6.3tok/s
+  PASS  product_spec/q2      s1      3tok    0.5s   6.6tok/s
+  PASS  language_french/q1   s0      4tok    0.4s  10.1tok/s
+  PASS  language_french/q1   s1      4tok    0.5s   8.8tok/s
+  PASS  language_french/q2   s0      2tok    0.5s   4.1tok/s
+  PASS  language_french/q2   s1      3tok    0.5s   5.5tok/s
+  PASS  golden_retriever/q1  s0      2tok    0.5s   3.9tok/s
+  PASS  golden_retriever/q1  s1      3tok    0.5s   6.4tok/s
+  PASS  golden_retriever/q2  s0      4tok    0.5s   7.9tok/s
+  PASS  golden_retriever/q2  s1      2tok    0.6s   3.6tok/s
+  PASS  ref_code/q1          s0      3tok    0.4s   7.7tok/s
+  PASS  ref_code/q1          s1      3tok    0.4s   7.5tok/s
+  PASS  ref_code/q2          s0      3tok   49.0s   0.1tok/s
+  PASS  ref_code/q2          s1      3tok    0.4s   8.1tok/s
+  PASS  sale_item_refund/q1  s0      4tok    0.4s  11.1tok/s
+  PASS  sale_item_refund/q1  s1      2tok    0.4s   4.6tok/s
+  PASS  sale_item_refund/q2  s0      2tok    0.4s   5.4tok/s
+  PASS  sale_item_refund/q2  s1      3tok    0.4s   7.3tok/s
+  PASS  sale_item_refund/q3  s0      4tok    0.4s   9.3tok/s
+  PASS  sale_item_refund/q3  s1      3tok    0.4s   6.8tok/s
+  PASS  ticket_billing/q1    s0      4tok    0.5s   7.8tok/s
+  PASS  ticket_billing/q1    s1      3tok    0.4s   7.9tok/s
+  PASS  ticket_billing/q2    s0      4tok    0.4s   9.2tok/s
+  PASS  ticket_billing/q2    s1      2tok    0.4s   5.2tok/s
+  PASS  chat_resolved/q1     s0      4tok    0.4s  10.4tok/s
+  PASS  chat_resolved/q1     s1      3tok    0.4s   7.4tok/s
+  PASS  chat_resolved/q2     s0      4tok    0.4s   9.0tok/s
+  PASS  chat_resolved/q2     s1      3tok    0.5s   6.3tok/s
+  PASS  json_order/q1        s0      2tok    0.4s   4.8tok/s
+  PASS  json_order/q1        s1      2tok    0.4s   4.9tok/s
+  PASS  json_order/q2        s0      4tok    0.5s   7.9tok/s
+  PASS  json_order/q2        s1      4tok    0.5s   8.2tok/s
+  PASS  height_order/q1      s0      3tok    0.4s   8.1tok/s
+  PASS  height_order/q1      s1      3tok   51.6s   0.1tok/s
+  PASS  height_order/q2      s0      2tok    0.5s   4.3tok/s
+  PASS  height_order/q2      s1      3tok    0.4s   6.9tok/s
+  PASS  bag_allowance/q1     s0      2tok    0.5s   4.3tok/s
+  PASS  bag_allowance/q1     s1      2tok    0.4s   5.3tok/s
+  PASS  bag_allowance/q2     s0      2tok    0.5s   4.0tok/s
+  PASS  bag_allowance/q2     s1      2tok    0.5s   4.3tok/s
+  PASS  cafe_hours/q1        s0      4tok    0.6s   7.0tok/s
+  PASS  cafe_hours/q1        s1      3tok    0.4s   7.3tok/s
+  PASS  cafe_hours/q2        s0      2tok    0.4s   4.9tok/s
+  PASS  cafe_hours/q2        s1      2tok    0.4s   5.0tok/s
+  PASS  cafe_hours/q3        s0      4tok    0.5s   7.6tok/s
+  PASS  cafe_hours/q3        s1      4tok    0.4s   9.6tok/s
+  PASS  harsh_review/q1      s0      3tok    0.4s   8.0tok/s
+  PASS  harsh_review/q1      s1      2tok    0.4s   5.0tok/s
+  PASS  harsh_review/q2      s0      4tok    0.4s  10.7tok/s
+  PASS  harsh_review/q2      s1      4tok    0.4s  10.6tok/s
+  FAIL  error_log/q1         s0      2tok    0.4s   4.8tok/s   <expected 'cannot determine'>
+  FAIL  error_log/q1         s1      3tok    0.4s   6.7tok/s   <expected 'cannot determine'>
+  PASS  error_log/q2         s0      4tok    0.4s   9.9tok/s
+  PASS  error_log/q2         s1      2tok    0.4s   4.5tok/s
+  PASS  error_log/q3         s0      2tok   51.4s   0.0tok/s
+  PASS  error_log/q3         s1      2tok    0.5s   4.4tok/s
+  PASS  budget_veto/q1       s0      3tok    0.5s   6.0tok/s
+  PASS  budget_veto/q1       s1      2tok    0.4s   4.7tok/s
+  PASS  budget_veto/q2       s0      2tok    0.4s   5.4tok/s
+  PASS  budget_veto/q2       s1      4tok    0.4s   9.4tok/s
+  PASS  device_policy/q1     s0      4tok    0.4s   9.7tok/s
+  PASS  device_policy/q1     s1      2tok    0.5s   4.4tok/s
+  PASS  device_policy/q2     s0      3tok    0.6s   5.4tok/s
+  PASS  device_policy/q2     s1      3tok    0.6s   5.3tok/s
+  PASS  borderline_comment/q1 s0      2tok    0.4s   4.5tok/s
+  PASS  borderline_comment/q1 s1      3tok    0.5s   6.4tok/s
+  PASS  borderline_comment/q2 s0      3tok    0.4s   8.1tok/s
+  PASS  borderline_comment/q2 s1      3tok    0.5s   6.5tok/s
+
+================================================================
+accuracy               98.0 %  (95% CI 92.9–99.4, n=98)
+tokens / task          82 in / 3 out
+time / task            2.6 s
+by difficulty          easy=100.0%  medium=100.0%  hard=88.9%
+wall                   259 s
+mean output tokens     3
+truncated / errored    0 / 0
+================================================================
+
+written to /home/montimage/workspace/luongnv89/m-bench/results/2026-10-01-mercury-decide-rerun/mercury-s1-rateaware.json

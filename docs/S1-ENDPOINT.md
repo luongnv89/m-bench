@@ -25,7 +25,8 @@ Transport: the OpenAI subset the s1 runner uses.
 
 | Endpoint | Notes |
 |---|---|
-| `GET /v1/models` | backend's model list (proxied verbatim in `proxy` mode) |
+| `GET /v1/models` | backend's model list (proxied in `proxy` mode unless `S1_MODEL` pins a model) |
+| `POST /v1/systemone` | native typed `state` / `questions` / `answers` contract in `systemone` mode |
 | `POST /v1/chat/completions` | `messages`, `stream`, `stream_options.include_usage` honoured; everything else (`chat_template_kwargs`, `max_tokens`, temperature, …) ignored or forwarded |
 
 Semantics — what an application may rely on:
@@ -63,6 +64,14 @@ Measured candidates through this same endpoint (issue #104):
 | Kev-4B (`kev.serve`, bf16) | `kev` | 95.9 % — inside noise | local, ~15 GiB measured, fine-tunable; misses only `spam_email/q2` beyond Jev's own `error_log/q1` |
 | Kev-27B (`kev.serve`, bf16) | `kev` | **98.0 %** — ties Jev | local, ~63 GiB measured; cannot coexist with the incumbent vLLM endpoint on this box — needed `vllm-qwen.service` stopped to run; only miss is `error_log/q1`, identical to Jev's |
 
+Mercury Decide `inception/mercury-decide:free` through `systemone`:
+**98.0% (96/98)**, zero generation errors; **F1 1.000 on 16 phishing emails**
+through the phishing service's `typesafe_only` pipeline. Measured mean latency:
+2.64 s/system1 question (includes free-tier quota waits), 2.93 s/email.
+This ties historical Jev, not a statistically established accuracy improvement;
+the small suites are saturated. Hosted fallback supported, not installed as the
+shared default. Report: `results/2026-10-01-mercury-decide-rerun/REPORT.md`.
+
 Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`);
 Kev runs: `results/2026-09-30/REPORT-kev-s1.md` (+ `NOTES-kev-s1.md`),
 `results/2026-10-01/REPORT-kev27b-s1.md` (+ `NOTES-kev27b-s1.md`).
@@ -86,10 +95,80 @@ become a choice over deduped state tokens — the documented
 S1_BACKEND=proxy S1_UPSTREAM=http://localhost:8001/v1 python3 configs/s1_gateway.py
 ```
 
-Forwards requests and streaming responses verbatim. This is how a locally
+Forwards requests and streaming responses verbatim, except that an explicitly
+set `S1_MODEL` overrides the client's model. For authenticated upstreams set
+`S1_API_KEY`; client Authorization headers and other providers' keys are never
+forwarded automatically. Trailing slashes on `S1_UPSTREAM` are accepted.
+This is how a locally
 served candidate — Bespoke-Nimble-9B on vLLM, a GGUF on llama.cpp, an ollama
 model — answers behind the same URL Jev uses. Zero translation, zero drift:
 the app sees the same wire contract, the model sees the same prompt.
+
+### `systemone` — any native System One decision endpoint
+
+Configure the **full request URL**, model, and upstream key once. Subsequently
+swap compatible providers by changing these deployment settings only; no runner,
+application, question, or scoring edits are needed. Both chat-shaped benchmark
+requests and native TypeSafe SDK requests use the same upstream.
+
+```bash
+# OpenRouter Mercury Decide (NOT a chat-completions model)
+# Export OPENROUTER_API_KEY from your .env securely first; do not commit it.
+S1_BACKEND=systemone \
+S1_DECISION_URL=https://openrouter.ai/api/alpha/decisions \
+S1_MODEL=inception/mercury-decide:free \
+S1_API_KEY="$OPENROUTER_API_KEY" \
+    python3 configs/s1_gateway.py
+```
+
+For TypeSafe directly use `S1_DECISION_URL=https://api.typesafe.ai/v1/systemone`,
+`S1_MODEL=jev-latest`, and `S1_API_KEY="$TYPESAFE_API_KEY"`. No provider-specific
+adapter is required for an endpoint using the same schema. `S1_API_KEY` is
+explicit, not guessed from the URL or loaded from `.env` by the gateway.
+
+- `GET /v1/models` advertises the configured model (not a remote availability
+  check). Prove availability with an actual decision request before benchmarking.
+- Chat benchmark prompts use the same parsing and open-question state-token
+  candidate fallback as Jev. Usage is mapped from real `input_tokens` and
+  `output_tokens`; no synthetic confidence or answers are introduced.
+- `POST /v1/systemone` forwards the native payload with the configured model,
+  preserving all question types, calibrated probabilities, answers, and usage.
+  This supports the phishing service's existing SDK without modifying its code:
+
+```bash
+# From anti-phishing-email-service; SDK appends /v1/systemone to this API root.
+TYPESAFE_API_KEY=local TYPESAFE_BASE_URL=http://localhost:8123 \
+TYPESAFE_DEFAULT_MODEL=inception/mercury-decide:free \
+    .venv/bin/python scripts/performance_benchmark.py \
+    --benchmarks variant_comparison --variants typesafe_only --split all \
+    --output evaluation/results/mercury-decide.json
+```
+
+The gateway retries transient native decision failures at most three times and
+reports upstream failures as 502, never as model answers. An explicitly exhausted
+OpenRouter daily free quota is not retried by the gateway: its 429 and reset
+metadata are preserved. For transient failures, numeric `Retry-After` and reported
+`X-RateLimit-Reset` timestamps are respected; each wait is capped at 65 seconds.
+Raising the daily allowance does not remove the observed 20 requests/minute free
+model limit. The system1 runner disables redundant OpenAI SDK retries;
+other runners are unchanged. Reasoning on/off flags are not applicable to these
+prefill-only typed decision endpoints.
+
+Budget requests before starting: this suite has 49 questions, so `--samples 2`
+needs 98 successful calls; the full phishing corpus adds 16 calls, plus smoke
+checks and retries. A fresh 50-request daily free allowance cannot cover both.
+Quota limits may vary: check the API's current allowance rather than assuming
+this observed limit is universal. Capture benchmark stdout to a fresh log file
+(e.g. `./bench run ... | tee candidate-run.log`), since final JSON is written only
+when the run finishes.
+
+**Do not restart a shared gateway without approval.** For a non-disruptive run,
+start a temporary gateway with `S1_PORT=8124` and point both clients at that port.
+The adapter and prompts are identical; disclose the port difference in reports.
+Stop only your temporary process afterward.
+
+API reference used: <https://openrouter.ai/openapi.json>,
+`POST /api/alpha/decisions` (`DecisionsRequest` / `DecisionsResponse`).
 
 ### `nimble` — Bespoke-Nimble-9B via Ollama
 
@@ -197,11 +276,12 @@ baseline file and report stay as the historical reference.
 
 ## Failure semantics worth knowing
 
-- The gateway answers `502` when its upstream fails and `400` when the prompt
-  is not the s1 shape — the bench records both as generation failures, never
-  as model wrongness.
+- The gateway answers `502` when its upstream fails, or `429` for confirmed
+  OpenRouter daily quota exhaustion, and `400` when the prompt is not the s1
+  shape. The bench records these as generation failures, never valid answers;
+  do not interpret a transport-failure score as model accuracy.
 - One upstream call per generation: concurrency comes from the runner
   (`BENCH_CONCURRENCY`, default 4), not request batching.
-- Latency through the `typesafe` backend is hosted-service latency (WAN
-  round-trip); latency through `proxy` is the local server's. Compare speed
-  within a backend class, or say which you mixed.
+- Latency includes the upstream: local backends measure local serving, while
+  TypeSafe, OpenRouter, and hosted proxy targets include WAN round-trip. Compare
+  speed within a backend class, or say which you mixed.

@@ -216,6 +216,13 @@ class TestRun(unittest.TestCase):
         self.assertEqual(summary["errored"], 1)
         self.assertEqual(summary["pass_at_1"], 0.5)
 
+    def test_sdk_retries_do_not_multiply_gateway_retries(self):
+        client = mock.Mock()
+        with mock.patch.object(runner, "_client", return_value=client), \
+                mock.patch.object(runner, "generate", side_effect=RuntimeError("quota")):
+            s1_runner.run(TASKS[:1], _cfg())
+        client.with_options.assert_called_once_with(max_retries=0)
+
     def test_uses_the_decision_system_prompt(self):
         seen = {}
 

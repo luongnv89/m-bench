@@ -1,0 +1,235 @@
+{
+  "variant_comparison": {
+    "corpus_dir": "/home/montimage/workspace/anti-phishing-email-service/tests/fixtures/corpus",
+    "corpus_split": "all",
+    "samples_evaluated": 16,
+    "variants": {
+      "typesafe_only": {
+        "samples_evaluated": 16,
+        "evaluated": 16,
+        "escalations": 0,
+        "detection": {
+          "evaluated": 16,
+          "skipped": 0,
+          "true_positives": 9,
+          "true_negatives": 7,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "false_positive_rate": 0.0
+        },
+        "records": [
+          {
+            "sample_id": "phish-cred-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-cred-002",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-bec-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-bec-002",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-tech-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-fin-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-mal-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-rom-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "phish-soc-001",
+            "expected_phishing": true,
+            "predicted_phishing": true,
+            "risk_score": 1.0,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-txn-001",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.2726894039441229,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-txn-002",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.2715337451497808,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-news-001",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.2683731607568356,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-biz-001",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.321747471434766,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-biz-002",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.2976658086432097,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-pers-001",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.3533107431965411,
+            "status": "success"
+          },
+          {
+            "sample_id": "ben-notif-001",
+            "expected_phishing": false,
+            "predicted_phishing": false,
+            "risk_score": 0.263530170023206,
+            "status": "success"
+          }
+        ],
+        "latency": {
+          "parse": {
+            "count": 16,
+            "total": 0.026026010513305664,
+            "avg": 0.001626625657081604,
+            "min": 0.0010881423950195312,
+            "max": 0.003749370574951172,
+            "median": 0.0014984607696533203,
+            "p95": 0.002310037612915039
+          },
+          "analysis": {
+            "count": 16,
+            "total": 46.77017140388489,
+            "avg": 2.9231357127428055,
+            "min": 0.43892812728881836,
+            "max": 4.879856824874878,
+            "median": 3.19610059261322,
+            "p95": 4.808533430099487
+          },
+          "risk_scoring": {
+            "count": 16,
+            "total": 0.013077735900878906,
+            "avg": 0.0008173584938049316,
+            "min": 0.0005002021789550781,
+            "max": 0.00136566162109375,
+            "median": 0.0007426738739013672,
+            "p95": 0.0011487007141113281
+          },
+          "total": {
+            "count": 16,
+            "total": 46.80927515029907,
+            "avg": 2.925579696893692,
+            "min": 0.4414355754852295,
+            "max": 4.881889343261719,
+            "median": 3.1986061334609985,
+            "p95": 4.810208559036255
+          }
+        },
+        "completeness": {
+          "emails_processed": 16,
+          "analyzers_expected": [
+            "typesafe_analyzer"
+          ],
+          "per_analyzer": {
+            "typesafe_analyzer": {
+              "attempted": 16,
+              "succeeded": 16,
+              "failed": 0
+            }
+          },
+          "full_coverage": 1.0,
+          "mean_coverage": 1.0
+        },
+        "cost": {
+          "input_tokens": 797,
+          "output_tokens": 4128,
+          "total_tokens": 4925,
+          "input_cost_per_1k_usd": 0.0,
+          "output_cost_per_1k_usd": 0.0,
+          "estimated_cost_usd": 0.0
+        },
+        "description": "TypeSafe evaluation arm: only typesafe_analyzer runs, so detection metrics isolate the TypeSafe System One verdict.",
+        "stages": [
+          [
+            "typesafe_analyzer"
+          ]
+        ],
+        "escalate": "always",
+        "notes": [
+          "typesafe_analyzer is force-enabled for this arm; it still needs TYPESAFE_API_KEY to produce real judgments."
+        ]
+      }
+    },
+    "comparison": {
+      "baseline": "baseline_full",
+      "variants": [
+        {
+          "name": "typesafe_only",
+          "evaluated": 16,
+          "skipped": 0,
+          "f1": 1.0,
+          "recall": 1.0,
+          "precision": 1.0,
+          "avg_latency": 2.925579696893692,
+          "p95_latency": 4.810208559036255,
+          "total_tokens": 4925,
+          "estimated_cost_usd": 0.0,
+          "escalations": 0,
+          "f1_delta": 1.0,
+          "avg_latency_delta": 2.925579696893692,
+          "latency_ratio": 0.0,
+          "tokens_delta": 4925,
+          "cost_delta_usd": 0.0
+        }
+      ]
+    }
+  }
+}

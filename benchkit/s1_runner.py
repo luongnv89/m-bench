@@ -93,7 +93,9 @@ def run(tasks, cfg, on_result=None, keep_code=False):
     report's accuracy axis, cost tables and charts work unchanged. With
     `keep_code` each raw reply is stored under `response`.
     """
-    client = runner._client(cfg)
+    # Native decision gateways own their bounded upstream retries. Avoid multiplying
+    # them with the OpenAI SDK's automatic retries (especially on exhausted quotas).
+    client = runner._client(cfg).with_options(max_retries=0)
     questions = _items(tasks)
 
     def work(item):
