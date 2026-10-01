@@ -346,6 +346,14 @@
     }
     .bar-fill.alt { background: linear-gradient(90deg, #1C1C21, #2E3540); border-right-color: var(--info); }
     .bar-row.is-lead .bar-fill { background: linear-gradient(90deg, #1C1C21, #4A4A54); }
+    /* the one current best: top score, ties broken by seconds/question */
+    .bar-row.is-best { background: rgba(0,255,65,0.06); box-shadow: inset 3px 0 0 var(--volt); }
+    .bar-row.is-best .bar-label { color: var(--volt); font-weight: 600; }
+    .best-tag {
+      display: inline-block; margin-left: 0.4rem; padding: 0 0.3rem;
+      font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.06em;
+      color: #0A0A0B; background: var(--volt); vertical-align: middle;
+    }
     /* hatched band = within the ~8-pt noise floor of the leader */
     .noise-band {
       position: absolute; top: 0; bottom: 0; left: var(--from); width: var(--span);
@@ -1153,8 +1161,8 @@
       function barRow(o) {
         const from = Math.max(0, o.lead - NOISE);
         return `
-          <div class="bar-row${o.isLead ? " is-lead" : ""}" role="listitem" aria-label="${esc(o.label)}: ${esc(o.value)}. ${esc(o.meta)}">
-            <span class="bar-label" aria-hidden="true">${esc(o.label)}</span>
+          <div class="bar-row${o.isLead ? " is-lead" : ""}${o.isBest ? " is-best" : ""}" role="listitem" aria-label="${esc(o.label)}${o.isBest ? " (current best)" : ""}: ${esc(o.value)}. ${esc(o.meta)}">
+            <span class="bar-label" aria-hidden="true">${esc(o.label)}${o.isBest ? '<span class="best-tag">BEST</span>' : ""}</span>
             <div class="bar-track" aria-hidden="true">
               <span class="noise-band" style="--from:${from}%;--span:${o.lead - from}%"></span>
               <div class="bar-fill${o.alt ? " alt" : ""}" style="--w:${o.value}%;--d:${o.i * 0.08}s"></div>
@@ -1409,15 +1417,22 @@
       }
 
       /* —— system one: typed-decision models behind the standard endpoint —— */
+      // solve rate ranks; seconds/question only breaks exact ties
+      const bestOf = (rows) => rows.reduce((b, r) =>
+        !b || r.score > b.score || (r.score === b.score && r.secPerQ < b.secPerQ) ? r : b, null);
       function renderSystemOne() {
         const s = data.systemOne;
         if (!s) return;
         $("#s1-question").textContent = s.question;
         const rows = s.rows.filter(modelVisible);
         const lead = Math.max(...rows.map((r) => r.score));
+        // tok/s only means generation speed when the answer is real model output;
+        // near-empty answers (0–4 tok) measure fixed latency, so show n/a.
+        const best = bestOf(rows);
+        const tokPerSec = (r) => (r.outTok >= 10 && r.secPerQ > 0 ? Math.round(r.outTok / r.secPerQ) + " tok/s" : "tok/s n/a");
         $("#s1-bars").innerHTML = rows.length ? rows.map((r, i) => barRow({
-          i, lead, isLead: r.score === lead, label: r.model, value: r.score.toFixed(1),
-          meta: `${r.secPerQ}s/question · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
+          i, lead, isLead: r.score === lead, isBest: r === best, label: r.model, value: r.score.toFixed(1),
+          meta: `${r.secPerQ}s/question · ${tokPerSec(r)} · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
         })).join("") : '<p class="chart-note">No models selected. Use Show all above to restore comparisons.</p>';
         paintMultiples($("#s1-multiples"), rows, [
           { title: "Seconds / question", sub: "mean · lower is better", get: (r) => r.secPerQ, fmt: (v) => v + "s" },
@@ -1434,8 +1449,9 @@
           $("#s1r-question").textContent = r.question;
           const realRows = r.rows.filter(modelVisible);
           const rLead = Math.max(...realRows.map((x) => x.score));
+          const rBest = bestOf(realRows);
           $("#s1r-bars").innerHTML = realRows.length ? realRows.map((x, i) => barRow({
-            i, lead: rLead, isLead: x.score === rLead, label: x.model, value: x.score.toFixed(1),
+            i, lead: rLead, isLead: x.score === rLead, isBest: x === rBest, label: x.model, value: x.score.toFixed(1),
             meta: `${x.secPerQ}s/email · wall ${x.wall}s · ${x.serving}` +
               (x.ci ? ` · 95% CI ${x.ci}` : "") + ` — ${x.note}`,
           })).join("") : '<p class="chart-note">No models selected. Use Show all above to restore comparisons.</p>';
