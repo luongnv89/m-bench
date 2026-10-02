@@ -63,6 +63,7 @@ Measured candidates through this same endpoint (issue #104):
 | Laya `typed-decisions` | `laya` | 73.5 % | not a replacement at this checkpoint; CPU-bound run |
 | Kev-4B (`kev.serve`, bf16) | `kev` | 95.9 % — inside noise | local, ~15 GiB measured, fine-tunable; misses only `spam_email/q2` beyond Jev's own `error_log/q1` |
 | Kev-27B (`kev.serve`, bf16) | `kev` | **98.0 %** — ties Jev | local, ~63 GiB measured; cannot coexist with the incumbent vLLM endpoint on this box — needed `vllm-qwen.service` stopped to run; only miss is `error_log/q1`, identical to Jev's |
+| Kev-4B (Q4_K_M GGUF, llama.cpp master `/v1/systemone`) | `kev` | 95.9 % — inside noise | identical miss profile to `kev.serve` bf16; ~3 GiB, needs a build ≥ decision-model merge (PR #29818, 2026-10-02) |
 
 Mercury Decide `inception/mercury-decide:free` through `systemone`:
 **98.0% (96/98)**, zero generation errors; **F1 1.000 on 16 phishing emails**
@@ -74,7 +75,8 @@ shared default. Report: `results/2026-10-01-mercury-decide-rerun/REPORT.md`.
 
 Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`);
 Kev runs: `results/2026-09-30/REPORT-kev-s1.md` (+ `NOTES-kev-s1.md`),
-`results/2026-10-01/REPORT-kev27b-s1.md` (+ `NOTES-kev27b-s1.md`).
+`results/2026-10-01/REPORT-kev27b-s1.md` (+ `NOTES-kev27b-s1.md`),
+`results/2026-10-02/REPORT-kev4b-llamacpp-s1.md` (+ `NOTES-kev4b-llamacpp-s1.md`).
 
 ## Backends
 
