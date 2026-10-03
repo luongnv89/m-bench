@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="m-bench — System One. Typed-decision models behind one stable gateway: system1 accuracy and a real phishing-classifier workload, measured on the same contract." />
+  <title>m-bench — System One: typed decisions behind one endpoint</title>
+  <meta name="theme-color" content="#0A0A0B" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="m-bench — System One: swappable judgment models" />
+  <meta property="og:description" content="Typed-decision models take state plus a question and return a typed pick. Local and hosted backends behind the same standard s1 gateway contract." />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/site.css" />
+</head>
+<body data-page="system-one" data-suites="system1,phishing-eval">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="index.html" aria-label="m-bench home">
+        <img src="assets/logo-mark.svg" alt="" width="28" height="28" />
+        <span class="brand-name">m<span>-</span>bench</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" id="nav-toggle">Menu</button>
+      <ul class="nav-links" id="nav-menu">
+        <li><a class="nav-page" href="system-one.html" aria-current="page">System One</a></li>
+        <li><a class="nav-page" href="index.html">LLM ranking</a></li>
+        <li><a href="#s1">Models</a></li>
+        <li><a href="#s1-real">Real use case</a></li>
+        <li><a href="#results">Ledger</a></li>
+        <li><a class="nav-cta" href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <noscript><p class="wrap load-error">This page renders its results with JavaScript. The raw data is in <a href="data.json">data.json</a>.</p></noscript>
+    <p class="wrap load-error" id="load-error" role="alert" hidden></p>
+
+    <!-- HERO -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="wrap">
+        <div class="hero-grid">
+          <div class="reveal">
+            <p class="kicker">System One · typed decisions</p>
+            <h1 id="hero-title">One endpoint.<br />Swappable <em>judgment models.</em></h1>
+            <p class="lead" style="margin-top:1.5rem;" id="s1-hero-question"></p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#s1">Compare the models ↓</a>
+              <a class="btn btn-ghost" href="#s1-real">The phishing workload</a>
+            </div>
+            <div class="hero-meta" id="s1-hero-meta"></div>
+            <p class="crosslink">Ranking coding agents instead? <a href="index.html">LLM setups — harness, model, thinking →</a></p>
+          </div>
+          <aside class="gauge reveal" aria-labelledby="s1-board-label">
+            <div class="gauge-label" id="s1-board-label">Leaderboard · system1 accuracy</div>
+            <div class="board-rows" id="s1-hero-board"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYSTEM ONE ACCURACY -->
+    <section id="s1" aria-labelledby="s1-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">Typed decisions</p>
+          <h2 id="s1-title">Same contract. Different engines.</h2>
+          <p>Each model takes application state plus a question and returns a typed pick with probabilities — no free text to parse.
+            Local and hosted backends sit behind the same standard s1 gateway, so swapping one is an env change, not an application change.
+            Jev is the historical baseline. These small suites are near saturation, not proof of a perfect model.</p>
+        </header>
+        <details class="model-picker" data-model-picker></details>
+
+        <div class="chart-block">
+          <div class="chart-title" id="s1-setup"></div>
+          <p class="chart-question" id="s1-question"></p>
+          <div class="bar-rows" id="s1-bars" role="list" aria-label="Accuracy by model, 0 to 100"></div>
+          <p class="bar-legend" aria-hidden="true"><i></i> within ~8 pts of the leader: a tie at 2 samples</p>
+          <div class="multiples" id="s1-multiples"></div>
+          <p class="chart-note" id="s1-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- REAL USE CASE -->
+    <section id="s1-real" aria-labelledby="s1r-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">Real workload</p>
+          <h2 id="s1r-title">The anti-phishing classifier, unchanged.</h2>
+          <p>Sixteen adjudicated emails through the service's own eval harness and its <span class="mono">typesafe_only</span> arm — zero code changes,
+            only the backend swapped by environment. The pipeline, not the model, makes the final risk decision.</p>
+        </header>
+
+        <div class="chart-block">
+          <div class="chart-title" id="s1r-setup"></div>
+          <p class="chart-question" id="s1r-question"></p>
+          <div class="bar-rows" id="s1r-bars" role="list" aria-label="F1 by backend, 0 to 100"></div>
+          <div class="multiples" id="s1r-multiples"></div>
+          <p class="chart-note" id="s1r-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEDGER -->
+    <section id="results" aria-labelledby="results-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">Ledger</p>
+          <h2 id="results-title">Every System One run, filterable.</h2>
+          <p>The <span class="mono">system1</span> and <span class="mono">phishing-eval</span> rows.
+            Click a column to sort, click a model to open its report. <span class="volt">Green</span> marks the best score per suite in view.
+            Coding-agent runs live on the <a href="index.html">LLM ranking page</a>.</p>
+        </header>
+
+        <details class="model-picker" data-model-picker></details>
+        <div class="filters" role="search" aria-label="Filter results">
+          <div class="filter-field">
+            <label for="f-machine">Machine</label>
+            <select id="f-machine"><option value="">All machines</option></select>
+          </div>
+          <div class="filter-field">
+            <label for="f-harness">Harness</label>
+            <select id="f-harness"><option value="">All harnesses</option></select>
+          </div>
+          <div class="filter-field">
+            <label for="f-suite">Suite</label>
+            <select id="f-suite"><option value="">All suites</option></select>
+          </div>
+          <div class="filter-field">
+            <label for="f-thinking">Thinking</label>
+            <select id="f-thinking">
+              <option value="">Any</option>
+              <option value="ON">ON</option>
+              <option value="OFF">OFF</option>
+            </select>
+          </div>
+          <button type="button" class="filter-reset" id="f-reset">Reset</button>
+        </div>
+
+        <div class="chart-block strip" id="strip" aria-labelledby="strip-title">
+          <div class="chart-title" id="strip-title">Every run in view · score by suite · follows the filters</div>
+          <div id="strip-rows"></div>
+          <div class="strip-legend" aria-hidden="true">
+            <span><i class="dot"></i> isolated</span>
+            <span><i class="dot best"></i> best in suite</span>
+            <span>hover or tap a dot · compare along a row: suites use different units</span>
+          </div>
+          <div class="strip-tip" id="strip-tip" role="tooltip" hidden></div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="results" id="results-table" role="table">
+            <thead role="rowgroup">
+              <tr role="row">
+                <th scope="col" role="columnheader" data-key="date" aria-sort="descending"><button type="button" class="sort">Date</button></th>
+                <th scope="col" role="columnheader" data-key="machine"><button type="button" class="sort">Machine</button></th>
+                <th scope="col" role="columnheader" data-key="model"><button type="button" class="sort">Model</button></th>
+                <th scope="col" role="columnheader" data-key="harness"><button type="button" class="sort">Harness</button></th>
+                <th scope="col" role="columnheader" data-key="mode"><button type="button" class="sort">Mode</button></th>
+                <th scope="col" role="columnheader" data-key="thinking"><button type="button" class="sort">Think</button></th>
+                <th scope="col" role="columnheader" data-key="suite"><button type="button" class="sort">Suite</button></th>
+                <th scope="col" role="columnheader" class="num" data-key="score"><button type="button" class="sort">Score</button></th>
+              </tr>
+            </thead>
+            <tbody id="results-body" role="rowgroup"></tbody>
+          </table>
+          <div class="table-empty" id="results-empty" hidden>
+            No runs match these filters. <button type="button" id="empty-reset">Clear filters</button>
+          </div>
+        </div>
+        <p class="result-count" id="result-count"></p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="run-it" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta-band">
+          <div>
+            <p class="kicker">Reproduce it</p>
+            <h2 id="cta-title">Run your own model behind the contract.</h2>
+            <p class="lead">One endpoint, any backend: <span class="mono">configs/s1_gateway.py</span> on :8123. Swap the backend by environment variable; the application never sees the change.</p>
+            <div class="cmd" style="margin-top:1rem;"><code id="cmd-text">./bench validate --suite system1</code><button type="button" class="copy-btn" id="copy-cmd">Copy</button></div>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="https://github.com/luongnv89/m-bench/blob/main/docs/S1-ENDPOINT.md" rel="noopener">Endpoint contract</a>
+            <a class="btn btn-ghost" href="https://github.com/luongnv89/m-bench/tree/main/results" rel="noopener">Raw results</a>
+            <a class="btn btn-ghost" href="index.html">LLM ranking →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div>© m-bench · MIT · measured where it runs</div>
+      <div class="footer-links">
+        <a href="index.html">LLM ranking</a>
+        <a href="https://github.com/luongnv89/m-bench/blob/main/docs/S1-ENDPOINT.md" rel="noopener">S1 endpoint</a>
+        <a href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a>
+        <a href="https://github.com/luongnv89/m-bench/blob/main/README.md" rel="noopener">README</a>
+      </div>
+      <div id="data-stamp">data · loading…</div>
+    </div>
+  </footer>
+
+  <script src="assets/site.js"></script>
+</body>
+</html>
