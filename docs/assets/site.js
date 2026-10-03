@@ -538,15 +538,15 @@
 
     $("#results-empty").hidden = rows.length > 0;
     body.innerHTML = rows.map((r) => `
-      <tr>
-        <td class="mono">${esc(r.date)}</td>
-        <td>${esc(machineName(r.machine))}</td>
-        <td class="model-cell"><a href="${gh(r.report)}" rel="noopener">${esc(r.model)}</a></td>
-        <td class="mono">${esc(r.harness)}</td>
-        <td><span class="badge ${esc(r.mode)}">${esc(r.mode)}</span></td>
-        <td class="mono">${esc(r.thinking)}</td>
-        <td class="mono">${esc(r.suite)}</td>
-        <td class="num score-cell${r.score === best[r.suite] ? " best" : ""}"><span class="score-wrap"><span class="s-track" aria-hidden="true"><span class="s-fill" style="--w:${r.score}%"></span></span><span class="s-num">${r.score.toFixed(1)}</span><span class="unit">${esc(r.unit)}</span></span></td>
+      <tr role="row">
+        <td class="mono" role="cell"><span class="col-label">Date</span>${esc(r.date)}</td>
+        <td role="cell"><span class="col-label">Machine</span>${esc(machineName(r.machine))}</td>
+        <td class="model-cell" role="cell"><span class="col-label">Model</span><a href="${gh(r.report)}" rel="noopener">${esc(r.model)}</a></td>
+        <td class="mono" role="cell"><span class="col-label">Harness</span>${esc(r.harness)}</td>
+        <td role="cell"><span class="col-label">Mode</span><span class="badge ${esc(r.mode)}">${esc(r.mode)}</span></td>
+        <td class="mono" role="cell"><span class="col-label">Think</span>${esc(r.thinking)}</td>
+        <td class="mono" role="cell"><span class="col-label">Suite</span>${esc(r.suite)}</td>
+        <td class="num score-cell${r.score === best[r.suite] ? " best" : ""}" role="cell"><span class="col-label">Score</span><span class="score-wrap"><span class="s-track" aria-hidden="true"><span class="s-fill" style="--w:${r.score}%"></span></span><span class="s-num">${r.score.toFixed(1)}</span><span class="unit">${esc(r.unit)}</span></span></td>
       </tr>`).join("");
     renderStrip(rows, best);
 
@@ -569,9 +569,10 @@
     const count = {};
     rows.forEach((r) => { count[r.suite] = (count[r.suite] || 0) + 1; });
     const suites = Object.keys(count).sort((a, b) => count[b] - count[a] || a.localeCompare(b));
-    const LANE = 13;
-    // the minimum gap, in points, before two dots share a lane: wider on phones
-    const GAP = NARROW.matches ? 4.6 : 2.6;
+    const LANE = 24;
+    // the minimum gap, in points, before two dots share a lane: wide enough
+    // that adjacent 24px hit targets (WCAG 2.5.8) never intersect, on phones too
+    const GAP = NARROW.matches ? 8 : 4.4;
     stripRows = [];
     $("#strip-rows").innerHTML = suites.map((s) => {
       const rs = rows.filter((r) => r.suite === s).sort((a, b) => a.score - b.score);
@@ -644,15 +645,31 @@
       </article>`).join("");
   }
 
+  // every page renders the whole suite catalogue, but a suite that belongs to
+  // the other page's family is tagged and cross-linked, so the grid never
+  // contradicts the copy that says those runs live on their own page
+  const SUITE_FAMILY = { system1: "system-one", "phishing-eval": "system-one" };
+  const SUITE_PAGE = {
+    llm: { href: "index.html", label: "LLM setups" },
+    "system-one": { href: "system-one.html", label: "System One" },
+  };
+
   function renderSuites() {
     const el = $("#suite-grid");
     if (!el) return;
-    el.innerHTML = data.suites.map((s) => `
+    el.innerHTML = data.suites.map((s) => {
+      const family = SUITE_FAMILY[s.name] || "llm";
+      const foreign = family !== PAGE;
+      const chip = foreign
+        ? ` <a class="suite-family" href="${SUITE_PAGE[family].href}">${esc(SUITE_PAGE[family].label)} →</a>`
+        : "";
+      return `
       <div class="suite">
-        <div class="suite-name">${esc(s.name)}</div>
+        <div class="suite-name">${esc(s.name)}${chip}</div>
         <div class="suite-tasks">${s.tasks} tasks</div>
         <p class="suite-desc">${esc(s.desc)}</p>
-      </div>`).join("");
+      </div>`;
+    }).join("");
   }
 
   /* —— boot: each page runs only the renderers its markup provides —— */

@@ -514,8 +514,9 @@ p { margin: 0 0 1rem; color: var(--ink-muted); }
   width: 10px; height: 10px; padding: 0; border: none; border-radius: 50%;
   background: var(--ink-dim); cursor: pointer; transition: transform 0.12s;
 }
-/* a hit target larger than the mark */
-.strip-dot::after { content: ""; position: absolute; inset: -5px; }
+/* a hit target larger than the mark — 10px mark + 7px each side = 24x24 CSS px,
+   the WCAG 2.5.8 minimum; renderStrip spaces lanes so targets never intersect */
+.strip-dot::after { content: ""; position: absolute; inset: -7px; }
 .strip-dot.live { background: var(--surface); box-shadow: inset 0 0 0 2px var(--info); }
 .strip-dot.best { background: var(--surface); box-shadow: inset 0 0 0 2px var(--volt); }
 .strip-dot:hover, .strip-dot:focus-visible, .strip-dot.on {
@@ -618,6 +619,16 @@ table.results .model-cell a::after { content: " ↗"; font-size: 0.75em; color: 
 table.results .score-cell { font-family: var(--font-mono); font-weight: 600; color: var(--ink); font-size: 0.95rem; white-space: nowrap; }
 table.results .score-cell.best { color: var(--volt); }
 table.results .score-cell .unit { font-size: 0.62rem; font-weight: 400; color: var(--ink-dim); margin-left: 0.35rem; letter-spacing: 0.04em; }
+/* per-cell column labels: on phones the rows become flex, so the implicit
+   header association is lost and each value needs its own label; wide screens
+   keep the real column headers, so the labels are removed from the a11y tree */
+table.results .col-label {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+}
+@media (min-width: 641px) {
+  table.results .col-label { display: none; }
+}
 th .sort {
   all: unset; cursor: pointer; display: inline-flex; gap: 0.35rem; align-items: center;
   font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
@@ -667,6 +678,15 @@ th[aria-sort="descending"] .sort::after { content: "↓"; opacity: 1; color: var
 .suite-name { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink); font-weight: 500; }
 .suite-tasks { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-dim); letter-spacing: 0.06em; margin: 0.3rem 0 0.5rem; }
 .suite-desc { font-size: 0.85rem; color: var(--ink-muted); margin: 0; }
+/* a suite that belongs to the other page's family: tagged and cross-linked,
+   never left looking like this page owns its runs */
+.suite-family {
+  display: inline-block; margin-left: 0.45rem; vertical-align: middle;
+  font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.04em;
+  color: var(--volt); text-decoration: none; border: 1px solid rgba(0, 255, 65, 0.4);
+  padding: 0 0.3rem;
+}
+.suite-family:hover { color: var(--canvas); background: var(--volt); }
 
 /* —— CTA —— */
 .cta-band {

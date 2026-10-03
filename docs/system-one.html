@@ -155,20 +155,20 @@
         </div>
 
         <div class="table-wrap">
-          <table class="results" id="results-table">
-            <thead>
-              <tr>
-                <th scope="col" data-key="date" aria-sort="descending"><button type="button" class="sort">Date</button></th>
-                <th scope="col" data-key="machine"><button type="button" class="sort">Machine</button></th>
-                <th scope="col" data-key="model"><button type="button" class="sort">Model</button></th>
-                <th scope="col" data-key="harness"><button type="button" class="sort">Harness</button></th>
-                <th scope="col" data-key="mode"><button type="button" class="sort">Mode</button></th>
-                <th scope="col" data-key="thinking"><button type="button" class="sort">Think</button></th>
-                <th scope="col" data-key="suite"><button type="button" class="sort">Suite</button></th>
-                <th scope="col" class="num" data-key="score"><button type="button" class="sort">Score</button></th>
+          <table class="results" id="results-table" role="table">
+            <thead role="rowgroup">
+              <tr role="row">
+                <th scope="col" role="columnheader" data-key="date" aria-sort="descending"><button type="button" class="sort">Date</button></th>
+                <th scope="col" role="columnheader" data-key="machine"><button type="button" class="sort">Machine</button></th>
+                <th scope="col" role="columnheader" data-key="model"><button type="button" class="sort">Model</button></th>
+                <th scope="col" role="columnheader" data-key="harness"><button type="button" class="sort">Harness</button></th>
+                <th scope="col" role="columnheader" data-key="mode"><button type="button" class="sort">Mode</button></th>
+                <th scope="col" role="columnheader" data-key="thinking"><button type="button" class="sort">Think</button></th>
+                <th scope="col" role="columnheader" data-key="suite"><button type="button" class="sort">Suite</button></th>
+                <th scope="col" role="columnheader" class="num" data-key="score"><button type="button" class="sort">Score</button></th>
               </tr>
             </thead>
-            <tbody id="results-body"></tbody>
+            <tbody id="results-body" role="rowgroup"></tbody>
           </table>
           <div class="table-empty" id="results-empty" hidden>
             No runs match these filters. <button type="button" id="empty-reset">Clear filters</button>
