@@ -397,7 +397,7 @@
     ], (r) => r.model);
     $("#s1-note").innerHTML = esc(s.note) +
       ` <a href="${gh(s.report)}" rel="noopener">Historical comparison →</a>` +
-      (s.latestReport ? ` <a href="${gh(s.latestReport)}" rel="noopener">Mercury results →</a>` : "");
+      (s.latestReport ? ` <a href="${gh(s.latestReport)}" rel="noopener">Latest results →</a>` : "");
 
     const r = s.realUseCase;
     if (!r) return;
@@ -419,7 +419,7 @@
     ], (x) => x.model);
     $("#s1r-note").innerHTML = esc(r.note) +
       ` <a href="${gh(r.report)}" rel="noopener">Historical comparison →</a>` +
-      (r.latestReport ? ` <a href="${gh(r.latestReport)}" rel="noopener">Mercury results →</a>` : "");
+      (r.latestReport ? ` <a href="${gh(r.latestReport)}" rel="noopener">Latest results →</a>` : "");
   }
 
   /* —— ledger filters (both pages, each over its own suites) —— */

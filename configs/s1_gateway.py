@@ -25,6 +25,14 @@ answers is a deployment detail behind `S1_BACKEND`:
               Jev-style decision model implementing the same `/v1/systemone`
               contract, so this reuses the identical translation pointed at
               `KEV_BASE_URL`. No API key.
+- `clef`      Cloudflare/clef (or clef-flash) in-process — the release ships
+              `joint_schema_model.py`, whose `systemone()` takes a
+              `/v1/systemone` request body and returns the same response
+              body. Loaded once at startup via `load_release_model` (bf16,
+              CUDA), each request runs in a thread executor, and the native
+              `/v1/systemone` route forwards verbatim to it — the phishing
+              service's SDK needs no changes. Needs a torch+transformers
+              interpreter (the kev venv); repo from `CLEF_REPO`.
 - `systemone` Any native System One API at `S1_DECISION_URL`, including
               OpenRouter's /api/alpha/decisions. Supports the benchmark chat
               surface and native SDK requests at /v1/systemone.
@@ -39,7 +47,7 @@ this URL measures the candidate through exactly the same transport the
 baseline was measured through (see docs/S1-ENDPOINT.md).
 
 Env:
-    S1_BACKEND         typesafe (default) | nimble | laya | kev | proxy | systemone
+    S1_BACKEND         typesafe (default) | nimble | laya | kev | clef | proxy | systemone
     S1_PORT            listen port (default 8123)
     TYPESAFE_API_KEY   bearer key for the typesafe backend
     TYPESAFE_BASE_URL  default https://api.typesafe.ai/v1
@@ -49,6 +57,9 @@ Env:
     KEV_MODEL          model id sent to kev's /v1/systemone (default kev-latest)
     LAYA_MODEL_DIR     HF id or local dir for the laya checkpoint
                        (default ~/models/laya-typed-decisions)
+    CLEF_REPO          HF id or local dir of a clef release
+                       (default Cloudflare/clef-flash)
+    CLEF_DEVICE        torch device for the clef backbone (default cuda)
     S1_UPSTREAM        proxy backend base URL, e.g. http://localhost:8001/v1
     S1_DECISION_URL    full native decision URL (systemone backend), default
                        https://api.typesafe.ai/v1/systemone; supports OpenRouter
@@ -81,6 +92,8 @@ KEV_MODEL = os.environ.get("KEV_MODEL", "kev-latest")
 LAYA_DIR = os.environ.get(
     "LAYA_MODEL_DIR",
     os.path.expanduser("~/models/laya-typed-decisions"))
+CLEF_REPO = os.environ.get("CLEF_REPO", "Cloudflare/clef-flash")
+CLEF_DEVICE = os.environ.get("CLEF_DEVICE", "cuda")
 
 # Fixed trailers emitted by benchkit.s1_runner._render — parse anchors.
 CHOICE_TAIL = "\nAnswer with the option letter or its exact text, and nothing else."
@@ -269,6 +282,30 @@ async def handle_laya(request, body):
                              "laya")
 
 
+async def _clef_systemone(app, body):
+    """Run clef's joint_schema_model.systemone() off the event loop."""
+    import asyncio
+    jsm = app.get("clef_jsm")
+    if jsm is None:
+        raise RuntimeError("clef model not loaded")
+    return await asyncio.get_running_loop().run_in_executor(
+        None, jsm.systemone, app["clef_model"], app["clef_processor"], body)
+
+
+async def handle_clef(request, body):
+    """Translate into a clef decision via joint_schema_model.systemone()."""
+    async def ask(app, state, question, options, model):
+        payload = _s1_question(state, question, options)
+        payload["model"] = model or _clef_model_id()
+        res = await _clef_systemone(app, payload)
+        return res["answers"]["q"]["choice"], res.get("usage") or {}, res.get("model")
+    return await _answer_via(request, body, ask, _clef_model_id(), "clef")
+
+
+def _clef_model_id():
+    return os.path.basename(CLEF_REPO.rstrip("/")) or "clef"
+
+
 def upstream_headers():
     """Never forward client credentials or implicitly reuse another provider's key."""
     return {"Authorization": f"Bearer {S1_KEY}"} if S1_KEY else {}
@@ -288,8 +325,8 @@ async def handle_systemone(request, body):
 
 async def systemone(request):
     """Native SDK surface: preserve typed questions and calibrated answers verbatim."""
-    if BACKEND != "systemone":
-        return _err(400, "native /v1/systemone requires S1_BACKEND=systemone",
+    if BACKEND not in ("systemone", "clef"):
+        return _err(400, f"native /v1/systemone not supported on backend {BACKEND}",
                     "invalid_request_error")
     try:
         body = await request.json()
@@ -297,6 +334,12 @@ async def systemone(request):
             return _err(400, "state and questions are required", "invalid_request_error")
     except Exception:  # noqa: BLE001
         return _err(400, "bad json", "invalid_request_error")
+    if BACKEND == "clef":
+        body["model"] = body.get("model") or _clef_model_id()
+        try:
+            return web.json_response(await _clef_systemone(request.app, body))
+        except Exception as e:  # noqa: BLE001
+            return _err(502, f"clef: {e}")
     body["model"] = MODEL_OVERRIDE or body.get("model") or TS_MODEL
     try:
         result = await post_decisions(request.app["session"], DECISION_URL,
@@ -334,8 +377,8 @@ async def handle_proxy(request, body):
 
 
 HANDLERS = {"typesafe": handle_typesafe, "nimble": handle_nimble,
-            "laya": handle_laya, "kev": handle_kev, "proxy": handle_proxy,
-            "systemone": handle_systemone}
+            "laya": handle_laya, "kev": handle_kev, "clef": handle_clef,
+            "proxy": handle_proxy, "systemone": handle_systemone}
 
 
 # ------------------------------------------------------------ openai surface ---
@@ -397,7 +440,7 @@ async def models(request):
         except Exception as e:  # noqa: BLE001
             return _err(502, f"proxy upstream: {e}")
     ids = {"typesafe": ["jev-latest"], "nimble": [NIMBLE_MODEL],
-           "kev": [KEV_MODEL], "systemone": [TS_MODEL],
+           "kev": [KEV_MODEL], "systemone": [TS_MODEL], "clef": [_clef_model_id()],
            "proxy": [MODEL_OVERRIDE] if MODEL_OVERRIDE else [],
            "laya": [os.path.basename(LAYA_DIR.rstrip("/")) or "laya"],
            }.get(BACKEND, [])
@@ -407,7 +450,7 @@ async def models(request):
 
 async def health(request):
     upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE, "kev": KEV_BASE,
-                "laya": LAYA_DIR, "proxy": UPSTREAM,
+                "laya": LAYA_DIR, "clef": CLEF_REPO, "proxy": UPSTREAM,
                 "systemone": DECISION_URL}.get(BACKEND, "")
     return web.json_response({"ok": True, "backend": BACKEND,
                               "upstream": upstream})
@@ -429,8 +472,23 @@ async def on_startup(app):
         app["laya"] = await asyncio.get_running_loop().run_in_executor(
             None, laya.load, LAYA_DIR)
         print("laya loaded", flush=True)
+    if BACKEND == "clef":
+        import asyncio
+        import sys
+        from huggingface_hub import snapshot_download
+        print(f"loading clef from {CLEF_REPO} on {CLEF_DEVICE} …", flush=True)
+
+        def _load_clef():
+            path = snapshot_download(CLEF_REPO)
+            sys.path.insert(0, path)
+            import joint_schema_model as jsm
+            return jsm, *jsm.load_release_model(path, device=CLEF_DEVICE)
+        (app["clef_jsm"], app["clef_model"],
+         app["clef_processor"]) = await asyncio.get_running_loop(
+            ).run_in_executor(None, _load_clef)
+        print("clef loaded", flush=True)
     upstream = {"typesafe": TS_BASE, "nimble": NIMBLE_BASE, "kev": KEV_BASE,
-                "laya": LAYA_DIR, "proxy": UPSTREAM,
+                "laya": LAYA_DIR, "clef": CLEF_REPO, "proxy": UPSTREAM,
                 "systemone": DECISION_URL}.get(BACKEND, "")
     print(f"s1-gateway on :{PORT}  backend={BACKEND}  upstream={upstream}", flush=True)
 

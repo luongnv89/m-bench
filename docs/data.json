@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-01",
+  "generated": "2026-10-05",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -221,7 +221,7 @@
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
   },
   "systemOne": {
-    "setup": "system1 suite · 49 typed questions · 2 samples · standard s1 gateway; Mercury used temporary :8124 without restarting shared :8123",
+    "setup": "system1 suite · 49 typed questions · 2 samples · standard s1 gateway; Mercury and Clef-Flash used temporary :8124 without restarting shared :8123",
     "question": "Typed-decision models behind one stable endpoint — can anything replace Jev?",
     "rows": [
       {
@@ -269,6 +269,17 @@
         "note": "96/98, no generation errors; ties historical Jev; latency includes free-tier quota waits"
       },
       {
+        "model": "Clef-Flash-9B",
+        "modelKey": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
+        "score": 98.0,
+        "ci": "92.9–99.4",
+        "secPerQ": 0.6,
+        "outTok": 0,
+        "wall": 14,
+        "serving": "local in-process bf16 ~19 GiB · clef backend",
+        "note": "ties Jev — identical failure set (only error_log/q1); fits alongside every service on the box, nothing stopped"
+      },
+      {
         "model": "Qwen3.6-35B think-OFF",
         "modelKey": "Qwen3.6-35B-A3B",
         "score": 96.9,
@@ -314,8 +325,8 @@
       }
     ],
     "report": "results/2026-09-30/REPORT-s1-candidates.md",
-    "latestReport": "results/2026-10-01-mercury-decide-rerun/REPORT.md",
-    "note": "Mercury Decide ties historical Jev at 96/98 (98.0%) with zero generation errors; its only miss is error_log/q1 in both samples. The 2.0-point advantage over today's kev-latest baseline is within statistical noise. Mercury used the same gateway on temporary :8124; all other ports and local services were untouched. Its 2.64 s/question includes OpenRouter quota waits and WAN latency, not just inference. Nimble and Kev-27B also tie Jev; Kev-4B remains the fastest local option in these historical comparisons. These small suites are near saturation — harder tasks are needed, not claims of a perfect model.",
+    "latestReport": "results/2026-10-05/REPORT-clef-flash-s1.md",
+    "note": "Clef-Flash-9B (Cloudflare/clef-flash, bf16 ~19 GiB) ties Jev at 98.0% with an identical failure set — error_log/q1 only — and is the largest top-tier candidate that fits alongside every running service; nothing was stopped. Mercury Decide also ties at 96/98 via hosted OpenRouter (2.64 s/question includes free-tier quota waits); Nimble and Kev-27B tie at 98.0% too, but Kev-27B needed the incumbent vLLM endpoint stopped to run. Kev-4B remains the fastest local backend at 0.23 s/question. These small suites are near saturation — harder tasks are needed, not claims of a perfect model.",
     "realUseCase": {
       "setup": "anti-phishing-email-service · 16 adjudicated emails · typesafe_only arm, zero code changes",
       "question": "Real workload, same contract: can local or hosted models replace Jev on the phishing classifier?",
@@ -351,6 +362,16 @@
           "note": "16/16 — matches Jev, slower than Kev-4B; named the right attack type on the hardest lure, still needed the risk pipeline over a borderline noul"
         },
         {
+          "model": "Clef-Flash-9B · same arm",
+          "modelKey": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
+          "score": 100.0,
+          "ci": "81–100",
+          "secPerQ": 0.47,
+          "wall": 7.5,
+          "serving": "local s1 gateway :8124 · env-only swap · ~19 GiB",
+          "note": "16/16 — matches Jev; the only local arm whose noul cleared the 0.5 gate unaided on the hardest lure (0.730), naming credential_harvesting at 0.72"
+        },
+        {
           "model": "Mercury Decide · same arm",
           "modelKey": "inception/mercury-decide:free",
           "score": 100.0,
@@ -382,11 +403,13 @@
         }
       ],
       "report": "results/2026-09-30/REPORT-s1-phishing-kev.md",
-      "latestReport": "results/2026-10-01-mercury-decide-rerun/REPORT.md",
-      "note": "Mercury Decide scored F1 1.000 on all 16 emails (9 phishing, 7 benign), with no analyzer failures or fallback. The existing typesafe_only pipeline makes the final risk decision — this is not a raw noul-head score. Native questions and calibrated answers pass through the gateway unchanged. Mean 2.93 s/email, p95 4.81 s; free-tier quota handling and WAN latency apply. Both Kev variants and historical Jev also solved 16/16; Kev-4B is faster and local. n=16 is saturated, not proof of generalization: one flip changes F1 by about 6 points."
+      "latestReport": "results/2026-10-05/REPORT-s1-phishing-clef-flash.md",
+      "note": "Clef-Flash-9B scored F1 1.000 on all 16 emails at 0.47 s/email — the only local arm whose phishing noul cleared the 0.5 analyzer gate unaided on the hardest credential-harvesting lure (0.730 vs Jev's 0.710), where both Kev variants needed the risk pipeline and Nimble missed outright. The existing typesafe_only pipeline makes the final risk decision — this is not a raw noul-head score. Jev, both Kevs, Mercury Decide and gpt-oss-120b also solved 16/16; Nimble scored 0.941. n=16 is saturated, not proof of generalization: one flip changes F1 by about 6 points."
     }
   },
   "results": [
+    {"date": "2026-10-05", "machine": "dgx-spark", "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-05/REPORT-clef-flash-s1.md"},
+    {"date": "2026-10-05", "machine": "dgx-spark", "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)", "harness": "anti-phishing pipeline", "mode": "isolated", "thinking": "—", "suite": "phishing-eval", "score": 100.0, "unit": "f1", "report": "results/2026-10-05/REPORT-s1-phishing-clef-flash.md"},
     {"date": "2026-10-01", "machine": "dgx-spark", "model": "inception/mercury-decide:free", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-01-mercury-decide-rerun/REPORT.md"},
     {"date": "2026-10-01", "machine": "dgx-spark", "model": "inception/mercury-decide:free", "harness": "anti-phishing pipeline", "mode": "isolated", "thinking": "—", "suite": "phishing-eval", "score": 100.0, "unit": "f1", "report": "results/2026-10-01-mercury-decide-rerun/REPORT.md"},
     {"date":  "2026-10-01", "machine":  "dgx-spark", "model":  "Kev-27B (kev.serve bf16)", "harness":  "anti-phishing pipeline", "mode":  "isolated", "thinking":  "—", "suite":  "phishing-eval", "score":  100.0, "unit":  "f1", "report":  "results/2026-10-01/REPORT-s1-phishing-kev27b.md"},
@@ -434,6 +457,12 @@
     {"date":  "2026-08-26", "machine":  "small-box", "model":  "Muse Spark 1.2 Free", "harness":  "opencode", "mode":  "live", "thinking":  "OFF", "suite":  "agentic-hard", "score":  44.1, "unit":  "agent", "report":  "results/2026-08-26/REPORT-live.md"}
   ],
   "campaigns": [
+    {
+      "date": "2026-10-05",
+      "question": "Can Cloudflare's clef decision model run locally behind the s1 endpoint without disturbing what is already served?",
+      "answer": "Clef-Flash-9B — yes, cleanly. 98.0% on system1 ties Jev with an identical failure set (error_log/q1 only), and F1 1.000 on the phishing corpus at 0.47 s/email — the only local arm whose phishing noul cleared the 0.5 gate unaided on the hardest lure (0.730 vs Jev's 0.710). At ~19 GiB bf16 it ran alongside every service; nothing was stopped. The requested 27B clef (~55-65 GiB) cannot coexist with the incumbent endpoint and was not benchmarked.",
+      "link": "results/2026-10-05/REPORT-s1-phishing-clef-flash.md"
+    },
     {
       "date": "2026-10-01",
       "question": "Can OpenRouter Mercury Decide replace the System One backend using only endpoint configuration?",

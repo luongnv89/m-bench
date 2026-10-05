@@ -9,14 +9,15 @@ change and a restart, not an application change.
 ```
 app / bench ──► :8123/v1 (OpenAI chat subset) ──► s1_gateway.py
                                                    │
-                  S1_BACKEND ───────────────────────────┤
-                  │          │          │         │     │
-               typesafe    nimble      laya     kev   proxy
-                  │          │          │         │     │
-            api.typesafe  ollama    in-process  kev.  S1_UPSTREAM
-            /v1/systemone /v1/      predict()   serve (vLLM, llama.cpp,
-                          systemone           /v1/    any OpenAI model)
-                                              systemone
+                  S1_BACKEND ──────────────────────────────┤
+                  │          │          │      │       │   │
+               typesafe    nimble      laya   kev    clef proxy
+                  │          │          │      │       │   │
+            api.typesafe  ollama    in-process kev.  in-  S1_UPSTREAM
+            /v1/systemone /v1/      predict()  serve proc.  (vLLM,
+                          systemone          /v1/  jsm.    llama.cpp,
+                                             systemone sys-  any OpenAI
+                                                     temone  model)
 ```
 
 ## The contract
@@ -64,6 +65,7 @@ Measured candidates through this same endpoint (issue #104):
 | Kev-4B (`kev.serve`, bf16) | `kev` | 95.9 % — inside noise | local, ~15 GiB measured, fine-tunable; misses only `spam_email/q2` beyond Jev's own `error_log/q1` |
 | Kev-27B (`kev.serve`, bf16) | `kev` | **98.0 %** — ties Jev | local, ~63 GiB measured; cannot coexist with the incumbent vLLM endpoint on this box — needed `vllm-qwen.service` stopped to run; only miss is `error_log/q1`, identical to Jev's |
 | Kev-4B (Q4_K_M GGUF, llama.cpp master `/v1/systemone`) | `kev` | 95.9 % — inside noise | identical miss profile to `kev.serve` bf16; ~3 GiB, needs a build ≥ decision-model merge (PR #29818, 2026-10-02) |
+| Clef-Flash-9B (`Cloudflare/clef-flash`, bf16) | `clef` | **98.0 %** — ties Jev | local, ~19 GiB measured; fits alongside everything — nothing stopped; only miss is `error_log/q1`, identical to Jev's; F1 1.000 on the phishing corpus with the strongest local noul on the hardest lure |
 
 Mercury Decide `inception/mercury-decide:free` through `systemone`:
 **98.0% (96/98)**, zero generation errors; **F1 1.000 on 16 phishing emails**
@@ -76,7 +78,9 @@ shared default. Report: `results/2026-10-01-mercury-decide-rerun/REPORT.md`.
 Full comparison: `results/2026-09-30/REPORT-s1-candidates.md` (+ `NOTES-s1-candidates.md`);
 Kev runs: `results/2026-09-30/REPORT-kev-s1.md` (+ `NOTES-kev-s1.md`),
 `results/2026-10-01/REPORT-kev27b-s1.md` (+ `NOTES-kev27b-s1.md`),
-`results/2026-10-02/REPORT-kev4b-llamacpp-s1.md` (+ `NOTES-kev4b-llamacpp-s1.md`).
+`results/2026-10-02/REPORT-kev4b-llamacpp-s1.md` (+ `NOTES-kev4b-llamacpp-s1.md`);
+Clef-Flash run: `results/2026-10-05/REPORT-clef-flash-s1.md` (+ `NOTES-clef-flash-s1.md`),
+`results/2026-10-05/REPORT-s1-phishing-clef-flash.md`.
 
 ## Backends
 
@@ -204,6 +208,26 @@ scores **98.0 %** — ties Jev — at 1.1 s/question in ~63 GiB, which does *not
 fit beside the vLLM incumbent on this box (~120 GiB unified); benchmarking it
 required stopping `vllm-qwen.service` first. Both variants share the shipped
 fine-tune loop as their differentiator.
+
+### `clef` — Cloudflare/clef(-flash) in-process
+
+```bash
+CLEF_REPO=Cloudflare/clef-flash S1_BACKEND=clef \
+    python3 configs/s1_gateway.py      # needs torch+transformers (the kev venv)
+```
+
+The release ships `joint_schema_model.py`; the gateway loads it at startup
+(`snapshot_download` + `load_release_model`, bf16 on `CLEF_DEVICE`, default
+cuda) and runs its `systemone(model, processor, body)` in a thread executor —
+it consumes a `/v1/systemone` request natively, so the adapter is one line
+and the native `/v1/systemone` route forwards verbatim (the phishing SDK
+needs no changes). `CLEF_REPO` takes any clef release (`Cloudflare/clef` for
+the 27B) or a local dir. Deps beyond aiohttp: torch, transformers 5.x, and
+`torchvision` for the AutoProcessor's video backend — on aarch64/GB10 the
+PyPI CPU wheel (0.23.0) works with torch 2.8.0+cu129; there is no aarch64
+CUDA torchvision wheel. Prefill-only scorer: reports input tokens only.
+Measured: clef-flash ~19 GiB resident, coexists with the incumbent; clef-27B
+(~55-65 GiB) cannot — benchmarking it needs the vLLM endpoint stopped.
 
 ### `laya` — convaiinnovations/laya in-process
 
