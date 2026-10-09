@@ -1,0 +1,141 @@
+s1-gateway on :8124  backend=kev  upstream=http://localhost:8009/v1
+Error handling request from 127.0.0.1
+Traceback (most recent call last):
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_protocol.py", line 575, in _handle_request
+    resp = await request_handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_app.py", line 559, in _handle
+    return await handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 430, in chat_completions
+    return await HANDLERS[BACKEND](request, body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 265, in handle_kev
+    return await _answer_via(request, body, ask, KEV_MODEL, "kev")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 236, in _answer_via
+    return await _chat_response(request, body, shown or fallback_model,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                answer, usage)
+                                ^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 414, in _chat_response
+    await resp.prepare(request)
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 464, in prepare
+    return await self._start(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 472, in _start
+    await self._write_headers()
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 552, in _write_headers
+    writer.send_headers()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 231, in send_headers
+    self._write(headers_buf)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 102, in _write
+    raise ClientConnectionResetError("Cannot write to closing transport")
+aiohttp.client_exceptions.ClientConnectionResetError: Cannot write to closing transport
+Error handling request from 127.0.0.1
+Traceback (most recent call last):
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_protocol.py", line 575, in _handle_request
+    resp = await request_handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_app.py", line 559, in _handle
+    return await handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 430, in chat_completions
+    return await HANDLERS[BACKEND](request, body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 265, in handle_kev
+    return await _answer_via(request, body, ask, KEV_MODEL, "kev")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 236, in _answer_via
+    return await _chat_response(request, body, shown or fallback_model,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                answer, usage)
+                                ^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 414, in _chat_response
+    await resp.prepare(request)
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 464, in prepare
+    return await self._start(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 472, in _start
+    await self._write_headers()
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 552, in _write_headers
+    writer.send_headers()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 231, in send_headers
+    self._write(headers_buf)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 102, in _write
+    raise ClientConnectionResetError("Cannot write to closing transport")
+aiohttp.client_exceptions.ClientConnectionResetError: Cannot write to closing transport
+Error handling request from 127.0.0.1
+Traceback (most recent call last):
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_protocol.py", line 575, in _handle_request
+    resp = await request_handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_app.py", line 559, in _handle
+    return await handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 430, in chat_completions
+    return await HANDLERS[BACKEND](request, body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 265, in handle_kev
+    return await _answer_via(request, body, ask, KEV_MODEL, "kev")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 236, in _answer_via
+    return await _chat_response(request, body, shown or fallback_model,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                answer, usage)
+                                ^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 414, in _chat_response
+    await resp.prepare(request)
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 464, in prepare
+    return await self._start(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 472, in _start
+    await self._write_headers()
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 552, in _write_headers
+    writer.send_headers()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 231, in send_headers
+    self._write(headers_buf)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 102, in _write
+    raise ClientConnectionResetError("Cannot write to closing transport")
+aiohttp.client_exceptions.ClientConnectionResetError: Cannot write to closing transport
+Error handling request from 127.0.0.1
+Traceback (most recent call last):
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_protocol.py", line 575, in _handle_request
+    resp = await request_handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_app.py", line 559, in _handle
+    return await handler(request)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 430, in chat_completions
+    return await HANDLERS[BACKEND](request, body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 265, in handle_kev
+    return await _answer_via(request, body, ask, KEV_MODEL, "kev")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 236, in _answer_via
+    return await _chat_response(request, body, shown or fallback_model,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                answer, usage)
+                                ^^^^^^^^^^^^^^
+  File "/home/montimage/workspace/luongnv89/m-bench/configs/s1_gateway.py", line 414, in _chat_response
+    await resp.prepare(request)
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 464, in prepare
+    return await self._start(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 472, in _start
+    await self._write_headers()
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/web_response.py", line 552, in _write_headers
+    writer.send_headers()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 231, in send_headers
+    self._write(headers_buf)
+    ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/montimage/miniconda3/lib/python3.13/site-packages/aiohttp/http_writer.py", line 102, in _write
+    raise ClientConnectionResetError("Cannot write to closing transport")
+aiohttp.client_exceptions.ClientConnectionResetError: Cannot write to closing transport

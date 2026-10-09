@@ -45,7 +45,8 @@ Do not proceed until `/models` returns the model you intend to test.
 pip install -e .
 ./bench validate                  # must print 28/28
 ./bench validate --suite agentic-all   # must print 16/16
-./bench validate --suite system1       # must print 23/23 (data lint)
+./bench validate --suite system1       # must print 200/200 (data lint, v2)
+./bench validate --suite system1-legacy # must print 23/23 (historical v1)
 ```
 
 **If either is not 100 %, stop and fix the harness.** A failing reference solution or oracle
@@ -105,8 +106,11 @@ with `--max-turns` bounding each task exactly as in `./bench run`.
 
 Otherwise point `BENCH_BASE_URL` at each endpoint in turn and use `./bench run`.
 
-For `system1` candidates specifically: the baseline is TypeSafe Jev
-(`results/2026-09-30/typesafe-jev-1-13-s1.json`, 98.0 %). Serve the candidate
+For `system1` candidates specifically: re-measure the TypeSafe Jev baseline on
+the current 200-scenario / 400-question v2 suite. The historical baseline
+(`results/2026-09-30/typesafe-jev-1-13-s1.json`, 98.0 %) belongs to
+`system1-legacy` (23 scenarios / 49 questions) and cannot be compared with v2.
+Serve the candidate
 behind the **standard s1 endpoint** — `configs/s1_gateway.py` on :8123, same
 URL for every backend (`typesafe`, `proxy` to any OpenAI-native model, `laya`
 stub) — so the candidate is measured through the same transport the baseline
@@ -287,7 +291,8 @@ Both kinds require proof the task is winnable before any model is judged:
   `oracle(ws)`, then `./bench validate --suite agentic-all` stays at 100 %.
 - system1: a task in `benchkit/suites/system1.py` with `state` and `questions`
   (`{question, options, answer}`; `answer` ∈ `options`, or `options` omitted for an
-  open short answer), then `./bench validate --suite system1` data-lints 23/23.
+  open short answer), then `./bench validate --suite system1` data-lints 200/200.
+  Dataset design and independent answer-key checks: `docs/SYSTEM1-DATASET.md`.
 
 The oracle also sets **par** — the minimum tool calls — which is what efficiency is
 measured against. Write the oracle the way a competent engineer would work, not

@@ -1,0 +1,815 @@
+suite=system1 (200 tasks)  typesafe jev-1.13.0 api.typesafe.ai system1-v2
+endpoint=http://localhost:8124/v1  samples=2  concurrency=1
+
+  PASS  policy_01/q1         s0     46tok    0.3s 131.6tok/s
+  PASS  policy_01/q1         s1     46tok    0.3s 183.1tok/s
+  PASS  policy_01/q2         s0     58tok    0.2s 240.9tok/s
+  PASS  policy_01/q2         s1     58tok    0.3s 203.1tok/s
+  PASS  policy_02/q1         s0     46tok    0.2s 208.5tok/s
+  PASS  policy_02/q1         s1     46tok    0.2s 205.9tok/s
+  PASS  policy_02/q2         s0     58tok    0.2s 256.3tok/s
+  PASS  policy_02/q2         s1     58tok    0.2s 288.8tok/s
+  PASS  policy_03/q1         s0     47tok    0.2s 197.3tok/s
+  PASS  policy_03/q1         s1     47tok    0.3s 187.0tok/s
+  PASS  policy_03/q2         s0     58tok    0.2s 237.3tok/s
+  PASS  policy_03/q2         s1     58tok    0.2s 232.8tok/s
+  FAIL  policy_04/q1         s0     46tok    0.2s 207.1tok/s   <expected 'reject'>
+  FAIL  policy_04/q1         s1     46tok    0.2s 227.9tok/s   <expected 'reject'>
+  FAIL  policy_04/q2         s0     58tok    0.2s 239.1tok/s   <expected 'R5'>
+  FAIL  policy_04/q2         s1     58tok    0.2s 244.2tok/s   <expected 'R5'>
+  PASS  policy_05/q1         s0     46tok    0.2s 218.4tok/s
+  PASS  policy_05/q1         s1     46tok    0.2s 215.4tok/s
+  PASS  policy_05/q2         s0     58tok    0.2s 271.6tok/s
+  PASS  policy_05/q2         s1     58tok    0.2s 290.8tok/s
+  PASS  policy_06/q1         s0     47tok    0.3s 183.3tok/s
+  PASS  policy_06/q1         s1     47tok    0.3s 154.7tok/s
+  PASS  policy_06/q2         s0     58tok    0.2s 272.9tok/s
+  PASS  policy_06/q2         s1     58tok    0.3s 211.3tok/s
+  PASS  policy_07/q1         s0     46tok    0.2s 196.8tok/s
+  PASS  policy_07/q1         s1     46tok    0.2s 197.4tok/s
+  PASS  policy_07/q2         s0     58tok    0.2s 276.9tok/s
+  PASS  policy_07/q2         s1     58tok    0.2s 256.1tok/s
+  PASS  policy_08/q1         s0     46tok    0.2s 216.3tok/s
+  PASS  policy_08/q1         s1     46tok    0.2s 234.7tok/s
+  PASS  policy_08/q2         s0     58tok    0.2s 241.4tok/s
+  PASS  policy_08/q2         s1     58tok    0.3s 180.1tok/s
+  PASS  policy_09/q1         s0     46tok    0.3s 182.8tok/s
+  PASS  policy_09/q1         s1     46tok    0.2s 221.0tok/s
+  PASS  policy_09/q2         s0     58tok    0.2s 288.3tok/s
+  PASS  policy_09/q2         s1     58tok    0.2s 274.0tok/s
+  PASS  policy_10/q1         s0     47tok    0.2s 200.3tok/s
+  PASS  policy_10/q1         s1     47tok    0.3s 174.7tok/s
+  PASS  policy_10/q2         s0     58tok    0.2s 257.8tok/s
+  PASS  policy_10/q2         s1     58tok    0.2s 271.4tok/s
+  FAIL  policy_11/q1         s0     46tok    0.2s 216.3tok/s   <expected 'reject'>
+  FAIL  policy_11/q1         s1     46tok    0.3s 150.5tok/s   <expected 'reject'>
+  PASS  policy_11/q2         s0     58tok    0.2s 276.4tok/s
+  FAIL  policy_11/q2         s1     58tok    0.2s 251.4tok/s   <expected 'R5'>
+  PASS  policy_12/q1         s0     46tok    0.2s 199.7tok/s
+  PASS  policy_12/q1         s1     46tok    0.2s 219.6tok/s
+  PASS  policy_12/q2         s0     58tok    0.2s 238.3tok/s
+  PASS  policy_12/q2         s1     58tok    0.3s 218.6tok/s
+  FAIL  policy_13/q1         s0     46tok    0.2s 216.7tok/s   <expected 'replacement'>
+  FAIL  policy_13/q1         s1     46tok    0.2s 228.3tok/s   <expected 'replacement'>
+  PASS  policy_13/q2         s0     58tok    0.2s 281.5tok/s
+  PASS  policy_13/q2         s1     58tok    0.2s 243.7tok/s
+  FAIL  policy_14/q1         s0     46tok    0.2s 224.2tok/s   <expected 'reject'>
+  PASS  policy_14/q1         s1     46tok    0.2s 226.3tok/s
+  FAIL  policy_14/q2         s0     58tok    0.2s 287.4tok/s   <expected 'R5'>
+  FAIL  policy_14/q2         s1     58tok    0.2s 291.1tok/s   <expected 'R5'>
+  PASS  policy_15/q1         s0     46tok    0.2s 218.2tok/s
+  FAIL  policy_15/q1         s1     46tok    0.2s 218.3tok/s   <expected 'replacement'>
+  PASS  policy_15/q2         s0     58tok    0.2s 276.8tok/s
+  PASS  policy_15/q2         s1     58tok    0.2s 265.7tok/s
+  PASS  policy_16/q1         s0     46tok    0.2s 231.2tok/s
+  PASS  policy_16/q1         s1     46tok    0.2s 236.5tok/s
+  PASS  policy_16/q2         s0     58tok    0.2s 236.3tok/s
+  PASS  policy_16/q2         s1     58tok    0.2s 299.8tok/s
+  FAIL  policy_17/q1         s0     46tok    0.3s 152.9tok/s   <expected 'request proof'>
+  FAIL  policy_17/q1         s1     46tok    0.2s 232.5tok/s   <expected 'request proof'>
+  FAIL  policy_17/q2         s0     58tok    0.2s 278.1tok/s   <expected 'R2'>
+  FAIL  policy_17/q2         s1     58tok    0.2s 300.8tok/s   <expected 'R2'>
+  PASS  policy_18/q1         s0     46tok    0.2s 228.3tok/s
+  PASS  policy_18/q1         s1     46tok    0.2s 247.0tok/s
+  PASS  policy_18/q2         s0     58tok    0.2s 260.1tok/s
+  PASS  policy_18/q2         s1     58tok    0.2s 250.8tok/s
+  PASS  policy_19/q1         s0     46tok    0.2s 192.0tok/s
+  PASS  policy_19/q1         s1     46tok    0.3s 178.0tok/s
+  PASS  policy_19/q2         s0     58tok    0.3s 231.6tok/s
+  PASS  policy_19/q2         s1     58tok    0.2s 261.1tok/s
+  PASS  policy_20/q1         s0     46tok    0.2s 188.9tok/s
+  PASS  policy_20/q1         s1     46tok    0.3s 157.0tok/s
+  PASS  policy_20/q2         s0     58tok    0.3s 231.8tok/s
+  PASS  policy_20/q2         s1     58tok    0.2s 278.3tok/s
+  FAIL  triage_01/q1         s0     50tok    0.2s 224.4tok/s   <expected 'P1'>
+  FAIL  triage_01/q1         s1     50tok    0.2s 234.1tok/s   <expected 'P1'>
+  FAIL  triage_01/q2         s0     45tok    0.2s 216.3tok/s   <expected 'operations'>
+  FAIL  triage_01/q2         s1     45tok    0.2s 215.1tok/s   <expected 'operations'>
+  PASS  triage_02/q1         s0     50tok    0.2s 223.4tok/s
+  PASS  triage_02/q1         s1     50tok    0.2s 234.0tok/s
+  PASS  triage_02/q2         s0     45tok    0.2s 192.3tok/s
+  PASS  triage_02/q2         s1     45tok    0.2s 187.3tok/s
+  PASS  triage_03/q1         s0     50tok    0.2s 230.5tok/s
+  PASS  triage_03/q1         s1     50tok    0.4s 130.0tok/s
+  PASS  triage_03/q2         s0     45tok    0.2s 202.8tok/s
+  PASS  triage_03/q2         s1     45tok    0.2s 208.1tok/s
+  PASS  triage_04/q1         s0     50tok    0.4s 140.6tok/s
+  PASS  triage_04/q1         s1     50tok    0.3s 198.8tok/s
+  PASS  triage_04/q2         s0     45tok    0.3s 179.9tok/s
+  PASS  triage_04/q2         s1     45tok    0.3s 167.5tok/s
+  PASS  triage_05/q1         s0     50tok    0.2s 220.5tok/s
+  PASS  triage_05/q1         s1     50tok    0.3s 193.6tok/s
+  PASS  triage_05/q2         s0     45tok    0.2s 193.4tok/s
+  PASS  triage_05/q2         s1     45tok    0.3s 179.5tok/s
+  PASS  triage_06/q1         s0     50tok    0.3s 180.7tok/s
+  PASS  triage_06/q1         s1     50tok    0.2s 205.9tok/s
+  PASS  triage_06/q2         s0     45tok    0.3s 172.3tok/s
+  PASS  triage_06/q2         s1     45tok    0.2s 206.4tok/s
+  PASS  triage_07/q1         s0     50tok    0.2s 212.1tok/s
+  PASS  triage_07/q1         s1     50tok    0.2s 215.5tok/s
+  PASS  triage_07/q2         s0     45tok    0.2s 204.1tok/s
+  PASS  triage_07/q2         s1     45tok    0.2s 207.4tok/s
+  FAIL  triage_08/q1         s0     50tok    0.2s 212.8tok/s   <expected 'P2'>
+  FAIL  triage_08/q1         s1     50tok    0.3s 148.8tok/s   <expected 'P2'>
+  FAIL  triage_08/q2         s0     45tok    0.2s 210.2tok/s   <expected 'billing'>
+  PASS  triage_08/q2         s1     45tok    0.2s 198.7tok/s
+  PASS  triage_09/q1         s0     50tok    0.2s 231.1tok/s
+  PASS  triage_09/q1         s1     50tok    0.2s 230.0tok/s
+  PASS  triage_09/q2         s0     45tok    0.3s 174.5tok/s
+  PASS  triage_09/q2         s1     45tok    0.2s 185.0tok/s
+  PASS  triage_10/q1         s0     50tok    0.2s 207.1tok/s
+  PASS  triage_10/q1         s1     50tok    0.3s 155.2tok/s
+  PASS  triage_10/q2         s0     45tok    0.2s 189.4tok/s
+  PASS  triage_10/q2         s1     45tok    0.2s 225.8tok/s
+  PASS  triage_11/q1         s0     50tok    0.3s 177.4tok/s
+  PASS  triage_11/q1         s1     50tok    0.2s 225.0tok/s
+  PASS  triage_11/q2         s0     45tok    0.2s 212.8tok/s
+  PASS  triage_11/q2         s1     45tok    0.2s 184.2tok/s
+  PASS  triage_12/q1         s0     50tok    0.2s 229.3tok/s
+  PASS  triage_12/q1         s1     50tok    0.2s 209.3tok/s
+  PASS  triage_12/q2         s0     45tok    0.3s 158.0tok/s
+  PASS  triage_12/q2         s1     45tok    0.2s 183.7tok/s
+  PASS  triage_13/q1         s0     50tok    0.2s 238.4tok/s
+  PASS  triage_13/q1         s1     50tok    0.2s 211.7tok/s
+  PASS  triage_13/q2         s0     45tok    0.2s 184.2tok/s
+  PASS  triage_13/q2         s1     45tok    0.2s 182.1tok/s
+  PASS  triage_14/q1         s0     50tok    0.3s 171.3tok/s
+  PASS  triage_14/q1         s1     50tok    0.3s 188.0tok/s
+  PASS  triage_14/q2         s0     45tok    0.2s 208.8tok/s
+  PASS  triage_14/q2         s1     45tok    0.3s 167.4tok/s
+  PASS  triage_15/q1         s0     50tok    0.5s 106.9tok/s
+  PASS  triage_15/q1         s1     50tok    0.2s 228.0tok/s
+  PASS  triage_15/q2         s0     45tok    0.3s 178.0tok/s
+  PASS  triage_15/q2         s1     45tok    0.2s 182.5tok/s
+  PASS  triage_16/q1         s0     50tok    0.2s 213.3tok/s
+  PASS  triage_16/q1         s1     50tok    0.2s 211.5tok/s
+  PASS  triage_16/q2         s0     45tok    0.3s 169.4tok/s
+  PASS  triage_16/q2         s1     45tok    0.2s 196.4tok/s
+  PASS  triage_17/q1         s0     50tok    0.2s 200.9tok/s
+  PASS  triage_17/q1         s1     50tok    0.3s 169.8tok/s
+  PASS  triage_17/q2         s0     45tok    0.3s 173.9tok/s
+  PASS  triage_17/q2         s1     45tok    0.2s 182.8tok/s
+  PASS  triage_18/q1         s0     50tok    0.3s 192.3tok/s
+  PASS  triage_18/q1         s1     50tok    0.2s 224.4tok/s
+  PASS  triage_18/q2         s0     45tok    0.2s 203.3tok/s
+  PASS  triage_18/q2         s1     45tok    0.2s 197.6tok/s
+  PASS  triage_19/q1         s0     50tok    0.2s 212.2tok/s
+  PASS  triage_19/q1         s1     50tok    0.2s 213.4tok/s
+  PASS  triage_19/q2         s0     45tok    0.3s 148.3tok/s
+  PASS  triage_19/q2         s1     45tok    0.3s 177.4tok/s
+  PASS  triage_20/q1         s0     50tok    0.2s 230.0tok/s
+  PASS  triage_20/q1         s1     50tok    0.2s 221.8tok/s
+  PASS  triage_20/q2         s0     45tok    0.2s 180.4tok/s
+  PASS  triage_20/q2         s1     45tok    0.2s 198.5tok/s
+  PASS  access_01/q1         s0     31tok    0.3s 119.3tok/s
+  PASS  access_01/q1         s1     31tok    0.2s 135.7tok/s
+  PASS  access_01/q2         s0     61tok    0.2s 288.7tok/s
+  PASS  access_01/q2         s1     61tok    0.2s 248.0tok/s
+  PASS  access_02/q1         s0     31tok    0.2s 139.3tok/s
+  PASS  access_02/q1         s1     31tok    0.2s 138.8tok/s
+  PASS  access_02/q2         s0     62tok    0.2s 270.9tok/s
+  PASS  access_02/q2         s1     62tok    0.3s 244.1tok/s
+  PASS  access_03/q1         s0     31tok    0.2s 134.4tok/s
+  PASS  access_03/q1         s1     31tok    0.2s 131.5tok/s
+  PASS  access_03/q2         s0     61tok    0.4s 145.5tok/s
+  PASS  access_03/q2         s1     61tok    0.2s 261.1tok/s
+  PASS  access_04/q1         s0     31tok    0.2s 126.3tok/s
+  PASS  access_04/q1         s1     31tok    0.3s 120.6tok/s
+  PASS  access_04/q2         s0     61tok    0.6s  99.5tok/s
+  PASS  access_04/q2         s1     61tok    0.2s 310.3tok/s
+  PASS  access_05/q1         s0     31tok    0.2s 152.0tok/s
+  PASS  access_05/q1         s1     31tok    0.2s 141.3tok/s
+  PASS  access_05/q2         s0     61tok    0.2s 276.4tok/s
+  PASS  access_05/q2         s1     61tok    0.2s 272.5tok/s
+  PASS  access_06/q1         s0     31tok    0.2s 129.5tok/s
+  PASS  access_06/q1         s1     31tok    0.2s 142.0tok/s
+  PASS  access_06/q2         s0     62tok    0.2s 332.9tok/s
+  PASS  access_06/q2         s1     62tok    0.2s 257.7tok/s
+  PASS  access_07/q1         s0     31tok    0.2s 131.6tok/s
+  PASS  access_07/q1         s1     31tok    0.2s 147.4tok/s
+  PASS  access_07/q2         s0     62tok    0.2s 309.2tok/s
+  PASS  access_07/q2         s1     62tok    0.2s 275.5tok/s
+  PASS  access_08/q1         s0     31tok    0.2s 157.1tok/s
+  PASS  access_08/q1         s1     31tok    0.2s 146.5tok/s
+  FAIL  access_08/q2         s0     61tok    0.2s 279.6tok/s   <expected 'DEFAULT'>
+  FAIL  access_08/q2         s1     61tok    0.2s 307.2tok/s   <expected 'DEFAULT'>
+  PASS  access_09/q1         s0     31tok    0.2s 137.0tok/s
+  PASS  access_09/q1         s1     31tok    0.2s 140.1tok/s
+  FAIL  access_09/q2         s0     62tok    0.3s 189.4tok/s   <expected 'DEFAULT'>
+  FAIL  access_09/q2         s1     62tok    0.2s 324.4tok/s   <expected 'DEFAULT'>
+  PASS  access_10/q1         s0     31tok    0.2s 154.2tok/s
+  PASS  access_10/q1         s1     31tok    0.4s  81.3tok/s
+  PASS  access_10/q2         s0     61tok    0.2s 288.2tok/s
+  PASS  access_10/q2         s1     61tok    0.2s 283.6tok/s
+  PASS  access_11/q1         s0     31tok    0.2s 143.6tok/s
+  PASS  access_11/q1         s1     31tok    0.2s 134.9tok/s
+  PASS  access_11/q2         s0     61tok    0.2s 294.5tok/s
+  PASS  access_11/q2         s1     61tok    0.4s 170.1tok/s
+  PASS  access_12/q1         s0     31tok    0.2s 157.2tok/s
+  PASS  access_12/q1         s1     31tok    0.2s 128.7tok/s
+  PASS  access_12/q2         s0     61tok    0.2s 285.3tok/s
+  PASS  access_12/q2         s1     61tok    0.2s 283.3tok/s
+  PASS  access_13/q1         s0     31tok    0.2s 146.3tok/s
+  PASS  access_13/q1         s1     31tok    0.2s 136.1tok/s
+  FAIL  access_13/q2         s0     61tok    0.2s 265.8tok/s   <expected 'DEFAULT'>
+  FAIL  access_13/q2         s1     61tok    0.2s 265.5tok/s   <expected 'DEFAULT'>
+  FAIL  access_14/q1         s0     31tok    0.2s 146.6tok/s   <expected 'deny'>
+  PASS  access_14/q1         s1     31tok    0.2s 157.5tok/s
+  PASS  access_14/q2         s0     61tok    0.3s 220.2tok/s
+  FAIL  access_14/q2         s1     61tok    0.4s 162.6tok/s   <expected 'DEFAULT'>
+  PASS  access_15/q1         s0     31tok    0.2s 137.6tok/s
+  PASS  access_15/q1         s1     31tok    0.3s 115.5tok/s
+  PASS  access_15/q2         s0     61tok    0.3s 241.0tok/s
+  PASS  access_15/q2         s1     61tok    0.2s 262.3tok/s
+  PASS  access_16/q1         s0     31tok    0.2s 147.8tok/s
+  PASS  access_16/q1         s1     31tok    0.3s 113.1tok/s
+  PASS  access_16/q2         s0     62tok    0.2s 328.8tok/s
+  PASS  access_16/q2         s1     62tok    0.2s 285.5tok/s
+  PASS  access_17/q1         s0     31tok    0.3s 108.8tok/s
+  PASS  access_17/q1         s1     31tok    0.2s 137.6tok/s
+  PASS  access_17/q2         s0     61tok    0.2s 281.8tok/s
+  PASS  access_17/q2         s1     61tok    0.2s 267.9tok/s
+  PASS  access_18/q1         s0     31tok    0.3s 117.3tok/s
+  PASS  access_18/q1         s1     31tok    0.2s 145.6tok/s
+  PASS  access_18/q2         s0     62tok    0.2s 299.3tok/s
+  PASS  access_18/q2         s1     62tok    0.2s 275.8tok/s
+  PASS  access_19/q1         s0     31tok    0.2s 132.3tok/s
+  PASS  access_19/q1         s1     31tok    0.2s 137.6tok/s
+  PASS  access_19/q2         s0     62tok    0.2s 259.6tok/s
+  PASS  access_19/q2         s1     62tok    0.3s 242.4tok/s
+  PASS  access_20/q1         s0     31tok    0.2s 136.3tok/s
+  PASS  access_20/q1         s1     31tok    0.2s 156.5tok/s
+  PASS  access_20/q2         s0     61tok    0.2s 275.9tok/s
+  PASS  access_20/q2         s1     61tok    0.2s 282.7tok/s
+  PASS  events_01/q1         s0     57tok    0.2s 246.2tok/s
+  PASS  events_01/q1         s1     57tok    0.2s 303.3tok/s
+  PASS  events_01/q2         s0     45tok    0.2s 229.8tok/s
+  PASS  events_01/q2         s1     45tok    0.2s 221.5tok/s
+  PASS  events_02/q1         s0     56tok    0.2s 249.2tok/s
+  PASS  events_02/q1         s1     56tok    0.2s 251.0tok/s
+  PASS  events_02/q2         s0     45tok    0.2s 243.2tok/s
+  PASS  events_02/q2         s1     45tok    0.2s 215.3tok/s
+  PASS  events_03/q1         s0     58tok    0.2s 270.3tok/s
+  PASS  events_03/q1         s1     58tok    0.2s 292.6tok/s
+  PASS  events_03/q2         s0     45tok    0.2s 224.0tok/s
+  PASS  events_03/q2         s1     45tok    0.3s 159.3tok/s
+  FAIL  events_04/q1         s0     56tok    0.2s 284.1tok/s   <expected 'cancelled'>
+  FAIL  events_04/q1         s1     56tok    0.2s 253.2tok/s   <expected 'cancelled'>
+  PASS  events_04/q2         s0     45tok    0.2s 186.2tok/s
+  PASS  events_04/q2         s1     45tok    0.2s 216.4tok/s
+  PASS  events_05/q1         s0     57tok    0.2s 290.8tok/s
+  PASS  events_05/q1         s1     57tok    0.2s 262.5tok/s
+  PASS  events_05/q2         s0     45tok    0.2s 204.0tok/s
+  PASS  events_05/q2         s1     45tok    0.2s 201.7tok/s
+  PASS  events_06/q1         s0     57tok    0.2s 285.0tok/s
+  PASS  events_06/q1         s1     57tok    0.2s 301.2tok/s
+  PASS  events_06/q2         s0     45tok    0.3s 173.0tok/s
+  PASS  events_06/q2         s1     45tok    0.2s 209.6tok/s
+  PASS  events_07/q1         s0     57tok    0.2s 232.3tok/s
+  PASS  events_07/q1         s1     57tok    0.2s 257.6tok/s
+  PASS  events_07/q2         s0     45tok    0.4s 116.0tok/s
+  PASS  events_07/q2         s1     45tok    0.3s 171.1tok/s
+  FAIL  events_08/q1         s0     56tok    0.2s 253.9tok/s   <expected 'shipped'>
+  FAIL  events_08/q1         s1     56tok    0.2s 230.1tok/s   <expected 'shipped'>
+  PASS  events_08/q2         s0     45tok    0.3s 177.4tok/s
+  PASS  events_08/q2         s1     45tok    0.3s 176.4tok/s
+  PASS  events_09/q1         s0     57tok    0.2s 236.6tok/s
+  PASS  events_09/q1         s1     57tok    0.2s 254.0tok/s
+  PASS  events_09/q2         s0     45tok    0.3s 163.8tok/s
+  PASS  events_09/q2         s1     45tok    0.2s 192.4tok/s
+  FAIL  events_10/q1         s0     56tok    0.2s 241.1tok/s   <expected 'refunded'>
+  FAIL  events_10/q1         s1     56tok    0.2s 263.7tok/s   <expected 'refunded'>
+  PASS  events_10/q2         s0     45tok    0.3s 154.5tok/s
+  PASS  events_10/q2         s1     45tok    0.2s 180.1tok/s
+  PASS  events_11/q1         s0     58tok    0.2s 270.6tok/s
+  PASS  events_11/q1         s1     58tok    0.2s 254.6tok/s
+  PASS  events_11/q2         s0     45tok    0.3s 159.4tok/s
+  PASS  events_11/q2         s1     45tok    0.3s 171.1tok/s
+  PASS  events_12/q1         s0     56tok    0.3s 215.2tok/s
+  PASS  events_12/q1         s1     56tok    0.2s 227.1tok/s
+  PASS  events_12/q2         s0     45tok    0.2s 187.4tok/s
+  PASS  events_12/q2         s1     45tok    0.3s 161.3tok/s
+  PASS  events_13/q1         s0     57tok    0.3s 179.1tok/s
+  FAIL  events_13/q1         s1     56tok    0.3s 220.9tok/s   <expected 'shipped'>
+  PASS  events_13/q2         s0     45tok    0.3s 176.7tok/s
+  FAIL  events_13/q2         s1     45tok    0.3s 166.7tok/s   <expected '2'>
+  PASS  events_14/q1         s0     58tok    0.2s 250.9tok/s
+  PASS  events_14/q1         s1     58tok    0.3s 169.3tok/s
+  PASS  events_14/q2         s0     45tok    0.2s 196.1tok/s
+  PASS  events_14/q2         s1     45tok    0.3s 162.6tok/s
+  PASS  events_15/q1         s0     57tok    0.3s 221.0tok/s
+  PASS  events_15/q1         s1     57tok    0.3s 219.7tok/s
+  PASS  events_15/q2         s0     45tok    0.2s 199.7tok/s
+  PASS  events_15/q2         s1     45tok    0.2s 187.5tok/s
+  PASS  events_16/q1         s0     56tok    0.3s 224.0tok/s
+  PASS  events_16/q1         s1     56tok    0.2s 246.1tok/s
+  PASS  events_16/q2         s0     46tok    0.2s 197.6tok/s
+  PASS  events_16/q2         s1     46tok    0.3s 183.8tok/s
+  FAIL  events_17/q1         s0     56tok    0.2s 240.5tok/s   <expected 'refunded'>
+  FAIL  events_17/q1         s1     56tok    0.2s 250.2tok/s   <expected 'refunded'>
+  FAIL  events_17/q2         s0     45tok    0.2s 185.7tok/s   <expected '2'>
+  FAIL  events_17/q2         s1     45tok    0.2s 208.0tok/s   <expected '2'>
+  PASS  events_18/q1         s0     58tok    0.3s 169.4tok/s
+  PASS  events_18/q1         s1     58tok    0.2s 238.7tok/s
+  PASS  events_18/q2         s0     45tok    0.2s 210.7tok/s
+  PASS  events_18/q2         s1     45tok    0.2s 204.4tok/s
+  PASS  events_19/q1         s0     56tok    0.2s 229.6tok/s
+  PASS  events_19/q1         s1     56tok    0.2s 231.8tok/s
+  PASS  events_19/q2         s0     46tok    0.2s 187.5tok/s
+  PASS  events_19/q2         s1     46tok    0.2s 198.0tok/s
+  PASS  events_20/q1         s0     57tok    0.2s 253.3tok/s
+  PASS  events_20/q1         s1     57tok    0.2s 255.0tok/s
+  PASS  events_20/q2         s0     45tok    0.2s 202.8tok/s
+  PASS  events_20/q2         s1     45tok    0.2s 198.5tok/s
+  PASS  time_01/q1           s0     31tok    0.3s 120.6tok/s
+  PASS  time_01/q1           s1     31tok    0.2s 147.4tok/s
+  PASS  time_01/q2           s0     55tok    0.2s 256.9tok/s
+  PASS  time_01/q2           s1     55tok    0.2s 287.4tok/s
+  PASS  time_02/q1           s0     31tok    0.2s 140.6tok/s
+  PASS  time_02/q1           s1     31tok    0.2s 158.2tok/s
+  PASS  time_02/q2           s0     55tok    0.2s 258.5tok/s
+  PASS  time_02/q2           s1     55tok    0.2s 255.4tok/s
+  PASS  time_03/q1           s0     31tok    0.2s 133.7tok/s
+  PASS  time_03/q1           s1     31tok    0.3s 110.4tok/s
+  PASS  time_03/q2           s0     57tok    0.2s 266.9tok/s
+  PASS  time_03/q2           s1     57tok    0.2s 263.7tok/s
+  PASS  time_04/q1           s0     31tok    0.2s 153.6tok/s
+  PASS  time_04/q1           s1     31tok    0.2s 153.4tok/s
+  PASS  time_04/q2           s0     55tok    0.2s 272.4tok/s
+  PASS  time_04/q2           s1     55tok    0.2s 274.5tok/s
+  FAIL  time_05/q1           s0     31tok    0.2s 155.8tok/s   <expected 'yes'>
+  FAIL  time_05/q1           s1     31tok    0.2s 151.7tok/s   <expected 'yes'>
+  FAIL  time_05/q2           s0     55tok    0.3s 208.2tok/s   <expected 'valid'>
+  FAIL  time_05/q2           s1     55tok    0.2s 279.4tok/s   <expected 'valid'>
+  PASS  time_06/q1           s0     31tok    0.2s 151.6tok/s
+  PASS  time_06/q1           s1     31tok    0.3s 120.7tok/s
+  PASS  time_06/q2           s0     55tok    0.4s 141.8tok/s
+  PASS  time_06/q2           s1     55tok    0.2s 274.8tok/s
+  PASS  time_07/q1           s0     31tok    0.2s 160.0tok/s
+  PASS  time_07/q1           s1     31tok    0.2s 160.1tok/s
+  PASS  time_07/q2           s0     56tok    0.3s 207.0tok/s
+  PASS  time_07/q2           s1     56tok    0.2s 254.6tok/s
+  FAIL  time_08/q1           s0     31tok    0.2s 141.5tok/s   <expected 'yes'>
+  FAIL  time_08/q1           s1     31tok    0.2s 162.2tok/s   <expected 'yes'>
+  FAIL  time_08/q2           s0     57tok    0.2s 261.3tok/s   <expected 'valid'>
+  FAIL  time_08/q2           s1     57tok    0.2s 283.0tok/s   <expected 'valid'>
+  FAIL  time_09/q1           s0     31tok    0.3s 119.9tok/s   <expected 'yes'>
+  FAIL  time_09/q1           s1     31tok    0.2s 155.9tok/s   <expected 'yes'>
+  FAIL  time_09/q2           s0     55tok    0.2s 251.3tok/s   <expected 'valid'>
+  FAIL  time_09/q2           s1     55tok    0.2s 275.1tok/s   <expected 'valid'>
+  PASS  time_10/q1           s0     31tok    0.2s 135.4tok/s
+  PASS  time_10/q1           s1     31tok    0.2s 161.0tok/s
+  FAIL  time_10/q2           s0     57tok    0.2s 293.9tok/s   <expected 'expired'>
+  FAIL  time_10/q2           s1     57tok    0.2s 294.0tok/s   <expected 'expired'>
+  FAIL  time_11/q1           s0     31tok    0.2s 140.1tok/s   <expected 'no'>
+  FAIL  time_11/q1           s1     31tok    0.2s 138.8tok/s   <expected 'no'>
+  FAIL  time_11/q2           s0     55tok    0.2s 239.7tok/s   <expected 'maintenance'>
+  FAIL  time_11/q2           s1     55tok    0.2s 274.4tok/s   <expected 'maintenance'>
+  PASS  time_12/q1           s0     31tok    0.2s 140.4tok/s
+  PASS  time_12/q1           s1     31tok    0.2s 139.3tok/s
+  PASS  time_12/q2           s0     55tok    0.2s 229.1tok/s
+  PASS  time_12/q2           s1     55tok    0.2s 280.2tok/s
+  PASS  time_13/q1           s0     31tok    0.3s 119.5tok/s
+  PASS  time_13/q1           s1     31tok    0.2s 125.8tok/s
+  PASS  time_13/q2           s0     55tok    0.2s 255.3tok/s
+  PASS  time_13/q2           s1     55tok    0.3s 210.6tok/s
+  FAIL  time_14/q1           s0     31tok    0.2s 140.4tok/s   <expected 'no'>
+  FAIL  time_14/q1           s1     31tok    0.2s 144.0tok/s   <expected 'no'>
+  FAIL  time_14/q2           s0     55tok    0.2s 252.2tok/s   <expected 'maintenance'>
+  FAIL  time_14/q2           s1     55tok    0.2s 234.7tok/s   <expected 'maintenance'>
+  PASS  time_15/q1           s0     31tok    0.2s 140.9tok/s
+  PASS  time_15/q1           s1     31tok    0.2s 126.2tok/s
+  PASS  time_15/q2           s0     56tok    0.2s 242.4tok/s
+  PASS  time_15/q2           s1     56tok    0.2s 231.8tok/s
+  PASS  time_16/q1           s0     31tok    0.2s 127.2tok/s
+  PASS  time_16/q1           s1     31tok    0.2s 140.9tok/s
+  PASS  time_16/q2           s0     56tok    0.5s 119.1tok/s
+  PASS  time_16/q2           s1     56tok    0.2s 255.6tok/s
+  PASS  time_17/q1           s0     31tok    0.2s 138.6tok/s
+  PASS  time_17/q1           s1     31tok    0.2s 146.5tok/s
+  PASS  time_17/q2           s0     56tok    0.2s 256.5tok/s
+  PASS  time_17/q2           s1     56tok    0.2s 257.4tok/s
+  PASS  time_18/q1           s0     31tok    0.2s 124.0tok/s
+  PASS  time_18/q1           s1     31tok    0.2s 129.9tok/s
+  FAIL  time_18/q2           s0     55tok    0.2s 245.7tok/s   <expected 'maintenance'>
+  FAIL  time_18/q2           s1     55tok    0.2s 223.4tok/s   <expected 'maintenance'>
+  FAIL  time_19/q1           s0     31tok    0.2s 134.9tok/s   <expected 'yes'>
+  FAIL  time_19/q1           s1     31tok    0.2s 131.4tok/s   <expected 'yes'>
+  FAIL  time_19/q2           s0     55tok    0.2s 238.5tok/s   <expected 'valid'>
+  FAIL  time_19/q2           s1     55tok    0.2s 243.3tok/s   <expected 'valid'>
+  FAIL  time_20/q1           s0     31tok    0.2s 128.8tok/s   <expected 'no'>
+  FAIL  time_20/q1           s1     31tok    0.2s 124.5tok/s   <expected 'no'>
+  FAIL  time_20/q2           s0     55tok    0.2s 248.1tok/s   <expected 'not yet valid'>
+  FAIL  time_20/q2           s1     55tok    0.3s 205.4tok/s   <expected 'not yet valid'>
+  FAIL  money_01/q1          s0     44tok    0.2s 194.1tok/s   <expected 'settled'>
+  FAIL  money_01/q1          s1     44tok    0.2s 194.3tok/s   <expected 'settled'>
+  PASS  money_01/q2          s0     60tok    0.2s 259.8tok/s
+  PASS  money_01/q2          s1     60tok    0.3s 233.9tok/s
+  PASS  money_02/q1          s0     44tok    0.2s 181.3tok/s
+  PASS  money_02/q1          s1     44tok    0.4s 112.3tok/s
+  PASS  money_02/q2          s0     60tok    0.2s 256.7tok/s
+  PASS  money_02/q2          s1     60tok    0.2s 262.0tok/s
+  FAIL  money_03/q1          s0     44tok    0.2s 198.0tok/s   <expected 'overpaid'>
+  FAIL  money_03/q1          s1     44tok    0.2s 198.4tok/s   <expected 'overpaid'>
+  PASS  money_03/q2          s0     60tok    0.2s 263.2tok/s
+  PASS  money_03/q2          s1     60tok    0.2s 266.4tok/s
+  PASS  money_04/q1          s0     43tok    0.2s 191.9tok/s
+  PASS  money_04/q1          s1     43tok    0.2s 193.6tok/s
+  PASS  money_04/q2          s0     59tok    0.3s 230.9tok/s
+  PASS  money_04/q2          s1     59tok    0.2s 253.9tok/s
+  PASS  money_05/q1          s0     44tok    0.2s 181.1tok/s
+  PASS  money_05/q1          s1     44tok    0.2s 193.3tok/s
+  PASS  money_05/q2          s0     50tok    0.2s 214.8tok/s
+  PASS  money_05/q2          s1     50tok    0.2s 214.4tok/s
+  FAIL  money_06/q1          s0     43tok    0.2s 175.3tok/s   <expected 'settled'>
+  FAIL  money_06/q1          s1     43tok    0.2s 199.8tok/s   <expected 'settled'>
+  PASS  money_06/q2          s0     50tok    0.2s 212.1tok/s
+  PASS  money_06/q2          s1     50tok    0.2s 222.1tok/s
+  PASS  money_07/q1          s0     43tok    0.2s 194.1tok/s
+  FAIL  money_07/q1          s1     44tok    0.2s 193.3tok/s   <expected 'settled'>
+  FAIL  money_07/q2          s0     58tok    0.2s 240.4tok/s   <expected '999'>
+  PASS  money_07/q2          s1     57tok    0.3s 213.3tok/s
+  FAIL  money_08/q1          s0     44tok    0.2s 192.4tok/s   <expected 'overpaid'>
+  FAIL  money_08/q1          s1     44tok    0.3s 139.4tok/s   <expected 'overpaid'>
+  FAIL  money_08/q2          s0     58tok    0.2s 237.4tok/s   <expected '999'>
+  FAIL  money_08/q2          s1     58tok    0.6s  94.4tok/s   <expected '999'>
+  PASS  money_09/q1          s0     44tok    0.2s 180.5tok/s
+  PASS  money_09/q1          s1     44tok    0.2s 195.1tok/s
+  PASS  money_09/q2          s0     55tok    0.2s 235.6tok/s
+  PASS  money_09/q2          s1     55tok    0.3s 214.1tok/s
+  PASS  money_10/q1          s0     43tok    0.3s 165.9tok/s
+  PASS  money_10/q1          s1     43tok    0.2s 183.5tok/s
+  PASS  money_10/q2          s0     55tok    0.2s 247.3tok/s
+  PASS  money_10/q2          s1     55tok    0.2s 239.4tok/s
+  FAIL  money_11/q1          s0     44tok    0.2s 192.3tok/s   <expected 'settled'>
+  FAIL  money_11/q1          s1     44tok    0.2s 178.1tok/s   <expected 'settled'>
+  PASS  money_11/q2          s0     46tok    0.3s 177.6tok/s
+  PASS  money_11/q2          s1     46tok    0.2s 198.1tok/s
+  FAIL  money_12/q1          s0     44tok    0.3s 161.7tok/s   <expected 'overpaid'>
+  FAIL  money_12/q1          s1     44tok    0.2s 199.7tok/s   <expected 'overpaid'>
+  PASS  money_12/q2          s0     46tok    0.2s 206.5tok/s
+  PASS  money_12/q2          s1     46tok    0.2s 216.7tok/s
+  FAIL  money_13/q1          s0     44tok    0.2s 177.2tok/s   <expected 'settled'>
+  PASS  money_13/q1          s1     43tok    0.2s 197.9tok/s
+  PASS  money_13/q2          s0     55tok    0.2s 265.5tok/s
+  PASS  money_13/q2          s1     55tok    0.2s 237.8tok/s
+  FAIL  money_14/q1          s0     43tok    0.3s 129.4tok/s   <expected 'outstanding'>
+  FAIL  money_14/q1          s1     43tok    0.3s 167.8tok/s   <expected 'outstanding'>
+  PASS  money_14/q2          s0     55tok    0.2s 221.9tok/s
+  PASS  money_14/q2          s1     55tok    0.2s 248.7tok/s
+  PASS  money_15/q1          s0     43tok    0.2s 211.1tok/s
+  PASS  money_15/q1          s1     43tok    0.2s 207.8tok/s
+  PASS  money_15/q2          s0     50tok    0.2s 212.9tok/s
+  PASS  money_15/q2          s1     50tok    0.2s 201.6tok/s
+  FAIL  money_16/q1          s0     43tok    0.3s 126.9tok/s   <expected 'overpaid'>
+  FAIL  money_16/q1          s1     43tok    0.2s 203.5tok/s   <expected 'overpaid'>
+  PASS  money_16/q2          s0     50tok    0.2s 242.9tok/s
+  PASS  money_16/q2          s1     50tok    0.2s 241.3tok/s
+  FAIL  money_17/q1          s0     44tok    0.2s 179.6tok/s   <expected 'settled'>
+  FAIL  money_17/q1          s1     44tok    0.2s 183.8tok/s   <expected 'settled'>
+  PASS  money_17/q2          s0     55tok    0.2s 235.7tok/s
+  PASS  money_17/q2          s1     55tok    0.2s 254.5tok/s
+  PASS  money_18/q1          s0     44tok    0.2s 203.9tok/s
+  PASS  money_18/q1          s1     44tok    0.2s 203.9tok/s
+  PASS  money_18/q2          s0     55tok    0.2s 222.0tok/s
+  PASS  money_18/q2          s1     55tok    0.2s 262.5tok/s
+  PASS  money_19/q1          s0     43tok    0.2s 193.1tok/s
+  FAIL  money_19/q1          s1     44tok    0.2s 195.5tok/s   <expected 'overpaid'>
+  PASS  money_19/q2          s0     55tok    0.2s 243.7tok/s
+  PASS  money_19/q2          s1     55tok    0.2s 230.0tok/s
+  FAIL  money_20/q1          s0     44tok    0.2s 196.1tok/s   <expected 'settled'>
+  FAIL  money_20/q1          s1     44tok    0.3s 169.9tok/s   <expected 'settled'>
+  FAIL  money_20/q2          s0     55tok    0.2s 232.9tok/s   <expected '745'>
+  FAIL  money_20/q2          s1     55tok    0.4s 156.5tok/s   <expected '745'>
+  FAIL  inventory_01/q1      s0     41tok    0.2s 181.2tok/s   <expected 'fill all'>
+  FAIL  inventory_01/q1      s1     41tok    0.3s 151.1tok/s   <expected 'fill all'>
+  PASS  inventory_01/q2      s0     45tok    0.3s 177.9tok/s
+  PASS  inventory_01/q2      s1     45tok    0.2s 201.6tok/s
+  PASS  inventory_02/q1      s0     41tok    0.2s 192.0tok/s
+  PASS  inventory_02/q1      s1     41tok    0.2s 181.8tok/s
+  PASS  inventory_02/q2      s0     45tok    0.4s 104.1tok/s
+  PASS  inventory_02/q2      s1     45tok    0.2s 190.1tok/s
+  PASS  inventory_03/q1      s0     40tok    0.2s 175.9tok/s
+  PASS  inventory_03/q1      s1     40tok    0.2s 167.7tok/s
+  PASS  inventory_03/q2      s0     46tok    0.3s 181.5tok/s
+  PASS  inventory_03/q2      s1     46tok    0.3s 176.2tok/s
+  FAIL  inventory_04/q1      s0     40tok    0.2s 192.9tok/s   <expected 'fill all'>
+  FAIL  inventory_04/q1      s1     40tok    0.2s 182.1tok/s   <expected 'fill all'>
+  PASS  inventory_04/q2      s0     45tok    0.2s 238.0tok/s
+  PASS  inventory_04/q2      s1     45tok    0.3s 178.1tok/s
+  FAIL  inventory_05/q1      s0     41tok    0.2s 180.5tok/s   <expected 'fill all'>
+  FAIL  inventory_05/q1      s1     41tok    0.2s 205.4tok/s   <expected 'fill all'>
+  PASS  inventory_05/q2      s0     45tok    0.2s 202.6tok/s
+  PASS  inventory_05/q2      s1     45tok    0.2s 189.6tok/s
+  FAIL  inventory_06/q1      s0     40tok    0.2s 200.9tok/s   <expected 'fill partial'>
+  FAIL  inventory_06/q1      s1     40tok    0.2s 198.2tok/s   <expected 'fill partial'>
+  PASS  inventory_06/q2      s0     45tok    0.3s 131.4tok/s
+  PASS  inventory_06/q2      s1     45tok    0.2s 203.4tok/s
+  PASS  inventory_07/q1      s0     41tok    0.2s 176.5tok/s
+  PASS  inventory_07/q1      s1     41tok    0.2s 196.3tok/s
+  FAIL  inventory_07/q2      s0     45tok    0.2s 209.0tok/s   <expected '5'>
+  FAIL  inventory_07/q2      s1     45tok    0.3s 173.7tok/s   <expected '5'>
+  PASS  inventory_08/q1      s0     40tok    0.2s 195.6tok/s
+  PASS  inventory_08/q1      s1     40tok    0.2s 165.0tok/s
+  PASS  inventory_08/q2      s0     46tok    0.2s 226.9tok/s
+  PASS  inventory_08/q2      s1     46tok    0.2s 230.0tok/s
+  PASS  inventory_09/q1      s0     41tok    0.2s 181.4tok/s
+  PASS  inventory_09/q1      s1     41tok    0.2s 200.7tok/s
+  PASS  inventory_09/q2      s0     45tok    0.2s 219.0tok/s
+  PASS  inventory_09/q2      s1     45tok    0.2s 191.5tok/s
+  PASS  inventory_10/q1      s0     40tok    0.2s 169.6tok/s
+  PASS  inventory_10/q1      s1     40tok    0.2s 172.3tok/s
+  PASS  inventory_10/q2      s0     46tok    0.2s 192.4tok/s
+  PASS  inventory_10/q2      s1     46tok    0.2s 195.4tok/s
+  PASS  inventory_11/q1      s0     41tok    0.2s 173.5tok/s
+  PASS  inventory_11/q1      s1     41tok    0.2s 166.2tok/s
+  PASS  inventory_11/q2      s0     45tok    0.2s 191.3tok/s
+  PASS  inventory_11/q2      s1     45tok    0.2s 181.0tok/s
+  PASS  inventory_12/q1      s0     40tok    0.2s 188.3tok/s
+  PASS  inventory_12/q1      s1     40tok    0.2s 189.6tok/s
+  PASS  inventory_12/q2      s0     46tok    0.2s 193.8tok/s
+  PASS  inventory_12/q2      s1     46tok    0.2s 206.8tok/s
+  PASS  inventory_13/q1      s0     41tok    0.2s 167.5tok/s
+  FAIL  inventory_13/q1      s1     41tok    0.2s 186.2tok/s   <expected 'fill all'>
+  PASS  inventory_13/q2      s0     49tok    0.2s 225.3tok/s
+  PASS  inventory_13/q2      s1     49tok    0.3s 195.7tok/s
+  PASS  inventory_14/q1      s0     41tok    0.2s 191.4tok/s
+  PASS  inventory_14/q1      s1     41tok    0.2s 176.3tok/s
+  PASS  inventory_14/q2      s0     45tok    0.3s 144.7tok/s
+  PASS  inventory_14/q2      s1     45tok    0.3s 180.0tok/s
+  PASS  inventory_15/q1      s0     40tok    0.2s 184.2tok/s
+  PASS  inventory_15/q1      s1     40tok    0.2s 168.0tok/s
+  PASS  inventory_15/q2      s0     46tok    0.2s 198.7tok/s
+  PASS  inventory_15/q2      s1     46tok    0.2s 196.9tok/s
+  PASS  inventory_16/q1      s0     41tok    0.2s 192.1tok/s
+  PASS  inventory_16/q1      s1     41tok    0.2s 193.8tok/s
+  PASS  inventory_16/q2      s0     45tok    0.2s 194.0tok/s
+  PASS  inventory_16/q2      s1     45tok    0.2s 209.8tok/s
+  FAIL  inventory_17/q1      s0     41tok    0.2s 200.4tok/s   <expected 'fill all'>
+  FAIL  inventory_17/q1      s1     41tok    0.3s 123.0tok/s   <expected 'fill all'>
+  PASS  inventory_17/q2      s0     45tok    0.2s 188.8tok/s
+  PASS  inventory_17/q2      s1     45tok    0.2s 208.1tok/s
+  PASS  inventory_18/q1      s0     41tok    0.2s 188.6tok/s
+  PASS  inventory_18/q1      s1     41tok    0.2s 171.9tok/s
+  PASS  inventory_18/q2      s0     45tok    0.2s 221.1tok/s
+  PASS  inventory_18/q2      s1     45tok    0.2s 186.5tok/s
+  FAIL  inventory_19/q1      s0     40tok    0.3s 151.1tok/s   <expected 'fill partial'>
+  FAIL  inventory_19/q1      s1     40tok    0.2s 197.1tok/s   <expected 'fill partial'>
+  PASS  inventory_19/q2      s0     45tok    0.2s 212.9tok/s
+  PASS  inventory_19/q2      s1     45tok    0.2s 220.3tok/s
+  FAIL  inventory_20/q1      s0     40tok    0.2s 173.5tok/s   <expected 'fill all'>
+  FAIL  inventory_20/q1      s1     40tok    0.2s 177.1tok/s   <expected 'fill all'>
+  PASS  inventory_20/q2      s0     45tok    0.2s 193.9tok/s
+  PASS  inventory_20/q2      s1     45tok    0.2s 210.8tok/s
+  PASS  dependencies_01/q1   s0     45tok    0.2s 201.2tok/s
+  PASS  dependencies_01/q1   s1     45tok    0.2s 212.4tok/s
+  PASS  dependencies_01/q2   s0     58tok    0.3s 222.6tok/s
+  PASS  dependencies_01/q2   s1     58tok    0.3s 223.7tok/s
+  PASS  dependencies_02/q1   s0     45tok    0.2s 181.6tok/s
+  PASS  dependencies_02/q1   s1     45tok    0.2s 187.6tok/s
+  PASS  dependencies_02/q2   s0     62tok    0.3s 236.5tok/s
+  PASS  dependencies_02/q2   s1     62tok    0.2s 251.7tok/s
+  PASS  dependencies_03/q1   s0     45tok    0.3s 179.6tok/s
+  PASS  dependencies_03/q1   s1     45tok    0.3s 146.7tok/s
+  PASS  dependencies_03/q2   s0     59tok    0.2s 270.4tok/s
+  PASS  dependencies_03/q2   s1     59tok    0.2s 248.6tok/s
+  PASS  dependencies_04/q1   s0     45tok    0.2s 209.8tok/s
+  PASS  dependencies_04/q1   s1     45tok    0.2s 190.2tok/s
+  PASS  dependencies_04/q2   s0     59tok    0.2s 246.3tok/s
+  PASS  dependencies_04/q2   s1     59tok    0.3s 222.0tok/s
+  FAIL  dependencies_05/q1   s0     45tok    0.3s 145.6tok/s   <expected 'archive'>
+  FAIL  dependencies_05/q1   s1     45tok    0.3s 169.6tok/s   <expected 'archive'>
+  PASS  dependencies_05/q2   s0     58tok    0.2s 273.4tok/s
+  PASS  dependencies_05/q2   s1     58tok    0.2s 253.4tok/s
+  PASS  dependencies_06/q1   s0     45tok    0.2s 206.1tok/s
+  PASS  dependencies_06/q1   s1     45tok    0.2s 191.6tok/s
+  PASS  dependencies_06/q2   s0     59tok    0.3s 228.2tok/s
+  PASS  dependencies_06/q2   s1     59tok    0.3s 233.9tok/s
+  FAIL  dependencies_07/q1   s0     45tok    0.2s 206.7tok/s   <expected 'archive'>
+  FAIL  dependencies_07/q1   s1     45tok    0.2s 213.5tok/s   <expected 'archive'>
+  FAIL  dependencies_07/q2   s0     58tok    0.2s 260.2tok/s   <expected 'failed dependency'>
+  FAIL  dependencies_07/q2   s1     58tok    0.2s 254.5tok/s   <expected 'failed dependency'>
+  PASS  dependencies_08/q1   s0     45tok    0.2s 208.9tok/s
+  PASS  dependencies_08/q1   s1     45tok    0.2s 184.7tok/s
+  PASS  dependencies_08/q2   s0     59tok    0.2s 249.2tok/s
+  PASS  dependencies_08/q2   s1     59tok    0.2s 281.2tok/s
+  PASS  dependencies_09/q1   s0     45tok    0.2s 192.4tok/s
+  PASS  dependencies_09/q1   s1     45tok    0.4s 123.5tok/s
+  PASS  dependencies_09/q2   s0     62tok    0.3s 228.1tok/s
+  PASS  dependencies_09/q2   s1     62tok    0.2s 272.3tok/s
+  PASS  dependencies_10/q1   s0     45tok    0.3s 172.9tok/s
+  PASS  dependencies_10/q1   s1     45tok    0.2s 202.2tok/s
+  PASS  dependencies_10/q2   s0     58tok    0.2s 255.6tok/s
+  PASS  dependencies_10/q2   s1     58tok    0.2s 261.7tok/s
+  PASS  dependencies_11/q1   s0     45tok    0.2s 195.7tok/s
+  PASS  dependencies_11/q1   s1     45tok    0.2s 187.4tok/s
+  PASS  dependencies_11/q2   s0     58tok    0.4s 132.8tok/s
+  PASS  dependencies_11/q2   s1     58tok    0.2s 283.2tok/s
+  PASS  dependencies_12/q1   s0     45tok    0.2s 193.2tok/s
+  PASS  dependencies_12/q1   s1     45tok    0.2s 211.5tok/s
+  PASS  dependencies_12/q2   s0     58tok    0.3s 229.3tok/s
+  PASS  dependencies_12/q2   s1     58tok    0.3s 214.3tok/s
+  FAIL  dependencies_13/q1   s0     45tok    0.3s 151.3tok/s   <expected 'none'>
+  FAIL  dependencies_13/q1   s1     45tok    0.5s  93.3tok/s   <expected 'none'>
+  PASS  dependencies_13/q2   s0     59tok    0.2s 270.3tok/s
+  PASS  dependencies_13/q2   s1     59tok    0.2s 250.2tok/s
+  PASS  dependencies_14/q1   s0     45tok    0.3s 174.4tok/s
+  PASS  dependencies_14/q1   s1     45tok    0.2s 197.3tok/s
+  PASS  dependencies_14/q2   s0     59tok    0.2s 279.4tok/s
+  PASS  dependencies_14/q2   s1     59tok    0.2s 243.0tok/s
+  PASS  dependencies_15/q1   s0     45tok    0.2s 188.7tok/s
+  PASS  dependencies_15/q1   s1     45tok    0.2s 196.8tok/s
+  PASS  dependencies_15/q2   s0     58tok    0.2s 240.2tok/s
+  PASS  dependencies_15/q2   s1     58tok    0.2s 291.6tok/s
+  PASS  dependencies_16/q1   s0     45tok    0.2s 202.2tok/s
+  PASS  dependencies_16/q1   s1     45tok    0.2s 196.8tok/s
+  FAIL  dependencies_16/q2   s0     62tok    0.2s 297.4tok/s   <expected 'failed dependency'>
+  FAIL  dependencies_16/q2   s1     62tok    0.2s 272.1tok/s   <expected 'failed dependency'>
+  PASS  dependencies_17/q1   s0     45tok    0.2s 193.4tok/s
+  PASS  dependencies_17/q1   s1     45tok    0.2s 186.9tok/s
+  PASS  dependencies_17/q2   s0     58tok    0.2s 238.7tok/s
+  PASS  dependencies_17/q2   s1     58tok    0.2s 258.8tok/s
+  PASS  dependencies_18/q1   s0     45tok    0.3s 149.3tok/s
+  PASS  dependencies_18/q1   s1     45tok    0.2s 195.2tok/s
+  PASS  dependencies_18/q2   s0     58tok    0.2s 293.2tok/s
+  PASS  dependencies_18/q2   s1     58tok    0.2s 282.6tok/s
+  PASS  dependencies_19/q1   s0     45tok    0.2s 221.4tok/s
+  PASS  dependencies_19/q1   s1     45tok    0.2s 208.3tok/s
+  PASS  dependencies_19/q2   s0     58tok    0.2s 261.9tok/s
+  PASS  dependencies_19/q2   s1     58tok    0.2s 264.2tok/s
+  PASS  dependencies_20/q1   s0     45tok    0.2s 204.3tok/s
+  PASS  dependencies_20/q1   s1     45tok    0.2s 208.1tok/s
+  PASS  dependencies_20/q2   s0     59tok    0.2s 280.0tok/s
+  PASS  dependencies_20/q2   s1     59tok    0.2s 277.5tok/s
+  PASS  evidence_01/q1       s0     48tok    0.2s 225.8tok/s
+  PASS  evidence_01/q1       s1     48tok    0.2s 242.7tok/s
+  PASS  evidence_01/q2       s0     48tok    0.2s 205.2tok/s
+  PASS  evidence_01/q2       s1     48tok    0.2s 229.0tok/s
+  PASS  evidence_02/q1       s0     49tok    0.2s 210.5tok/s
+  PASS  evidence_02/q1       s1     49tok    0.2s 214.8tok/s
+  PASS  evidence_02/q2       s0     48tok    0.3s 185.3tok/s
+  PASS  evidence_02/q2       s1     48tok    0.2s 195.0tok/s
+  PASS  evidence_03/q1       s0     50tok    0.2s 207.3tok/s
+  PASS  evidence_03/q1       s1     50tok    0.2s 209.4tok/s
+  PASS  evidence_03/q2       s0     48tok    0.2s 205.6tok/s
+  PASS  evidence_03/q2       s1     48tok    0.2s 221.5tok/s
+  PASS  evidence_04/q1       s0     48tok    0.3s 183.9tok/s
+  PASS  evidence_04/q1       s1     48tok    0.2s 210.6tok/s
+  PASS  evidence_04/q2       s0     48tok    0.2s 205.2tok/s
+  PASS  evidence_04/q2       s1     48tok    0.2s 223.8tok/s
+  PASS  evidence_05/q1       s0     48tok    0.2s 216.4tok/s
+  PASS  evidence_05/q1       s1     48tok    0.2s 207.1tok/s
+  PASS  evidence_05/q2       s0     49tok    0.2s 218.7tok/s
+  PASS  evidence_05/q2       s1     49tok    0.2s 207.2tok/s
+  PASS  evidence_06/q1       s0     49tok    0.2s 205.2tok/s
+  PASS  evidence_06/q1       s1     49tok    0.2s 236.1tok/s
+  PASS  evidence_06/q2       s0     48tok    0.2s 206.1tok/s
+  PASS  evidence_06/q2       s1     48tok    0.2s 234.4tok/s
+  PASS  evidence_07/q1       s0     50tok    0.2s 211.7tok/s
+  PASS  evidence_07/q1       s1     50tok    0.2s 221.7tok/s
+  PASS  evidence_07/q2       s0     48tok    0.2s 209.0tok/s
+  PASS  evidence_07/q2       s1     48tok    0.2s 195.6tok/s
+  PASS  evidence_08/q1       s0     48tok    0.2s 198.6tok/s
+  PASS  evidence_08/q1       s1     48tok    0.2s 193.3tok/s
+  PASS  evidence_08/q2       s0     49tok    0.2s 233.5tok/s
+  PASS  evidence_08/q2       s1     49tok    0.3s 188.5tok/s
+  PASS  evidence_09/q1       s0     48tok    0.2s 220.4tok/s
+  PASS  evidence_09/q1       s1     48tok    0.2s 224.4tok/s
+  PASS  evidence_09/q2       s0     49tok    0.2s 219.8tok/s
+  PASS  evidence_09/q2       s1     49tok    0.2s 232.6tok/s
+  PASS  evidence_10/q1       s0     49tok    0.2s 209.3tok/s
+  PASS  evidence_10/q1       s1     49tok    0.2s 207.5tok/s
+  PASS  evidence_10/q2       s0     48tok    0.2s 213.8tok/s
+  PASS  evidence_10/q2       s1     48tok    0.2s 200.2tok/s
+  PASS  evidence_11/q1       s0     50tok    0.2s 238.6tok/s
+  PASS  evidence_11/q1       s1     50tok    0.2s 211.7tok/s
+  PASS  evidence_11/q2       s0     50tok    0.2s 227.8tok/s
+  PASS  evidence_11/q2       s1     50tok    0.3s 150.4tok/s
+  PASS  evidence_12/q1       s0     48tok    0.2s 234.8tok/s
+  PASS  evidence_12/q1       s1     48tok    0.2s 207.7tok/s
+  PASS  evidence_12/q2       s0     48tok    0.2s 242.1tok/s
+  PASS  evidence_12/q2       s1     48tok    0.2s 233.8tok/s
+  PASS  evidence_13/q1       s0     48tok    0.3s 183.4tok/s
+  PASS  evidence_13/q1       s1     48tok    0.2s 232.2tok/s
+  PASS  evidence_13/q2       s0     49tok    0.2s 208.1tok/s
+  PASS  evidence_13/q2       s1     49tok    0.2s 211.5tok/s
+  PASS  evidence_14/q1       s0     49tok    0.2s 222.0tok/s
+  PASS  evidence_14/q1       s1     49tok    0.2s 229.5tok/s
+  PASS  evidence_14/q2       s0     48tok    0.3s 168.6tok/s
+  PASS  evidence_14/q2       s1     48tok    0.2s 221.6tok/s
+  PASS  evidence_15/q1       s0     50tok    0.2s 229.7tok/s
+  PASS  evidence_15/q1       s1     50tok    0.2s 217.4tok/s
+  PASS  evidence_15/q2       s0     50tok    0.3s 195.8tok/s
+  PASS  evidence_15/q2       s1     50tok    0.2s 200.9tok/s
+  PASS  evidence_16/q1       s0     48tok    0.2s 215.1tok/s
+  PASS  evidence_16/q1       s1     48tok    0.2s 226.4tok/s
+  PASS  evidence_16/q2       s0     48tok    0.2s 215.5tok/s
+  PASS  evidence_16/q2       s1     48tok    0.2s 223.9tok/s
+  PASS  evidence_17/q1       s0     48tok    0.2s 214.9tok/s
+  PASS  evidence_17/q1       s1     48tok    0.2s 215.8tok/s
+  PASS  evidence_17/q2       s0     48tok    0.3s 161.5tok/s
+  PASS  evidence_17/q2       s1     48tok    0.2s 228.8tok/s
+  PASS  evidence_18/q1       s0     49tok    0.2s 211.0tok/s
+  PASS  evidence_18/q1       s1     49tok    0.3s 184.9tok/s
+  PASS  evidence_18/q2       s0     50tok    0.2s 212.1tok/s
+  PASS  evidence_18/q2       s1     50tok    0.3s 193.5tok/s
+  PASS  evidence_19/q1       s0     50tok    0.2s 233.2tok/s
+  PASS  evidence_19/q1       s1     50tok    0.2s 223.6tok/s
+  PASS  evidence_19/q2       s0     49tok    0.3s 150.2tok/s
+  PASS  evidence_19/q2       s1     49tok    0.2s 201.0tok/s
+  PASS  evidence_20/q1       s0     48tok    0.2s 227.7tok/s
+  PASS  evidence_20/q1       s1     48tok    0.2s 203.8tok/s
+  PASS  evidence_20/q2       s0     50tok    0.2s 221.1tok/s
+  PASS  evidence_20/q2       s1     50tok    0.2s 225.3tok/s
+  PASS  records_01/q1        s0     46tok    0.2s 214.4tok/s
+  PASS  records_01/q1        s1     46tok    0.3s 174.9tok/s
+  FAIL  records_01/q2        s0    495tok    0.2s 2227.4tok/s   <expected 'REF-1-Q'>
+  FAIL  records_01/q2        s1    495tok    0.2s 2220.5tok/s   <expected 'REF-1-Q'>
+  PASS  records_02/q1        s0     46tok    0.2s 212.0tok/s
+  PASS  records_02/q1        s1     46tok    0.2s 202.6tok/s
+  FAIL  records_02/q2        s0    502tok    0.2s 2236.1tok/s   <expected 'REF-2-Q'>
+  FAIL  records_02/q2        s1    502tok    0.2s 2050.6tok/s   <expected 'REF-2-Q'>
+  PASS  records_03/q1        s0     46tok    0.2s 206.8tok/s
+  PASS  records_03/q1        s1     46tok    0.2s 197.9tok/s
+  FAIL  records_03/q2        s0    494tok    0.2s 2169.5tok/s   <expected 'REF-3-Q'>
+  FAIL  records_03/q2        s1    494tok    0.2s 2312.5tok/s   <expected 'REF-3-Q'>
+  PASS  records_04/q1        s0     46tok    0.3s 175.1tok/s
+  PASS  records_04/q1        s1     46tok    0.2s 196.8tok/s
+  PASS  records_04/q2        s0    500tok    0.2s 2139.5tok/s
+  PASS  records_04/q2        s1    500tok    0.2s 2221.5tok/s
+  PASS  records_05/q1        s0     46tok    0.2s 191.2tok/s
+  PASS  records_05/q1        s1     46tok    0.2s 185.8tok/s
+  PASS  records_05/q2        s0    499tok    0.2s 2166.6tok/s
+  PASS  records_05/q2        s1    499tok    0.4s 1412.3tok/s
+  FAIL  records_06/q1        s0     46tok    0.2s 202.8tok/s   <expected 'conflict'>
+  PASS  records_06/q1        s1     47tok    0.3s 174.1tok/s
+  FAIL  records_06/q2        s0    494tok    0.3s 1936.3tok/s   <expected 'NONE'>
+  FAIL  records_06/q2        s1    494tok    0.2s 2017.6tok/s   <expected 'NONE'>
+  FAIL  records_07/q1        s0     46tok    0.2s 200.7tok/s   <expected 'conflict'>
+  FAIL  records_07/q1        s1     46tok    0.4s 123.8tok/s   <expected 'conflict'>
+  FAIL  records_07/q2        s0    495tok    0.2s 2189.8tok/s   <expected 'NONE'>
+  FAIL  records_07/q2        s1    495tok    0.2s 2019.4tok/s   <expected 'NONE'>
+  FAIL  records_08/q1        s0     46tok    0.2s 204.1tok/s   <expected 'conflict'>
+  PASS  records_08/q1        s1     47tok    0.2s 230.6tok/s
+  FAIL  records_08/q2        s0    502tok    0.2s 2309.6tok/s   <expected 'NONE'>
+  FAIL  records_08/q2        s1    502tok    0.2s 2226.0tok/s   <expected 'NONE'>
+  PASS  records_09/q1        s0     47tok    0.2s 229.4tok/s
+  PASS  records_09/q1        s1     47tok    0.2s 240.2tok/s
+  PASS  records_09/q2        s0    498tok    0.2s 2085.3tok/s
+  PASS  records_09/q2        s1    498tok    0.2s 2230.8tok/s
+  PASS  records_10/q1        s0     47tok    0.2s 232.9tok/s
+  PASS  records_10/q1        s1     47tok    0.2s 194.2tok/s
+  FAIL  records_10/q2        s0    496tok    0.2s 2450.4tok/s   <expected 'NONE'>
+  FAIL  records_10/q2        s1    496tok    0.3s 1456.4tok/s   <expected 'NONE'>
+  FAIL  records_11/q1        s0     46tok    0.2s 225.4tok/s   <expected 'deleted'>
+  PASS  records_11/q1        s1     46tok    0.2s 240.3tok/s
+  PASS  records_11/q2        s0    495tok    0.3s 1916.2tok/s
+  PASS  records_11/q2        s1    495tok    0.2s 2541.7tok/s
+  FAIL  records_12/q1        s0     46tok    0.2s 234.0tok/s   <expected 'deleted'>
+  FAIL  records_12/q1        s1     46tok    0.2s 229.0tok/s   <expected 'deleted'>
+  FAIL  records_12/q2        s0    502tok    0.2s 2383.1tok/s   <expected 'NONE'>
+  FAIL  records_12/q2        s1    502tok    0.2s 2464.4tok/s   <expected 'NONE'>
+  PASS  records_13/q1        s0     46tok    0.2s 201.6tok/s
+  PASS  records_13/q1        s1     46tok    0.2s 220.7tok/s
+  FAIL  records_13/q2        s0    494tok    0.2s 2172.5tok/s   <expected 'NONE'>
+  FAIL  records_13/q2        s1    494tok    0.2s 2266.8tok/s   <expected 'NONE'>
+  PASS  records_14/q1        s0     46tok    0.2s 189.0tok/s
+  PASS  records_14/q1        s1     46tok    0.2s 245.5tok/s
+  FAIL  records_14/q2        s0    497tok    0.2s 2280.8tok/s   <expected 'NONE'>
+  FAIL  records_14/q2        s1    497tok    0.2s 2058.0tok/s   <expected 'NONE'>
+  PASS  records_15/q1        s0     46tok    0.2s 192.6tok/s
+  PASS  records_15/q1        s1     46tok    0.2s 236.9tok/s
+  FAIL  records_15/q2        s0    499tok    0.2s 2745.5tok/s   <expected 'NONE'>
+  FAIL  records_15/q2        s1    499tok    0.2s 2310.6tok/s   <expected 'NONE'>
+  PASS  records_16/q1        s0     46tok    0.2s 198.6tok/s
+  PASS  records_16/q1        s1     46tok    0.2s 224.9tok/s
+  PASS  records_16/q2        s0    495tok    0.2s 2476.1tok/s
+  PASS  records_16/q2        s1    495tok    0.2s 2638.5tok/s
+  FAIL  records_17/q1        s0     46tok    0.2s 222.8tok/s   <expected 'missing'>
+  FAIL  records_17/q1        s1     46tok    0.2s 232.0tok/s   <expected 'missing'>
+  FAIL  records_17/q2        s0    502tok    0.2s 2379.3tok/s   <expected 'NONE'>
+  FAIL  records_17/q2        s1    502tok    0.2s 2337.9tok/s   <expected 'NONE'>
+  PASS  records_18/q1        s0     46tok    0.2s 202.1tok/s
+  PASS  records_18/q1        s1     46tok    0.2s 233.3tok/s
+  PASS  records_18/q2        s0    495tok    0.2s 2447.1tok/s
+  PASS  records_18/q2        s1    495tok    0.2s 2492.4tok/s
+  PASS  records_19/q1        s0     46tok    0.2s 238.1tok/s
+  PASS  records_19/q1        s1     46tok    0.2s 198.9tok/s
+  PASS  records_19/q2        s0    499tok    0.2s 2414.5tok/s
+  PASS  records_19/q2        s1    499tok    0.4s 1362.9tok/s
+  PASS  records_20/q1        s0     46tok    0.2s 209.3tok/s
+  PASS  records_20/q1        s1     46tok    0.2s 193.6tok/s
+  PASS  records_20/q2        s0    500tok    0.3s 1959.4tok/s
+  PASS  records_20/q2        s1    500tok    0.3s 1727.5tok/s
+
+================================================================
+accuracy               79.5 %  (95% CI 76.6–82.2, n=800)
+tokens / task          512 in / 70 out
+time / task            0.2 s
+by difficulty          medium=85.0%  hard=78.1%
+wall                   189 s
+mean output tokens     70
+truncated / errored    0 / 0
+================================================================
+
+written to results/2026-10-09-system1-v2-kev4b-vs-jev/typesafe-jev-1-13-system1-v2.json

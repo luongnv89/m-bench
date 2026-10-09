@@ -65,7 +65,7 @@ Useful flags:
 
 | Flag | Default | Notes |
 |---|---|---|
-| `--suite` | `all` | `core16`, `hard12`, `all`, `system1`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
+| `--suite` | `all` | `core16`, `hard12`, `all`, `system1`, `system1-legacy`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
 | `--thinking` | off | Enables the model's reasoning block via `chat_template_kwargs` |
 | `--max-tokens` | 6000 | Raise to ~16000 with `--thinking`, or reasoning eats the budget |
 | `--samples` | 2 | Generations per task (`bench harness run` / `bench setup run`: 3). 2 is cheap; 5+ before trusting small gaps |
@@ -235,12 +235,23 @@ e.g. `bespokelabs/Bespoke-Nimble-9B` or `convaiinnovations/laya` (behind any
 OpenAI-compatible server or shim — the bench only needs `BENCH_BASE_URL`).
 
 ```bash
-./bench validate --suite system1          # 23/23 — data lint, see below
+./bench validate --suite system1          # 200/200 — data lint, see below
+./bench validate --suite system1-legacy   # 23/23 — original historical dataset
 ./bench run --suite system1 --samples 2 --label "nimble-9b"
 ```
 
-Each of the 23 scenarios carries 2–3 typed questions (49 scored questions in
-all). Each question is one chat completion scored by **exact match** against its
+The v2 dataset contains 200 distinct scenarios with two questions each (400
+scored questions): 380 multiple choice and 20 open extraction. Ten equally sized
+families cover exceptions, thresholds, state changes, time, exact arithmetic,
+permissions, conflicting evidence and joins. Rules and facts are self-contained;
+near misses and counterfactuals target decision boundaries. See
+[the dataset design](SYSTEM1-DATASET.md) for coverage and validation.
+
+The original 23 scenarios / 49 questions remain in `system1-legacy`. Historical
+98% s1 scores belong to that saturated dataset. Re-measure the incumbent on v2
+before comparing candidates; repetitions do not add distinct cases.
+
+Each question is one chat completion scored by **exact match** against its
 answer key — the option letter counts the same as the full option text, since
 decision shims emit either. Verbosity, explanations and empty replies all fail:
 deliberating instead of deciding is the failure mode this suite measures.
@@ -251,10 +262,12 @@ per-question tokens, tok/s, TTFT, wall-clock and the cost scatter. Comparing two
 candidates on both axes is just two runs and `bench report`.
 
 `bench validate` does not execute anything here — a decision task has no
-reference implementation. It lints the data instead: every task needs an id, a
+executable task to run. It lints the data instead: every task needs an id, a
 difficulty, a non-empty `state` and a non-empty `questions` list, and every
 question's `answer` must be one of its own `options` (normalised); `options`
-may be omitted for open short-answer questions.
+may be omitted for open short-answer questions. V2 derives rule-based answer
+keys from structured fixtures and has independent dataset regression checks;
+the CLI lint alone cannot establish semantic correctness.
 
 ## Adding tasks and suites
 

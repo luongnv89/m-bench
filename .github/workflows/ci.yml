@@ -44,6 +44,11 @@ jobs:
       - name: Run bench validate agentic-all with coverage
         run: uv run coverage run --source=benchkit --parallel-mode -m benchkit.cli validate --suite agentic-all
 
+      - name: Lint System One datasets with coverage
+        run: |
+          uv run coverage run --source=benchkit --parallel-mode -m benchkit.cli validate --suite system1
+          uv run coverage run --source=benchkit --parallel-mode -m benchkit.cli validate --suite system1-legacy
+
       - name: Combine and report coverage
         run: |
           uv run coverage combine

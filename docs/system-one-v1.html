@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="System One benchmark v2: 200 scenarios, 400 scored questions and ten decision families. Fresh Jev, local Nimble-9B and local Kev-4B results, with v1 kept as a reference." />
-  <title>m-bench — System One benchmark v2: 400 decision questions</title>
+  <meta name="description" content="System One benchmark v1 reference: the original 23 scenarios, 49 questions, historical rankings and phishing workload. See benchmark v2 for current results." />
+  <title>m-bench — System One benchmark v1 reference</title>
   <meta name="theme-color" content="#0A0A0B" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="m-bench — System One benchmark v2" />
-  <meta property="og:description" content="200 scenarios. 400 questions. Ten decision families. Compare freshly measured models on benchmark v2 and explore the v1 reference separately." />
+  <meta property="og:title" content="m-bench — System One benchmark v1 reference" />
+  <meta property="og:description" content="Historical results on benchmark v1: 23 scenarios and 49 typed questions. These scores are a reference for the original dataset, separate from v2." />
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/site.css" />
 </head>
-<body data-page="system-one" data-suites="system1">
+<body data-page="system-one-v1" data-suites="system1-legacy,phishing-eval">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="nav">
@@ -27,11 +27,11 @@
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" id="nav-toggle">Menu</button>
       <ul class="nav-links" id="nav-menu">
-        <li><a class="nav-page" href="system-one.html" aria-current="page">System One v2</a></li>
-        <li><a class="nav-page" href="system-one-v1.html">v1 reference</a></li>
+        <li><a class="nav-page" href="system-one.html">System One v2</a></li>
+        <li><a class="nav-page" href="system-one-v1.html" aria-current="page">v1 reference</a></li>
         <li><a class="nav-page" href="index.html">LLM ranking</a></li>
         <li><a href="#s1">Models</a></li>
-        <li><a href="#dataset">Dataset</a></li>
+        <li><a href="#s1-real">Real use case</a></li>
         <li><a href="#results">Ledger</a></li>
         <li><a class="nav-cta" href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a></li>
       </ul>
@@ -47,18 +47,18 @@
       <div class="wrap">
         <div class="hero-grid">
           <div class="reveal">
-            <p class="kicker">System One · benchmark v2</p>
-            <h1 id="hero-title">System One.<br />Benchmark v2.</h1>
+            <p class="kicker">System One · benchmark v1 reference</p>
+            <h1 id="hero-title">System One.<br />Benchmark v1 reference.</h1>
             <p class="lead" style="margin-top:1.5rem;" id="s1-hero-question"></p>
             <div class="hero-actions">
-              <a class="btn btn-primary" href="#s1">Compare the models ↓</a>
-              <a class="btn btn-ghost" href="system-one-v1.html">View the v1 reference →</a>
+              <a class="btn btn-primary" href="#s1">View v1 rankings ↓</a>
+              <a class="btn btn-ghost" href="system-one.html">Open benchmark v2 →</a>
             </div>
             <div class="hero-meta" id="s1-hero-meta"></div>
             <p class="crosslink">Ranking coding agents instead? <a href="index.html">LLM setups — harness, model, thinking →</a></p>
           </div>
           <aside class="gauge reveal" aria-labelledby="s1-board-label">
-            <div class="gauge-label" id="s1-board-label">Accuracy · benchmark v2 (%)</div>
+            <div class="gauge-label" id="s1-board-label">Accuracy · benchmark v1 (%)</div>
             <div class="board-rows" id="s1-hero-board"></div>
           </aside>
         </div>
@@ -70,11 +70,11 @@
       <div class="wrap">
         <header class="section-head">
           <p class="kicker">Typed decisions</p>
-          <h2 id="s1-title">Fresh measurements on a harder dataset.</h2>
-          <p>Benchmark v2 contains <strong>200 distinct scenarios and 400 scored questions</strong>.
-            Each question supplies the facts and rules needed for a short decision. Jev, local Nimble-9B and
-            local Kev-4B were measured through the same gateway, with two samples per question and concurrency 1.
-            The <a href="system-one-v1.html">v1 rankings</a> remain a separate historical reference.</p>
+          <h2 id="s1-title">The original 49-question benchmark.</h2>
+          <p>The original dataset contained 23 scenarios and 49 questions. Several models reached 98%,
+            so it stopped separating the strongest endpoints. These historical rankings and the phishing workload below
+            remain available as a reference. <a href="system-one.html">Benchmark v2</a> uses a new dataset;
+            its scores cannot be compared directly with v1.</p>
         </header>
         <details class="model-picker" data-model-picker></details>
 
@@ -82,27 +82,30 @@
           <div class="chart-title" id="s1-setup"></div>
           <p class="chart-question" id="s1-question"></p>
           <div class="bar-rows" id="s1-bars" role="list" aria-label="Accuracy by model, 0 to 100"></div>
-          <p class="bar-legend" aria-hidden="true"><i></i> shaded band: leader’s 95% accuracy interval</p>
+          <p class="bar-legend" aria-hidden="true"><i></i> within ~8 pts of the leader: a tie at 2 samples</p>
           <div class="multiples" id="s1-multiples"></div>
           <p class="chart-note" id="s1-note"></p>
         </div>
       </div>
     </section>
 
-    <!-- DATASET V2 -->
-    <section id="dataset" aria-labelledby="dataset-title">
+    <!-- REAL USE CASE -->
+    <section id="s1-real" aria-labelledby="s1r-title">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">Dataset v2</p>
-          <h2 id="dataset-title">200 scenarios. 400 decisions.</h2>
-          <p>Ten equally sized families test exceptions, close boundaries and conflicting evidence.
-            The dataset has 380 multiple-choice questions and 20 open code-extraction questions,
-            with two scored questions per scenario. All necessary rules and facts are supplied.</p>
+          <p class="kicker">Real workload</p>
+          <h2 id="s1r-title">The anti-phishing classifier, unchanged.</h2>
+          <p>Sixteen adjudicated emails through the service's own eval harness and its <span class="mono">typesafe_only</span> arm — zero code changes,
+            only the backend swapped by environment. The pipeline, not the model, makes the final risk decision.</p>
         </header>
-        <div class="suite-grid" id="s1-family-grid" role="list" aria-label="Ten benchmark v2 decision families"></div>
-        <p class="chart-note">Two samples per question produce 800 responses per model; repeated samples do not add new scenarios.
-          Questions sharing a scenario are correlated, so confidence intervals describe scored attempts.
-          <a href="https://github.com/luongnv89/m-bench/blob/main/docs/SYSTEM1-DATASET.md" rel="noopener">Read the dataset design →</a></p>
+
+        <div class="chart-block">
+          <div class="chart-title" id="s1r-setup"></div>
+          <p class="chart-question" id="s1r-question"></p>
+          <div class="bar-rows" id="s1r-bars" role="list" aria-label="F1 by backend, 0 to 100"></div>
+          <div class="multiples" id="s1r-multiples"></div>
+          <p class="chart-note" id="s1r-note"></p>
+        </div>
       </div>
     </section>
 
@@ -111,9 +114,8 @@
       <div class="wrap">
         <header class="section-head">
           <p class="kicker">Ledger</p>
-          <h2 id="results-title">Every benchmark v2 run, filterable.</h2>
-          <p>Runs on the 400-question <span class="mono">system1</span> v2 dataset.
-            <a href="system-one-v1.html">Historical v1 and phishing results</a> have their own page.
+          <h2 id="results-title">Every System One v1 run, filterable.</h2>
+          <p>The <span class="mono">system1-legacy</span> and historical <span class="mono">phishing-eval</span> rows.
             Click a column to sort, click a model to open its report. <span class="volt">Green</span> marks the best score per suite in view.
             Coding-agent runs live on the <a href="index.html">LLM ranking page</a>.</p>
         </header>
@@ -184,9 +186,9 @@
         <div class="cta-band">
           <div>
             <p class="kicker">Reproduce it</p>
-            <h2 id="cta-title">Run benchmark v2 on your endpoint.</h2>
+            <h2 id="cta-title">Reproduce benchmark v1.</h2>
             <p class="lead">One endpoint, any backend: <span class="mono">configs/s1_gateway.py</span> on :8123. Swap the backend by environment variable; the application never sees the change.</p>
-            <div class="cmd" style="margin-top:1rem;"><code id="cmd-text">./bench run --suite system1 --samples 2</code><button type="button" class="copy-btn" id="copy-cmd">Copy</button></div>
+            <div class="cmd" style="margin-top:1rem;"><code id="cmd-text">./bench validate --suite system1-legacy</code><button type="button" class="copy-btn" id="copy-cmd">Copy</button></div>
           </div>
           <div class="cta-actions">
             <a class="btn btn-primary" href="https://github.com/luongnv89/m-bench/blob/main/docs/S1-ENDPOINT.md" rel="noopener">Endpoint contract</a>
@@ -202,7 +204,7 @@
     <div class="wrap footer-inner">
       <div>© m-bench · MIT · measured where it runs</div>
       <div class="footer-links">
-        <a href="system-one-v1.html">v1 reference</a>
+        <a href="system-one.html">System One v2</a>
         <a href="index.html">LLM ranking</a>
         <a href="https://github.com/luongnv89/m-bench/blob/main/docs/S1-ENDPOINT.md" rel="noopener">S1 endpoint</a>
         <a href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a>
