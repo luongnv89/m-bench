@@ -227,9 +227,43 @@
     "samples": 2,
     "generations": 800,
     "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
-    "setup": "system1 v2 · 200 scenarios · 400 questions · 2 samples/question · standard S1 gateway; same temporary :8124 URL · concurrency 1",
-    "question": "Which decision model handles benchmark v2 best? Jev, local Nimble-9B and local Kev-4B measured through one gateway — the v1 tie is gone.",
+    "setup": "system1 v2 · 200 scenarios · 400 questions · 2 samples/question · concurrency 1 · typed arms through the standard S1 gateway on a private :8124 instance; the incumbent vLLM measured directly on :8001",
+    "question": "Which decision model handles benchmark v2 best? The whole v1 roster re-measured on 400 questions — reasoning is the lever that separates them.",
     "rows": [
+      {
+        "model": "Qwen3.6-35B-A3B · think-ON",
+        "modelKey": "Qwen3.6-35B-A3B (vLLM think-ON)",
+        "score": 98.6,
+        "ci": "97.6–99.2",
+        "ciBounds": [
+          97.55473839327496,
+          99.23051589572304
+        ],
+        "secPerQ": 9.016,
+        "outTok": 766.61,
+        "wall": 7213.26,
+        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning enabled",
+        "note": "789/800 correct; 0 generation errors — reasoning turns the same weights from mid-pack into near-saturation",
+        "sourceJson": "results/2026-10-09-system1-v2-v1-roster/qwen3-6-35b-a3b-nvfp4-thinkon-system1-v2.json",
+        "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
+      },
+      {
+        "model": "Mercury Decide · free",
+        "modelKey": "inception/mercury-decide:free",
+        "score": 86.5,
+        "ci": "84.0–88.7",
+        "ciBounds": [
+          83.95682490318882,
+          88.69431713379684
+        ],
+        "secPerQ": 0.49,
+        "outTok": 1.0,
+        "wall": 391.86,
+        "serving": "hosted OpenRouter · systemone backend · no local weights",
+        "note": "692/800 correct; 0 generation errors; no free-tier throttling this run",
+        "sourceJson": "results/2026-10-09-system1-v2-v1-roster/mercury-decide-free-system1-v2.json",
+        "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
+      },
       {
         "model": "TypeSafe Jev · jev-1.13.0",
         "modelKey": "TypeSafe Jev (jev-1.13.0)",
@@ -266,6 +300,23 @@
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
+        "model": "Qwen3.6-35B-A3B · think-OFF",
+        "modelKey": "Qwen3.6-35B-A3B (vLLM think-OFF)",
+        "score": 61.8,
+        "ci": "58.3–65.1",
+        "ciBounds": [
+          58.333705359082174,
+          65.05399105008445
+        ],
+        "secPerQ": 0.205,
+        "outTok": 3.8,
+        "wall": 164.16,
+        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning disabled",
+        "note": "494/800 correct; 0 generation errors — same weights as the leader, thinking off",
+        "sourceJson": "results/2026-10-09-system1-v2-v1-roster/qwen3-6-35b-a3b-nvfp4-thinkoff-system1-v2.json",
+        "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
+      },
+      {
         "model": "Kev-4B · bf16",
         "modelKey": "Kev-4B (kev.serve bf16)",
         "score": 59.8,
@@ -281,11 +332,28 @@
         "note": "478/800 correct; 0 generation errors",
         "sourceJson": "results/2026-10-09-system1-v2-kev4b-vs-jev/kev-4b-kevserve-bf16-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
+      },
+      {
+        "model": "Laya typed-decisions",
+        "modelKey": "Laya typed-decisions",
+        "score": 33.5,
+        "ci": "30.3–36.8",
+        "ciBounds": [
+          30.31505627087722,
+          36.8426466439101
+        ],
+        "secPerQ": 0.473,
+        "outTok": 0.0,
+        "wall": 378.33,
+        "serving": "in-process scorer · laya backend · CPU-bound",
+        "note": "268/800 correct; 0 generation errors — non-autoregressive scorer collapses on v2's multi-step states",
+        "sourceJson": "results/2026-10-09-system1-v2-v1-roster/laya-typed-decisions-system1-v2.json",
+        "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       }
     ],
-    "report": "results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md",
+    "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
     "wallNote": "800 responses per model · concurrency 1",
-    "note": "Jev scored 79.5%, local Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window), local Kev-4B 59.8%. On the level optioned subset: Jev 81.6% > Nimble 71.6% > Kev-4B 62.4%. All arms used the same gateway URL sequentially and the same dataset. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included.",
+    "note": "Every v1-board model re-measured on v2. The incumbent Qwen3.6-35B with reasoning enabled leads at 98.6% — the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included.",
     "families": [
       {
         "id": "policy",
@@ -404,6 +472,66 @@
       "unit": "accuracy",
       "report": "results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md",
       "sourceJson": "results/2026-10-09-system1-v2-kev4b-vs-jev/bespoke-nimble-9b-ollama-q8-0-system1-v2.json"
+    },
+    {
+      "date": "2026-10-09",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B (vLLM think-ON)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "system1",
+      "datasetVersion": 2,
+      "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
+      "score": 98.6,
+      "unit": "accuracy",
+      "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
+      "sourceJson": "results/2026-10-09-system1-v2-v1-roster/qwen3-6-35b-a3b-nvfp4-thinkon-system1-v2.json"
+    },
+    {
+      "date": "2026-10-09",
+      "machine": "dgx-spark",
+      "model": "inception/mercury-decide:free",
+      "harness": "s1-gateway",
+      "mode": "isolated",
+      "thinking": "—",
+      "suite": "system1",
+      "datasetVersion": 2,
+      "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
+      "score": 86.5,
+      "unit": "accuracy",
+      "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
+      "sourceJson": "results/2026-10-09-system1-v2-v1-roster/mercury-decide-free-system1-v2.json"
+    },
+    {
+      "date": "2026-10-09",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B (vLLM think-OFF)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "system1",
+      "datasetVersion": 2,
+      "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
+      "score": 61.8,
+      "unit": "accuracy",
+      "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
+      "sourceJson": "results/2026-10-09-system1-v2-v1-roster/qwen3-6-35b-a3b-nvfp4-thinkoff-system1-v2.json"
+    },
+    {
+      "date": "2026-10-09",
+      "machine": "dgx-spark",
+      "model": "Laya typed-decisions",
+      "harness": "s1-gateway",
+      "mode": "isolated",
+      "thinking": "—",
+      "suite": "system1",
+      "datasetVersion": 2,
+      "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
+      "score": 33.5,
+      "unit": "accuracy",
+      "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
+      "sourceJson": "results/2026-10-09-system1-v2-v1-roster/laya-typed-decisions-system1-v2.json"
     },
     {
       "date": "2026-10-09",
@@ -1019,6 +1147,12 @@
     }
   ],
   "campaigns": [
+    {
+      "date": "2026-10-09",
+      "question": "How does the whole v1 roster rank on benchmark v2?",
+      "answer": "Reasoning separates them. The incumbent Qwen3.6-35B with thinking enabled leads at 98.6% (CI 97.6–99.2) — the same weights score 61.8% with thinking off, the widest thinking-mode gap on this suite. Hosted Mercury Decide 86.5% beats hosted Jev 79.5%. Laya's scorer collapses to 33.5% (was 73.5% on v1). Kev-27B, Clef-27B and Clef-Flash-9B did not fit beside the shared services (~20 GiB free) and were not re-measured.",
+      "link": "results/2026-10-09-system1-v2-v1-roster/REPORT.md"
+    },
     {
       "date": "2026-10-09",
       "question": "Benchmark v2 (200 scenarios, 400 questions): does the v1 Jev↔Nimble tie still hold, and where does local Kev-4B land?",

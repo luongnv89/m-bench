@@ -36,9 +36,14 @@ class LandingPageTests(unittest.TestCase):
         self.assertEqual(s1["generations"], 98)
         self.assertEqual(phish["completeness"]["per_analyzer"]["typesafe_analyzer"]["failed"], 0)
         self.assertEqual(phish["samples_evaluated"], 16)
+        v2 = json.loads((ROOT / "results/2026-10-09-system1-v2-v1-roster"
+                         "/mercury-decide-free-system1-v2.json").read_text())["summary"]
+        self.assertEqual(v2["errored"], 0)
+        self.assertEqual(v2["generations"], 800)
         rows = [r for r in self.data["results"] if r["model"] == model]
-        self.assertEqual(len(rows), 2)
-        expected = {"system1-legacy": round(s1["pass_at_1"] * 100, 1),
+        self.assertEqual(len(rows), 3)
+        expected = {"system1": round(v2["pass_at_1"] * 100, 1),
+                    "system1-legacy": round(s1["pass_at_1"] * 100, 1),
                     "phishing-eval": phish["detection"]["f1"] * 100}
         for row in rows:
             self.assertEqual(row["score"], expected[row["suite"]])

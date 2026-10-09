@@ -24,11 +24,15 @@ points, not gospel.
 
 System One "98 %"-class measurements below were collected on the original
 49-question `system1` dataset, now named `system1-legacy`; they are kept as
-history. Measured on the 400-question v2 default (2026-10-09,
-[same gateway transport](../docs/S1-ENDPOINT.md) for both arms):
-**Jev `jev-1.13.0` 79.5 % (CI 76.6–82.2) vs local Kev-4B bf16 59.8 %
-(CI 56.3–63.1)** — v2 is not saturated and Jev stays the s1 baseline; see
-[`../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT.md`](../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT.md).
+history. Measured on the 400-question v2 default (2026-10-09): the incumbent
+**Qwen3.6-35B with thinking enabled leads the full roster at 98.6 %**
+(CI 97.6–99.2, same weights 61.8 % think-OFF); Mercury Decide :free 86.5 %,
+**Jev `jev-1.13.0` 79.5 %** (CI 76.6–82.2), Nimble-9B 68.0 % as-scored,
+Kev-4B bf16 59.8 %, Laya 33.5 % — see
+[`../results/2026-10-09-system1-v2-v1-roster/REPORT.md`](../results/2026-10-09-system1-v2-v1-roster/REPORT.md)
+and [`../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md`](../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md).
+Jev stays the s1 baseline: the Qwen-ON number comes from the incumbent's own
+plain-chat endpoint at ~9 s/question, not the typed s1 contract.
 
 | Config | Model | Quant | VRAM budget | Image digest | Measured | Use it when |
 |---|---|---|---|---|---|---|
@@ -41,8 +45,8 @@ history. Measured on the 400-question v2 default (2026-10-09,
 | `typesafe-jev-shim.py` | TypeSafe Jev `jev-latest` (resolved `jev-1.13.0`) | — (hosted API) | — | — | **79.5 % accuracy on `system1` v2** (CI 76.6–82.2, n=800) — the current s1 baseline — 0.24 s/question (WAN); legacy `system1-legacy`: 98.0 %, 0.3 s/question, 38 out-tok; see [`../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT.md`](../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT.md) and [`../results/2026-09-30/REPORT-jev-s1.md`](../results/2026-09-30/REPORT-jev-s1.md) | `typesafe` backend of the standard s1 endpoint (`s1_gateway.py`, see [`../docs/S1-ENDPOINT.md`](../docs/S1-ENDPOINT.md)); needs `TYPESAFE_API_KEY` |
 | `s1_gateway.py` `S1_BACKEND=kev` | `jaredpalmer/kev-4b` via `kev.serve` (LoRA-16 on Qwen3.5-4B-Base) | bf16 | ~15 GiB, coexists with the incumbent | — | **59.8 % accuracy on `system1` v2** (CI 56.3–63.1, n=800) — loses every family to Jev; legacy `system1-legacy`: 95.9 %, inside noise of Jev; 0.077 s/question local; see [`../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT.md`](../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT.md) | **Local, keyless fallback** for the s1 endpoint (`KEV_BASE_URL`, no API key) — not a drop-in Jev replacement on v2 decision quality |
 | `s1_gateway.py` `S1_BACKEND=nimble` | Bespoke-Nimble-9B (`ollama pull nimble`, merged Q8_0) | Q8_0 | ~9.5 GiB via Ollama | Ollama ≥ 0.35 | **71.6 % on `system1` v2 optioned questions** (544/760; 68.0 % as-scored — 40 open-question gens failed at transport: Ollama caps `criteria` at 26 vs the gateway's 64-token fallback); legacy `system1-legacy`: 98.0 % tied Jev, 0.5 s/question, 1 out-tok; see [`../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md`](../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md) | **Strongest measured local backend** — clearly ahead of Kev-4B, but no longer Jev-parity on v2 and open questions are unscorable through today's gateway. Ollama's native `/v1/systemone` implements the Jev contract, so the gateway translator is shared verbatim with `typesafe` |
-| `s1_gateway.py` `S1_BACKEND=systemone` | OpenRouter `inception/mercury-decide:free` | — (hosted native decision API) | No local weights | — | **98.0% system1 (96/98)**, **F1 1.000 on 16 phishing emails**; 2.64 s/question including quota waits, 2.93 s/email; [report](../results/2026-10-01-mercury-decide-rerun/REPORT.md) | Optional hosted backend, not shared default. Set `S1_DECISION_URL`, `S1_MODEL`, `S1_API_KEY`; free-tier 20 requests/minute still applies with increased daily allowance |
-| `s1_gateway.py` `S1_BACKEND=laya` | `convaiinnovations/laya` `typed-decisions` checkpoint (ModernBERT scorer) | — | ~843 MB, in-process | `laya` pip pkg | 73.5 % accuracy on `system1` (CI 64–81) — fails 12 tasks across all difficulties; CPU-bound in this run; see the same report | **Not a Jev replacement at this checkpoint.** Kept as a backend because the contract is satisfied; re-test if a GPU slot frees or a newer checkpoint lands |
+| `s1_gateway.py` `S1_BACKEND=systemone` | OpenRouter `inception/mercury-decide:free` | — (hosted native decision API) | No local weights | — | **86.5 % accuracy on `system1` v2** (CI 84.0–88.7, n=800) — beats hosted Jev on v2; 0.49 s/question, no throttling this run; legacy `system1-legacy`: 98.0% (96/98), **F1 1.000 on 16 phishing emails**; see [v2 report](../results/2026-10-09-system1-v2-v1-roster/REPORT.md) and [legacy report](../results/2026-10-01-mercury-decide-rerun/REPORT.md) | Optional hosted backend, not shared default. Set `S1_DECISION_URL`, `S1_MODEL`, `S1_API_KEY`; free-tier 20 requests/minute still applies with increased daily allowance |
+| `s1_gateway.py` `S1_BACKEND=laya` | `convaiinnovations/laya` `typed-decisions` checkpoint (ModernBERT scorer) | — | ~843 MB, in-process | `laya` pip pkg | **33.5 % accuracy on `system1` v2** (CI 30.3–36.8, n=800) — near chance on the multi-step families; legacy `system1-legacy`: 73.5 % (CI 64–81); CPU-bound both runs; see the same reports | **Not a Jev replacement at this checkpoint.** Kept as a backend because the contract is satisfied; re-test if a GPU slot frees or a newer checkpoint lands |
 | (no recipe — evaluated, not adopted) | Qwen3.8-Flash-Next NVFP4 (Mia-AiLab, 99 GB, PLE-offload, solo tenant) | NVFP4+MXFP8 | ~100 GB, KV cut 22→18 GiB to fit | `vllm/vllm-openai:qwen38-flash-next` | 87.5 % think-OFF / 58.9 % think-ON / 87.5 % agentic-OFF / 87.5 % agentic-ON — see [`../results/2026-09-04/REPORT-flash-next-analysis.md`](../results/2026-09-04/REPORT-flash-next-analysis.md) | **Not adopted.** Only win is think-OFF (+7pp, noise); loses think-ON and both agentic modes, 2–3× slower, shipped defaults fail this box's safety check |
 
 "Measured" links to the campaign in [`../results/`](../results/) that produced it.

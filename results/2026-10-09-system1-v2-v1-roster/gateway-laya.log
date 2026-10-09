@@ -1,0 +1,17 @@
+loading laya from /home/montimage/models/laya-typed-decisions …
+/home/montimage/miniconda3/lib/python3.13/site-packages/laya/agent.py:1668: RuntimeWarning: laya: this checkpoint ships invalid temperatures or values outside [0.5, 5]; using choice:11+=0.10058280825614929 -> 0.5. Treat confidence from the affected entries as uncalibrated.
+  return Agent(model_id_or_path, device=device, token=token, subfolder=subfolder, fast=fast,
+
+[laya] Warning: could not place the model on cuda, so it is running on CPU.
+  Reason: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+
+  Inference will be roughly 10-15x slower (~200-500 ms rather than ~35 ms).
+  If this is a newer NVIDIA GPU (Blackwell / RTX 50-series), your PyTorch build
+  may not support its CUDA architecture:
+    pip install --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128
+  See https://pytorch.org/get-started/locally/
+
+laya loaded
+s1-gateway on :8124  backend=laya  upstream=/home/montimage/models/laya-typed-decisions
