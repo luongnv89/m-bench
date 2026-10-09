@@ -221,7 +221,7 @@
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
   },
   "systemOne": {
-    "setup": "system1 suite · 49 typed questions · 2 samples · standard s1 gateway; Mercury and Clef-Flash used temporary :8124 without restarting shared :8123",
+    "setup": "system1 suite · 49 typed questions · 2 samples · standard S1 gateway; Clef runs used temporary :8124; full 27B Clef required pausing Qwen vLLM",
     "question": "Typed-decision models behind one stable endpoint — can anything replace Jev?",
     "rows": [
       {
@@ -273,11 +273,22 @@
         "modelKey": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
         "score": 98.0,
         "ci": "92.9–99.4",
-        "secPerQ": 0.6,
+        "secPerQ": 0.69,
         "outTok": 0,
-        "wall": 14,
-        "serving": "local in-process bf16 ~19 GiB · clef backend",
-        "note": "ties Jev — identical failure set (only error_log/q1); fits alongside every service on the box, nothing stopped"
+        "wall": 17.1,
+        "serving": "local in-process bf16 ~19 GiB · clef backend · Qwen stayed up",
+        "note": "96/98; ties Jev and full Clef with the same error_log/q1 misses; fits alongside the active Qwen service"
+      },
+      {
+        "model": "Clef-27B",
+        "modelKey": "Clef-27B (Cloudflare/clef bf16)",
+        "score": 98.0,
+        "ci": "92.9–99.4",
+        "secPerQ": 1.93,
+        "outTok": 0,
+        "wall": 47.7,
+        "serving": "local in-process bf16 · clef backend · Qwen paused",
+        "note": "96/98; ties Jev and Clef-Flash with the same error_log/q1 misses; required pausing shared Qwen vLLM to fit"
       },
       {
         "model": "Qwen3.6-35B think-OFF",
@@ -294,12 +305,12 @@
         "model": "Kev-4B",
         "modelKey": "Kev-4B (kev.serve bf16)",
         "score": 95.9,
-        "ci": "90–98",
-        "secPerQ": 0.23,
+        "ci": "90.0–98.4",
+        "secPerQ": 0.24,
         "outTok": 61,
-        "wall": 6,
+        "wall": 6.0,
         "serving": "local kev.serve bf16 ~15 GiB · kev backend",
-        "note": "fine-tunable Jev-style model — one extra miss vs Jev, inside noise; fastest local backend"
+        "note": "current incumbent reference: 94/98; remains fastest local backend, with the margin to 98% candidates inside uncertainty"
       },
       {
         "model": "Qwen3.6-35B think-ON",
@@ -325,8 +336,8 @@
       }
     ],
     "report": "results/2026-09-30/REPORT-s1-candidates.md",
-    "latestReport": "results/2026-10-05/REPORT-clef-flash-s1.md",
-    "note": "Clef-Flash-9B (Cloudflare/clef-flash, bf16 ~19 GiB) ties Jev at 98.0% with an identical failure set — error_log/q1 only — and is the largest top-tier candidate that fits alongside every running service; nothing was stopped. Mercury Decide also ties at 96/98 via hosted OpenRouter (2.64 s/question includes free-tier quota waits); Nimble and Kev-27B tie at 98.0% too, but Kev-27B needed the incumbent vLLM endpoint stopped to run. Kev-4B remains the fastest local backend at 0.23 s/question. These small suites are near saturation — harder tasks are needed, not claims of a perfect model.",
+    "latestReport": "results/2026-10-09/REPORT-cloudflare-s1-final.md",
+    "note": "Fresh local runs put both Cloudflare Clef variants at 98.0% (96/98), matching historical Jev with the same error_log/q1 misses. Their margins over current Kev-4B (95.9%, 94/98) are within uncertainty. Clef-Flash takes 0.69 s/question and fits alongside Qwen; full Clef takes 1.93 s and required pausing Qwen vLLM to fit. Latencies reflect those actual deployment conditions, not a controlled co-tenancy comparison. The system1 suite is near saturation; these scores do not establish a perfect model or significant winner.",
     "realUseCase": {
       "setup": "anti-phishing-email-service · 16 adjudicated emails · typesafe_only arm, zero code changes",
       "question": "Real workload, same contract: can local or hosted models replace Jev on the phishing classifier?",
@@ -408,6 +419,9 @@
     }
   },
   "results": [
+    {"date": "2026-10-09", "machine": "dgx-spark", "model": "Clef-27B (Cloudflare/clef bf16)", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-09/REPORT-cloudflare-s1-final.md"},
+    {"date": "2026-10-09", "machine": "dgx-spark", "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-09/REPORT-cloudflare-s1-final.md"},
+    {"date": "2026-10-09", "machine": "dgx-spark", "model": "Kev-4B (kev.serve bf16)", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 95.9, "unit": "accuracy", "report": "results/2026-10-09/REPORT-cloudflare-s1-final.md"},
     {"date": "2026-10-05", "machine": "dgx-spark", "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-05/REPORT-clef-flash-s1.md"},
     {"date": "2026-10-05", "machine": "dgx-spark", "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)", "harness": "anti-phishing pipeline", "mode": "isolated", "thinking": "—", "suite": "phishing-eval", "score": 100.0, "unit": "f1", "report": "results/2026-10-05/REPORT-s1-phishing-clef-flash.md"},
     {"date": "2026-10-01", "machine": "dgx-spark", "model": "inception/mercury-decide:free", "harness": "s1-gateway", "mode": "isolated", "thinking": "—", "suite": "system1", "score": 98.0, "unit": "accuracy", "report": "results/2026-10-01-mercury-decide-rerun/REPORT.md"},

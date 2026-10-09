@@ -72,9 +72,9 @@
           <h2 id="s1-title">Same contract. Different engines.</h2>
           <p>Each model takes application state plus a question and returns a typed pick with probabilities — no free text to parse.
             Local and hosted backends sit behind the same standard s1 gateway, so swapping one is an env change, not an application change.
-            Jev is the historical baseline; Clef-Flash-9B now ties it at 98.0% — the largest top-tier model that fits alongside everything
-            else on the box — and solves all 16 phishing emails with the strongest local read on the hardest lure.
-            These small suites are near saturation, not proof of a perfect model.</p>
+            Jev is the historical baseline; fresh runs put both Cloudflare Clef models at 98.0% (96/98), with the same
+            <span class="mono">error_log/q1</span> misses. Clef-Flash takes 0.69 s/question and fits alongside Qwen; the 27B Clef takes 1.93 s and needed Qwen vLLM paused to fit.
+            Flash remains the practical Clef choice, including its measured 16/16 phishing result. These small suites are near saturation, not proof of a perfect model.</p>
         </header>
         <details class="model-picker" data-model-picker></details>
 

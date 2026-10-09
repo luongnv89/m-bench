@@ -1,0 +1,49 @@
+run=cloudflare-clef-27b-s1-warmed-20261009T053334Z
+UTC=2026-10-09T05:33:34Z
+
+--- user unit ---
+MainPID=2043
+ExecStart={ path=/home/montimage/llm-serving/start-qwen.sh ; argv[]=/home/montimage/llm-serving/start-qwen.sh ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }
+ExecStop={ path=/usr/bin/docker ; argv[]=/usr/bin/docker stop -t 60 vllm-qwen ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }
+ControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/vllm-qwen.service
+ActiveState=active
+FragmentPath=/home/montimage/.config/systemd/user/vllm-qwen.service
+
+--- :8001 baseline ---
+{"object": "list", "data": [{"id": "montimage-dgx-spark", "object": "model", "created": 1791524014, "owned_by": "vllm", "root": "unsloth/Qwen3.6-35B-A3B-NVFP4", "parent": null, "max_model_len": 262144, "permission": [{"id": "modelperm-b13781c0bb9bebfa", "object": "model_permission", "created": 1791524014, "allow_create_engine": false, "allow_sampling": true, "allow_logprobs": true, "allow_search_indices": false, "allow_view": true, "allow_fine_tuning": false, "organization": "*", "group": null, "is_blocking": false}]}, {"id": "unsloth/Qwen3.6-35B-A3B-NVFP4", "object": "model", "created": 1791524014, "owned_by": "vllm", "root": "unsloth/Qwen3.6-35B-A3B-NVFP4", "parent": null, "max_model_len": 262144, "permission": [{"id": "modelperm-b723c73e6e6f2d47", "object": "model_permission", "created": 1791524014, "allow_create_engine": false, "allow_sampling": true, "allow_logprobs": true, "allow_search_indices": false, "allow_view": true, "allow_fine_tuning": false, "organization": "*", "group": null, "is_blocking": false}]}]}
+--- :8123 baseline ---
+{"object": "list", "data": [{"id": "kev-latest", "object": "model", "owned_by": "kev"}]}
+--- listeners ---
+LISTEN 0      128                                      0.0.0.0:8001       0.0.0.0:*    users:(("python3",pid=2046,fd=6))         
+LISTEN 0      128                                    127.0.0.1:8123       0.0.0.0:*    users:(("python3",pid=2039,fd=6))         
+LISTEN 0      2048                                   127.0.0.1:8801       0.0.0.0:*    users:(("vllm",pid=4219,fd=23))           
+
+--- memory ---
+               total        used        free      shared  buff/cache   available
+Mem:           119Gi        89Gi        12Gi       269Mi        19Gi        29Gi
+Swap:           15Gi       9.0Gi       7.0Gi
+
+--- GPU processes ---
+Fri Oct  9 07:33:34 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.173.02             Driver Version: 580.173.02     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GB10                    On  |   0000000F:01:00.0  On |                  N/A |
+| N/A   44C    P0             10W /  N/A  | Not Supported          |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            8882      C   VLLM::EngineCore                      68599MiB |
+|    0   N/A  N/A            9352      G   /usr/lib/xorg/Xorg                       56MiB |
+|    0   N/A  N/A            9606      G   /usr/bin/gnome-shell                    126MiB |
+|    0   N/A  N/A          933494      C   ...uongnv89/kev/.venv/bin/python      14336MiB |
++-----------------------------------------------------------------------------------------+
