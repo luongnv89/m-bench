@@ -43,12 +43,17 @@ Semantics — what an application may rely on:
 
 ## The baseline: TypeSafe Jev
 
+The measurements in this section use the original 49-question suite, now
+`system1-legacy`. The default `system1` is v2 (200 scenarios / 400 questions).
+Re-measure Jev on v2 before comparing a new candidate; historical scores cannot
+serve as its baseline. See [the dataset design](SYSTEM1-DATASET.md).
+
 `S1_BACKEND=typesafe` (the default) serves Jev — the measured reference every
 candidate is compared against.
 
 | Metric | Jev `jev-1.13.0` (`jev-latest`) |
 |---|---|
-| Accuracy on `system1` | **98.0 %** (95 % CI 92.9–99.4, n=98) |
+| Accuracy on `system1-legacy` | **98.0 %** (95 % CI 92.9–99.4, n=98) |
 | Time per question | 0.3 s |
 | Tokens per question | 327 in / 38 out |
 | Failure modes observed | `error_log/q1` (epistemic "cannot determine") only |
@@ -160,9 +165,10 @@ model limit. The system1 runner disables redundant OpenAI SDK retries;
 other runners are unchanged. Reasoning on/off flags are not applicable to these
 prefill-only typed decision endpoints.
 
-Budget requests before starting: this suite has 49 questions, so `--samples 2`
-needs 98 successful calls; the full phishing corpus adds 16 calls, plus smoke
-checks and retries. A fresh 50-request daily free allowance cannot cover both.
+Budget requests before starting: v2 `system1` has 400 questions, so `--samples 2`
+needs 800 successful calls per model. `system1-legacy` has 49 questions and needs
+98 calls at two samples. The full phishing corpus adds 16 calls, plus smoke
+checks and retries. A fresh 50-request daily free allowance cannot cover either.
 Quota limits may vary: check the API's current allowance rather than assuming
 this observed limit is universal. Capture benchmark stdout to a fresh log file
 (e.g. `./bench run ... | tee candidate-run.log`), since final JSON is written only
@@ -276,12 +282,14 @@ To return to Jev: `S1_BACKEND=typesafe` (or just run
 Same URL, same transport, same suite — the only thing that varies is the model:
 
 ```bash
-# candidate serving behind :8123 via whichever backend fits
+# incumbent serving behind :8123; set BENCH_MODEL to its /models ID
+./bench run --suite system1 --samples 2 --label "jev system1-v2 baseline"
+# candidate serving behind the same URL; set BENCH_MODEL to its /models ID
 ./bench run --suite system1 --samples 2 \
-    --label "candidate-x s1" \
+    --label "candidate-x system1-v2" \
     # BENCH_BASE_URL=http://localhost:8123/v1 BENCH_MODEL=<id /v1/models reports>
-./bench report results/2026-09-30/typesafe-jev-1-13-s1.json \
-    results/<date>/candidate-x-s1.json \
+./bench report results/<date>/jev-system1-v2-baseline.json \
+    results/<date>/candidate-x-system1-v2.json \
     --title "candidate-x vs Jev baseline on system1" \
     --question "Should candidate-x replace Jev behind the s1 endpoint?" \
     --verdict "..."
@@ -293,8 +301,8 @@ Decision criteria, in order:
    accuracy number *is* the "application works as expected" check.
 2. **Accuracy** — wins only if the 95 % Newcombe margin excludes zero;
    otherwise call it at-par and decide on cost.
-3. **Cost** — seconds and output tokens per question against Jev's
-   0.3 s / 38 tok.
+3. **Cost** — seconds and output tokens per question against Jev measured
+   on the same current suite.
 4. **Operability** — does it run on this machine next to what else is served?
 
 A candidate that clears all four replaces Jev behind the endpoint; the

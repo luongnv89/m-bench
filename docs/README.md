@@ -1,26 +1,27 @@
 # m-bench docs (GitHub Pages)
 
-Static site for measured benchmark results: two thin pages over one shared design system.
+Static site for measured benchmark results: three pages over one shared design system.
 
 | Page | `<body data-page>` | Suites it renders | Owns |
 |---|---|---|---|
 | `index.html` | `llm` | `all,agentic-hard,agentic-all` | Machine recommendations, harness comparison, thinking trade-off, campaigns, suites — the coding-agent story |
-| `system-one.html` | `system-one` | `system1,phishing-eval` | System One accuracy, the anti-phishing real workload — the typed-decision story |
+| `system-one.html` | `system-one` | `system1` | Benchmark v2: 200 scenarios / 400 questions, fresh accuracy and latency, ten decision families |
+| `system-one-v1.html` | `system-one-v1` | `system1-legacy,phishing-eval` | Benchmark v1 reference: 23 scenarios / 49 questions, historical rankings and the phishing workload |
 
 - `assets/site.css` — the one design system: tokens, layout, nav, charts, ledger, responsive and reduced-motion rules
 - `assets/site.js` — the one render layer: reads `<body data-page data-suites>` and renders only that page's sections and the suites it owns
 - `data.json` — curated scores from `results/**` (regenerate when campaigns land)
 - `assets/*.svg` — logo marks and favicon
 
-Both pages are shells: no inline `<style>`, no inline `<script>`. Adding a section means adding
+All pages are shells: no inline `<style>`, no inline `<script>`. Adding a section means adding
 markup with an id the renderer already targets, or a renderer keyed on the page; adding a
-third page means copying a shell, setting `data-page`/`data-suites`, and registering the
+page means copying a shell, setting `data-page`/`data-suites`, and registering the
 page's renderers in `site.js`. `tests/test_landing_page.py` fails if a ledger suite belongs
 to no page, or to two pages.
 
 Cross-page links live in the top nav (`aria-current="page"` marks the active page), the hero
 cross-link, and the footer. `index.html` and `system-one.html` link to each other by relative
-path so they work from a `file://` checkout of `docs/` too.
+path; the v2 and v1 pages also link directly to each other. Results require HTTP.
 
 ## Serve locally
 
@@ -47,9 +48,23 @@ Edit `data.json` when a new campaign report lands:
 | `machines[].recommendations[]` | The “use this harness + model” cards |
 | `harnessComparison` | Same-weights harness bar chart |
 | `thinkingTradeoff` | One-shot vs tool-loop cost panels |
-| `systemOne` / `realUseCase` | Typed-decision and phishing comparisons, including measured latency and caveats; `modelKey` must match a `results[].model` exactly |
+| `systemOne` | Current v2 comparison, dataset counts, family coverage, measured 95% intervals and gateway caveats |
+| `systemOneV1` / `realUseCase` | Historical v1 and phishing comparisons; retained independently of v2 |
 | `results[]` | Filterable ledger rows |
 | `campaigns[]` | Timeline verdicts |
+
+Every comparison row's `modelKey` must match a `results[].model` exactly.
+V2 rows carry `sourceJson` and `suiteHash` tied to their measured artifacts;
+ledger rows also carry `datasetVersion: 2`. The current page excludes unversioned
+`system1` rows or rows with a different hash. Historical ledger rows originally
+used the name `system1`; the site labels them `system1-legacy` and version 1
+without changing the underlying results. Never carry a v1 score into the v2 chart.
+
+The v2 chart shades the leader's measured 95% accuracy interval. The historical
+charts retain their approximate 8-point noise band. Response count and wall-clock
+captions come from the selected version; 2 samples mean 800 responses on v2,
+and 98 on v1. The current report discloses three open questions that the gateway's
+64-candidate cap made unwinnable for both models; keep this caveat beside the scores.
 
 The ledger's dot plot, the *Thinking OFF → ON* chart and the *Live vs isolated*
 chart are derived from `results[]` at load time — no extra fields. A pair is two

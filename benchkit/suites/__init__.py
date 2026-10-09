@@ -13,12 +13,14 @@ from ..agentic.tasks_hard import TASKS as AGENTIC_HARD
 from .core16 import TASKS as CORE16
 from .hard12 import TASKS as HARD12
 from .system1 import TASKS as SYSTEM1
+from .system1_legacy import TASKS as SYSTEM1_LEGACY
 
 SUITES = {
     "core16": CORE16,
     "hard12": HARD12,
     "all": CORE16 + HARD12,
     "system1": SYSTEM1,
+    "system1-legacy": SYSTEM1_LEGACY,
     "agentic": AGENTIC,
     "agentic-hard": AGENTIC_HARD,
     "agentic-all": AGENTIC + AGENTIC_HARD,
@@ -28,16 +30,18 @@ SUITES = {
 # "agentic": multi-turn tool calling, scored by a predicate over the final workspace.
 # "s1":      one-shot decision questions over a state, scored by exact match.
 KINDS = {"core16": "codegen", "hard12": "codegen", "all": "codegen",
-         "system1": "s1",
+         "system1": "s1", "system1-legacy": "s1",
          "agentic": "agentic", "agentic-hard": "agentic", "agentic-all": "agentic"}
 
 DESCRIPTIONS = {
     "core16": "16 general coding tasks — algorithms, data structures, parsing, Python idiom",
     "hard12": "12 hard tasks — built when core16 saturated; parsers, DP, cron, bigint, transactions",
     "all": "core16 + hard12, 28 tasks",
-    "system1": "23 decision scenarios (49 questions) — a state plus typed "
-               "questions scored by exact match: speed + accuracy for "
-               "System One endpoints",
+    "system1": f"{len(SYSTEM1)} decision scenarios "
+               f"({sum(len(t['questions']) for t in SYSTEM1)} questions), v2 — "
+               "exceptions, boundaries, evidence and state; exact-match accuracy + speed",
+    "system1-legacy": "23 decision scenarios (49 questions), v1 — saturated; "
+                      "retained for reproducing historical results",
     "agentic": "8 multi-turn tool-calling tasks — read/edit/run files to reach a goal state",
     "agentic-hard": "8 ranking tasks — hidden tests, decoys, cascades, restraint, perf budgets",
     "agentic-all": "agentic + agentic-hard, 16 tasks",

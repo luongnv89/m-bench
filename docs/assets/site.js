@@ -1,9 +1,10 @@
 /* ==========================================================================
-   m-bench — shared render layer for the two landing pages.
+   m-bench — shared render layer for the versioned landing pages.
    index.html      <body data-page="llm"        data-suites="all,agentic-hard,agentic-all">
-   system-one.html <body data-page="system-one" data-suites="system1,phishing-eval">
+   system-one.html <body data-page="system-one" data-suites="system1">
+   system-one-v1.html <body data-page="system-one-v1" data-suites="system1-legacy,phishing-eval">
 
-   Both pages read the same data.json and share these helpers; each page only
+   All pages read the same data.json and share these helpers; each page only
    renders the sections its markup provides and only shows the suites its
    data-suites attribute names. Page-local model pickers hide models inside
    that page's rows. Never quote a live-setup number as a model number.
@@ -39,9 +40,14 @@
   const modelVisible = (row) => !hiddenModels.has(row.modelKey || row.model);
   // every row this page owns — the ledger, the strip plot and the derived
   // comparisons are all computed from this pool, never from the whole file
-  const pageRows = () => data.results.filter((r) => !PAGE_SUITES.length || PAGE_SUITES.includes(r.suite));
+  // Old runs originally used the same suite name. Explicit v2 provenance keeps
+  // an accidentally unversioned row out of the current comparison.
+  const pageRows = () => data.results.filter((r) =>
+    (!PAGE_SUITES.length || PAGE_SUITES.includes(r.suite)) &&
+    (r.suite !== "system1" || (r.datasetVersion === 2 && r.suiteHash === data.systemOne.suiteHash)));
+  const systemOneData = () => PAGE === "system-one-v1" ? data.systemOneV1 : data.systemOne;
 
-  /* —— nav: two-page switcher + mobile menu —— */
+  /* —— nav: page switcher + mobile menu —— */
   function initNav() {
     const toggle = $("#nav-toggle");
     const menu = $("#nav-menu");
@@ -76,12 +82,13 @@
 
   /* —— bars: one honest 0–100 axis + the leader's tie band —— */
   function barRow(o) {
-    const from = Math.max(0, o.lead - NOISE);
+    const from = o.band ? o.band[0] : Math.max(0, o.lead - NOISE);
+    const to = o.band ? o.band[1] : o.lead;
     return `
       <div class="bar-row${o.isLead ? " is-lead" : ""}${o.isBest ? " is-best" : ""}" role="listitem" aria-label="${esc(o.label)}${o.isBest ? " (current best)" : ""}: ${esc(o.value)}. ${esc(o.meta)}">
         <span class="bar-label" aria-hidden="true">${esc(o.label)}${o.isBest ? '<span class="best-tag">BEST</span>' : ""}</span>
         <div class="bar-track" aria-hidden="true">
-          <span class="noise-band" style="--from:${from}%;--span:${o.lead - from}%"></span>
+          <span class="noise-band" style="--from:${from}%;--span:${to - from}%"></span>
           <div class="bar-fill${o.alt ? " alt" : ""}" style="--w:${o.value}%;--d:${o.i * 0.08}s"></div>
         </div>
         <span class="bar-val" aria-hidden="true">${esc(o.value)}</span>
@@ -353,9 +360,10 @@
 
   function renderSystemOneHero() {
     const meta = $("#s1-hero-meta");
-    if (!meta || !data.systemOne) return;
-    const s = data.systemOne;
-    const parts = String(s.setup).split(";")[0].split("·").map((x) => x.trim()).filter(Boolean);
+    const s = systemOneData();
+    if (!meta || !s) return;
+    const parts = [`benchmark v${s.version}`, `${s.scenarios} scenarios`,
+      `${s.questions} questions`, `${s.samples} samples/question`];
     meta.innerHTML = `<span><strong>${s.rows.length}</strong> models compared</span>` +
       parts.map((p) => `<span>${esc(p)}</span>`).join("");
     const q = $("#s1-hero-question");
@@ -375,8 +383,8 @@
 
   function renderSystemOne() {
     const bars = $("#s1-bars");
-    if (!bars || !data.systemOne) return;
-    const s = data.systemOne;
+    const s = systemOneData();
+    if (!bars || !s) return;
     const setup = $("#s1-setup");
     if (setup) setup.textContent = s.setup;
     $("#s1-question").textContent = s.question;
@@ -388,15 +396,17 @@
     const tokPerSec = (r) => (r.outTok >= 10 && r.secPerQ > 0 ? Math.round(r.outTok / r.secPerQ) + " tok/s" : "tok/s n/a");
     bars.innerHTML = rows.length ? rows.map((r, i) => barRow({
       i, lead, isLead: r.score === lead, isBest: r === best, label: r.model, value: r.score.toFixed(1),
-      meta: `${r.secPerQ}s/question · ${tokPerSec(r)} · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
+      // V2 shows measured uncertainty, rather than the v1 heuristic tie band.
+      band: s.version === 2 && best ? best.ciBounds : null,
+      meta: `${r.secPerQ}s/question · ${s.version === 2 ? r.outTok + " reported out-tok" : tokPerSec(r)} · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
     })).join("") : '<p class="chart-note">No models selected. Use Show all above to restore comparisons.</p>';
     paintMultiples($("#s1-multiples"), rows, [
       { title: "Seconds / question", sub: "mean · lower is better", get: (r) => r.secPerQ, fmt: (v) => v + "s" },
       { title: "Output tokens", sub: "per answer · lower is better", get: (r) => r.outTok, fmt: (v) => String(v) },
-      { title: "Suite wall-clock", sub: "98 generations · Mercury concurrency 1 · includes quota waits", get: (r) => r.wall, fmt: (v) => v + "s" },
+      { title: "Suite wall-clock", sub: s.wallNote || `${s.generations} responses per model`, get: (r) => r.wall, fmt: (v) => v + "s" },
     ], (r) => r.model);
     $("#s1-note").innerHTML = esc(s.note) +
-      ` <a href="${gh(s.report)}" rel="noopener">Historical comparison →</a>` +
+      ` <a href="${gh(s.report)}" rel="noopener">${s.version === 2 ? "V2 measured comparison" : "Historical comparison"} →</a>` +
       (s.latestReport ? ` <a href="${gh(s.latestReport)}" rel="noopener">Latest results →</a>` : "");
 
     const r = s.realUseCase;
@@ -420,6 +430,18 @@
     $("#s1r-note").innerHTML = esc(r.note) +
       ` <a href="${gh(r.report)}" rel="noopener">Historical comparison →</a>` +
       (r.latestReport ? ` <a href="${gh(r.latestReport)}" rel="noopener">Latest results →</a>` : "");
+  }
+
+  function renderSystemOneDataset() {
+    const grid = $("#s1-family-grid");
+    const s = systemOneData();
+    if (!grid || !s || !s.families) return;
+    grid.innerHTML = s.families.map((family) => `
+      <div class="suite" role="listitem">
+        <div class="suite-name">${esc(family.name)}</div>
+        <div class="suite-tasks">${family.scenarios} scenarios · ${family.questions} questions</div>
+        <p class="suite-desc">${esc(family.desc)}</p>
+      </div>`).join("");
   }
 
   /* —— ledger filters (both pages, each over its own suites) —— */
@@ -555,7 +577,8 @@
       else th.removeAttribute("aria-sort");
     });
     $("#result-count").textContent =
-      rows.length + " of " + pageRows().length + " runs in view · noise " + data.noiseFloor;
+      rows.length + " of " + pageRows().length + " runs in view · " +
+      (PAGE === "system-one" ? "benchmark v2 · 400 questions · 95% intervals describe scored attempts" : "noise " + data.noiseFloor);
   }
 
   /* —— strip plot: the filtered ledger as dots, one row per suite —— */
@@ -648,10 +671,11 @@
   // every page renders the whole suite catalogue, but a suite that belongs to
   // the other page's family is tagged and cross-linked, so the grid never
   // contradicts the copy that says those runs live on their own page
-  const SUITE_FAMILY = { system1: "system-one", "phishing-eval": "system-one" };
+  const SUITE_FAMILY = { system1: "system-one", "system1-legacy": "system-one-v1", "phishing-eval": "system-one-v1" };
   const SUITE_PAGE = {
     llm: { href: "index.html", label: "LLM setups" },
-    "system-one": { href: "system-one.html", label: "System One" },
+    "system-one": { href: "system-one.html", label: "System One v2" },
+    "system-one-v1": { href: "system-one-v1.html", label: "v1 reference" },
   };
 
   function renderSuites() {
@@ -676,6 +700,7 @@
   const RENDERERS = {
     llm: [renderHero, renderMachineTabs, renderMachinePanel, renderHarness, renderThinking],
     "system-one": [renderSystemOneHero],
+    "system-one-v1": [renderSystemOneHero],
   };
 
   function wire() {
@@ -720,6 +745,7 @@
       if (stamp) stamp.textContent = "data · " + json.generated;
       (RENDERERS[PAGE] || RENDERERS.llm).forEach((fn) => fn());
       renderSystemOne();
+      renderSystemOneDataset();
       renderPairs();
       fillFilters();
       fillModelPickers();

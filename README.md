@@ -110,7 +110,7 @@ Build the report:
 ```
 
 `validate` must print `28/28` (and `--suite agentic-all` must print `16/16`, `--suite
-system1` `23/23`). If it does not, the test is broken and no model score means anything.
+system1` `200/200`, `--suite system1-legacy` `23/23`). If it does not, the test is broken and no model score means anything.
 
 ## Your harness is part of the setup
 
@@ -174,7 +174,8 @@ identical weights by up to 23 points.
 | `agentic` | 8 | Multi-turn tool calling over a sandboxed workspace — 7 tools, scored by a predicate over the final state |
 | `agentic-hard` | 8 | **Ranking tasks.** Hidden tests, decoys, cascading bugs, perf budgets, cases where the correct move is to change nothing. Ranked on solve rate; efficiency vs oracle par and token/time cost reported separately |
 | `agentic-all` | 16 | `agentic` + `agentic-hard` |
-| `system1` | 23 | **Decision endpoints.** 49 typed questions over a `state` (email, ticket, JSON…), scored by exact match — accuracy with a 95% CI next to per-question tokens, TTFT and wall-clock. Built for System One models like `bespokelabs/Bespoke-Nimble-9B` or `convaiinnovations/laya` behind any OpenAI-compatible endpoint |
+| `system1` | 200 | **Decision endpoints, v2.** 400 typed questions across ten families: policy exceptions, triage, access, event state, time boundaries, money, inventory, dependencies, evidence and record joins. Exact-match accuracy next to per-question tokens, TTFT and wall-clock. [Dataset design and fresh-baseline workflow](docs/SYSTEM1-DATASET.md) |
+| `system1-legacy` | 23 | Original 49-question decision suite, now saturated. Reproduces historical s1 scores; those scores cannot be compared with v2 |
 
 ## Commands
 

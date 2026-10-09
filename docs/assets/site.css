@@ -1,7 +1,8 @@
 /* ==========================================================================
-   m-bench — shared design system for the two landing pages.
+   m-bench — shared design system for the landing pages.
    index.html       LLM setups (harness · model · thinking)
-   system-one.html  System One (typed decisions behind one endpoint)
+   system-one.html  System One benchmark v2
+   system-one-v1.html  System One v1 reference
 
    One palette: near-black canvas, white ink, a single bright-green accent
    used only as a line or a text highlight, grey for hierarchy. Status colours
@@ -140,7 +141,7 @@ p { margin: 0 0 1rem; color: var(--ink-muted); }
   padding-bottom: 2px;
 }
 .nav-links a:hover { color: var(--volt); }
-/* the current page keeps an underline: the nav is a two-page switcher */
+/* the current page keeps an underline in the page switcher */
 .nav-links a[aria-current="page"] { color: var(--ink); border-bottom: 1px solid var(--volt); }
 .nav-page { color: var(--ink) !important; }
 .nav-page[aria-current="page"] { border-bottom: 1px solid var(--volt); }
@@ -382,7 +383,7 @@ p { margin: 0 0 1rem; color: var(--ink-muted); }
   color: var(--volt); border: 1px solid rgba(0, 255, 65, 0.4);
   vertical-align: middle;
 }
-/* band = within the ~8-pt noise floor of the leader: a tie at 2 samples */
+/* V2 uses the leader's measured 95% interval; older charts use the 8-point band. */
 .noise-band {
   position: absolute; top: 0; bottom: 0; left: var(--from); width: var(--span);
   background: rgba(255, 255, 255, 0.045);
@@ -757,7 +758,8 @@ footer {
   .gauge { max-width: 100%; }
   .multiples { grid-template-columns: 1fr 1fr; }
 }
-@media (max-width: 768px) {
+/* Version links need the menu at tablet widths, before the nav can overflow. */
+@media (max-width: 960px) {
   .nav-toggle { display: block; }
   .nav-links {
     display: none; position: absolute; top: 60px; left: 0; right: 0;
