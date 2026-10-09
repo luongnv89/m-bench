@@ -1,0 +1,28 @@
+run=cloudflare-clef-27b-s1-warmed-20261009T053334Z
+restoration=verified
+UTC=2026-10-09T05:46:23Z
+
+--- user unit ---
+MainPID=1204449
+ControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/vllm-qwen.service
+ActiveState=active
+FragmentPath=/home/montimage/.config/systemd/user/vllm-qwen.service
+
+--- :8001 health ---
+{"status": "ok", "backends": {"montimage-dgx-spark": "ok"}}
+--- :8001 models ---
+{"object": "list", "data": [{"id": "montimage-dgx-spark", "object": "model", "created": 1791524781, "owned_by": "vllm", "root": "unsloth/Qwen3.6-35B-A3B-NVFP4", "parent": null, "max_model_len": 262144, "permission": [{"id": "modelperm-a60ad828a0cff7cb", "object": "model_permission", "created": 1791524781, "allow_create_engine": false, "allow_sampling": true, "allow_logprobs": true, "allow_search_indices": false, "allow_view": true, "allow_fine_tuning": false, "organization": "*", "group": null, "is_blocking": false}]}, {"id": "unsloth/Qwen3.6-35B-A3B-NVFP4", "object": "model", "created": 1791524781, "owned_by": "vllm", "root": "unsloth/Qwen3.6-35B-A3B-NVFP4", "parent": null, "max_model_len": 262144, "permission": [{"id": "modelperm-b4c0190f6c6a62d5", "object": "model_permission", "created": 1791524781, "allow_create_engine": false, "allow_sampling": true, "allow_logprobs": true, "allow_search_indices": false, "allow_view": true, "allow_fine_tuning": false, "organization": "*", "group": null, "is_blocking": false}]}]}
+--- :8123 models ---
+{"object": "list", "data": [{"id": "kev-latest", "object": "model", "owned_by": "kev"}]}
+--- listeners ---
+LISTEN 0      128                        0.0.0.0:8001       0.0.0.0:*    users:(("python3",pid=2046,fd=6))            
+LISTEN 0      128                      127.0.0.1:8123       0.0.0.0:*    users:(("python3",pid=2039,fd=6))            
+LISTEN 0      2048                     127.0.0.1:8801       0.0.0.0:*    users:(("vllm",pid=1204506,fd=23))           
+
+--- memory ---
+               total        used        free      shared  buff/cache   available
+Mem:           119Gi        93Gi       1.2Gi       269Mi        26Gi        25Gi
+Swap:           15Gi       3.5Gi        12Gi
+
+--- inference probe ---
+{"id":"chatcmpl-a1fbd1962f95d423","object":"chat.completion","created":1791524781,"model":"montimage-dgx-spark","choices":[{"index":0,"message":{"role":"assistant","content":"OK","refusal":null,"annotations":null,"audio":null,"function_call":null,"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.26.1.dev0+gf2654939e.d20260726-c42e58a9","usage":{"prompt_tokens":17,"total_tokens":19,"completion_tokens":2,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null,"ec_transfer_params":null,"metrics":null}
