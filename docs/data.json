@@ -231,6 +231,40 @@
     "question": "Which decision model handles benchmark v2 best? The whole v1 roster re-measured on 400 questions — reasoning is the lever that separates them.",
     "rows": [
       {
+        "model": "gpt-6.1-sol · think-high",
+        "modelKey": "gpt-6.1-sol (pi think-high)",
+        "score": 100.0,
+        "ci": "99.5–100.0",
+        "ciBounds": [
+          99.5221123794324,
+          100.0
+        ],
+        "secPerQ": 3.921,
+        "outTok": 28.89,
+        "wall": 3136.77,
+        "serving": "hosted OpenAI via pi CLI · thinking high",
+        "note": "800/800 correct — saturates the suite, including every open records question; 0 generation errors",
+        "sourceJson": "results/2026-10-09-system1-v2-pi-openai/gpt-6-1-sol-thinkhigh-system1-v2.json",
+        "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
+      },
+      {
+        "model": "gpt-6-luna · think-max",
+        "modelKey": "gpt-6-luna (pi think-max)",
+        "score": 99.1,
+        "ci": "98.2–99.6",
+        "ciBounds": [
+          98.20495953265953,
+          99.5755158801328
+        ],
+        "secPerQ": 5.678,
+        "outTok": 76.61,
+        "wall": 4542.55,
+        "serving": "hosted OpenAI via pi CLI · thinking max",
+        "note": "793/800 correct; 0 generation errors — all 7 misses in the records family, 5 on open questions",
+        "sourceJson": "results/2026-10-09-system1-v2-pi-openai/gpt-6-luna-thinkmax-system1-v2.json",
+        "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
+      },
+      {
         "model": "Qwen3.6-35B-A3B · think-ON",
         "modelKey": "Qwen3.6-35B-A3B (vLLM think-ON)",
         "score": 98.6,
@@ -353,7 +387,7 @@
     ],
     "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
     "wallNote": "800 responses per model · concurrency 1",
-    "note": "Every v1-board model re-measured on v2. The incumbent Qwen3.6-35B with reasoning enabled leads at 98.6% — the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included.",
+    "note": "Every v1-board model re-measured on v2, plus two frontier OpenAI models through pi. gpt-6.1-sol at high thinking saturates the suite outright (800/800 — v2 has stopped measuring this tier; the remaining headroom is in harder states, not better models); gpt-6-luna at max misses only 7 records questions. The incumbent Qwen3.6-35B with reasoning enabled scores 98.6% — the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included.",
     "families": [
       {
         "id": "policy",
@@ -532,6 +566,36 @@
       "unit": "accuracy",
       "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
       "sourceJson": "results/2026-10-09-system1-v2-v1-roster/laya-typed-decisions-system1-v2.json"
+    },
+    {
+      "date": "2026-10-09",
+      "machine": "dgx-spark",
+      "model": "gpt-6.1-sol (pi think-high)",
+      "harness": "pi",
+      "mode": "isolated",
+      "thinking": "high",
+      "suite": "system1",
+      "datasetVersion": 2,
+      "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
+      "score": 100.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-09-system1-v2-pi-openai/REPORT.md",
+      "sourceJson": "results/2026-10-09-system1-v2-pi-openai/gpt-6-1-sol-thinkhigh-system1-v2.json"
+    },
+    {
+      "date": "2026-10-09",
+      "machine": "dgx-spark",
+      "model": "gpt-6-luna (pi think-max)",
+      "harness": "pi",
+      "mode": "isolated",
+      "thinking": "max",
+      "suite": "system1",
+      "datasetVersion": 2,
+      "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
+      "score": 99.1,
+      "unit": "accuracy",
+      "report": "results/2026-10-09-system1-v2-pi-openai/REPORT.md",
+      "sourceJson": "results/2026-10-09-system1-v2-pi-openai/gpt-6-luna-thinkmax-system1-v2.json"
     },
     {
       "date": "2026-10-09",
@@ -1147,6 +1211,12 @@
     }
   ],
   "campaigns": [
+    {
+      "date": "2026-10-09",
+      "question": "Can frontier OpenAI models through pi beat the local winner on benchmark v2?",
+      "answer": "gpt-6.1-sol at high thinking scores 100.0% — all 800 generations, including every open records question; v2 is now saturated at the frontier. gpt-6-luna at max thinking scores 99.1% (7 misses, all records). Both run through the pi CLI per question with tools/extensions disabled; latency includes ~1 s process overhead per call. Reasoning depth, not the typed-decision transport, is what separates the top of the board.",
+      "link": "results/2026-10-09-system1-v2-pi-openai/REPORT.md"
+    },
     {
       "date": "2026-10-09",
       "question": "How does the whole v1 roster rank on benchmark v2?",
