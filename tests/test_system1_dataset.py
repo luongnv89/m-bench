@@ -1,10 +1,10 @@
-"""Independent answer keys and quality checks for the expanded decision data."""
+"""Independent answer keys and quality checks for the System One v2 data (`system1-v2`)."""
 import unittest
 from collections import Counter
 
 from benchkit import fingerprint, s1_runner
 from benchkit.suites import SUITES, kind
-from benchkit.suites.system1 import FAMILIES, TASKS
+from benchkit.suites.system1_v2 import FAMILIES, TASKS
 
 PRIMARY_KEYS = {
     "policy": "refund|reject|request proof|reject|refund|request proof|replacement|reject|refund|request proof|reject|refund|replacement|reject|replacement|refund|request proof|replacement|refund|reject",
@@ -30,8 +30,8 @@ NUMERIC_KEYS = {
 class TestSystemOneDataset(unittest.TestCase):
     def test_size_coverage_and_unique_prompts(self):
         self.assertEqual(len(TASKS), 200)
-        self.assertIs(SUITES["system1"], TASKS)
-        self.assertEqual(kind("system1"), "s1")
+        self.assertIs(SUITES["system1-v2"], TASKS)
+        self.assertEqual(kind("system1-v2"), "s1")
         self.assertEqual(Counter(t["id"].rsplit("_", 1)[0] for t in TASKS),
                          Counter({family: 20 for family in FAMILIES}))
         self.assertEqual(Counter(t["difficulty"] for t in TASKS),

@@ -48,6 +48,7 @@ jobs:
         run: |
           uv run coverage run --source=benchkit --parallel-mode -m benchkit.cli validate --suite system1
           uv run coverage run --source=benchkit --parallel-mode -m benchkit.cli validate --suite system1-legacy
+          uv run coverage run --source=benchkit --parallel-mode -m benchkit.cli validate --suite system1-v2
 
       - name: Combine and report coverage
         run: |

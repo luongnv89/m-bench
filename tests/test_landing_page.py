@@ -11,7 +11,7 @@ from benchkit.suites import SUITES
 
 ROOT = Path(__file__).parents[1]
 DOCS = ROOT / "docs"
-PAGES = ("index.html", "system-one.html", "system-one-v1.html")
+PAGES = ("index.html", "system-one.html", "system-one-v2.html", "system-one-v1.html")
 ASSETS = ("assets/site.css", "assets/site.js")
 
 
@@ -22,7 +22,8 @@ class LandingPageTests(unittest.TestCase):
     def test_comparison_visibility_keys_exist_in_ledger(self):
         models = {row["model"] for row in self.data["results"]}
         legacy = self.data["systemOneV1"]
-        for row in self.data["systemOne"]["rows"] + legacy["rows"] + legacy["realUseCase"]["rows"]:
+        for row in (self.data["systemOne"]["rows"] + self.data["systemOneV2"]["rows"]
+                    + legacy["rows"] + legacy["realUseCase"]["rows"]):
             with self.subTest(model=row["model"]):
                 self.assertIn(row["modelKey"], models)
 
@@ -42,7 +43,7 @@ class LandingPageTests(unittest.TestCase):
         self.assertEqual(v2["generations"], 800)
         rows = [r for r in self.data["results"] if r["model"] == model]
         self.assertEqual(len(rows), 3)
-        expected = {"system1": round(v2["pass_at_1"] * 100, 1),
+        expected = {"system1-v2": round(v2["pass_at_1"] * 100, 1),
                     "system1-legacy": round(s1["pass_at_1"] * 100, 1),
                     "phishing-eval": phish["detection"]["f1"] * 100}
         for row in rows:
@@ -75,8 +76,8 @@ class LandingPageTests(unittest.TestCase):
         self.assertEqual(set(claimed), suites, "a ledger suite belongs to no page")
 
     def test_v2_counts_and_scores_match_measured_artifacts(self):
-        current = self.data["systemOne"]
-        tasks = SUITES["system1"]
+        current = self.data["systemOneV2"]
+        tasks = SUITES["system1-v2"]
         self.assertEqual(current["version"], 2)
         self.assertEqual(current["scenarios"], len(tasks))
         self.assertEqual(current["questions"], sum(len(t["questions"]) for t in tasks))
@@ -86,7 +87,7 @@ class LandingPageTests(unittest.TestCase):
         self.assertEqual(sum(f["scenarios"] for f in current["families"]), 200)
         self.assertEqual(sum(f["questions"] for f in current["families"]), 400)
         self.assertNotIn("realUseCase", current)
-        ledger = [r for r in self.data["results"] if r["suite"] == "system1"]
+        ledger = [r for r in self.data["results"] if r["suite"] == "system1-v2"]
         self.assertEqual(len(ledger), len(current["rows"]))
         for row in current["rows"]:
             with self.subTest(model=row["model"]):
@@ -111,6 +112,49 @@ class LandingPageTests(unittest.TestCase):
         self.assertIn("64-candidate", current["note"])
         self.assertIn("three open questions", current["note"])
 
+    def test_v3_counts_and_scores_match_measured_artifacts(self):
+        v3 = self.data["systemOne"]
+        tasks = SUITES["system1"]
+        self.assertEqual(v3["version"], 3)
+        self.assertEqual(v3["scenarios"], len(tasks))
+        self.assertEqual(v3["questions"], sum(len(t["questions"]) for t in tasks))
+        self.assertEqual(v3["generations"], v3["questions"] * v3["samples"])
+        self.assertEqual(v3["suiteHash"], suite_hash(tasks))
+        self.assertEqual({f["id"] for f in v3["families"]},
+                         {t["id"].rsplit("_", 1)[0] for t in tasks})
+        self.assertEqual(sum(f["scenarios"] for f in v3["families"]), 200)
+        ledger = [r for r in self.data["results"] if r["suite"] == "system1"]
+        self.assertEqual(len(ledger), len(v3["rows"]))
+        self.assertNotIn("inception/mercury-decide:free", {r["model"] for r in ledger})
+        for row in v3["rows"]:
+            with self.subTest(model=row["model"]):
+                run = json.loads((ROOT / row["sourceJson"]).read_text())
+                summary, results = run["summary"], run["results"]
+                self.assertEqual(summary["generations"], 200)
+                self.assertEqual(summary["errored"], 0)
+                self.assertEqual(summary["config"]["concurrency"], 1)
+                self.assertEqual(summary["suite_hash"], v3["suiteHash"])
+                self.assertEqual(row["score"], round(summary["pass_at_1"] * 100, 1))
+                self.assertEqual(row["groupAcc"], round(summary["group_accuracy"] * 100, 1))
+                self.assertEqual(row["secPerQ"], round(summary["cost"]["seconds"], 3))
+                self.assertEqual(row["ciBounds"], [v * 100 for v in summary["solve_rate_ci"]])
+                for family in v3["families"]:
+                    passed = [r["passed"] for r in results
+                              if r["task"].startswith(family["id"] + "_")]
+                    self.assertEqual(v3["familyScores"][row["modelKey"]][family["id"]],
+                                     round(100 * sum(passed) / len(passed), 1))
+                measured = next(r for r in ledger if r["model"] == row["modelKey"])
+                self.assertEqual(measured["datasetVersion"], 3)
+                self.assertEqual(measured["score"], row["score"])
+                self.assertEqual(measured["sourceJson"], row["sourceJson"])
+                self.assertTrue((ROOT / measured["report"]).is_file())
+        page = (DOCS / "system-one.html").read_text()
+        self.assertIn('data-suites="system1"', page)
+        self.assertIn('id="s1-family-scores"', page)
+        self.assertIn('href="system-one-v2.html"', page)
+        for other in ("system-one-v2.html", "system-one-v1.html", "index.html"):
+            self.assertIn('href="system-one.html"', (DOCS / other).read_text())
+
     def test_v1_reference_is_versioned_and_linked(self):
         legacy = self.data["systemOneV1"]
         self.assertEqual((legacy["version"], legacy["scenarios"], legacy["questions"]), (1, 23, 49))
@@ -120,12 +164,15 @@ class LandingPageTests(unittest.TestCase):
             if row["suite"] == "system1-legacy":
                 self.assertEqual(row["datasetVersion"], 1)
         main = (DOCS / "system-one.html").read_text()
+        v2 = (DOCS / "system-one-v2.html").read_text()
         archive = (DOCS / "system-one-v1.html").read_text()
         self.assertIn('href="system-one-v1.html"', main)
+        self.assertIn('href="system-one-v1.html"', v2)
         self.assertIn('href="system-one.html"', archive)
         self.assertIn('data-suites="system1"', main)
+        self.assertIn('data-suites="system1-v2"', v2)
         self.assertIn('data-suites="system1-legacy,phishing-eval"', archive)
-        self.assertIn("200 distinct scenarios and 400 scored questions", main)
+        self.assertIn("200 distinct scenarios and 400 scored questions", v2)
         self.assertIn("Benchmark v1 reference", archive)
         self.assertNotIn("98.0%", main)
         self.assertNotIn('id="s1-real"', main)

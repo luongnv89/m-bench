@@ -1,0 +1,1 @@
+s1-gateway on :8124  backend=typesafe  upstream=https://api.typesafe.ai/v1

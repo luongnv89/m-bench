@@ -34,6 +34,13 @@ and [`../results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md`](../res
 Jev stays the s1 baseline: the Qwen-ON number comes from the incumbent's own
 plain-chat endpoint at ~9 s/question, not the typed s1 contract.
 
+**v3 became the default `system1` on 2026-10-10.** It precomputes the
+arithmetic that decided v2. At 200 calls per model: gpt-6.1-sol medium 100.0 %,
+gpt-6-luna max 99.5 %, Qwen3.6 think-ON 97.0 %, **Jev 95.5 %** (CI 91.7–97.6,
+0.22 s/question), Qwen3.6 think-OFF 85.0 %, Kev-4B 71.0 %. See
+[`../results/2026-10-10-system1-v3-200/REPORT.md`](../results/2026-10-10-system1-v3-200/REPORT.md).
+The v2 numbers in the table below are `system1-v2` measurements.
+
 | Config | Model | Quant | VRAM budget | Image digest | Measured | Use it when |
 |---|---|---|---|---|---|---|
 | `qwen3.6-35b-a3b-nvfp4` | Qwen3.6-35B-A3B | NVFP4 | 0.62 (~74 GB) | `@sha256:1962734…` | **82.1 % pass@1**, **100 % agentic**, 47.8 tok/s | **Current winner.** Best accuracy/latency mix for coding agents |

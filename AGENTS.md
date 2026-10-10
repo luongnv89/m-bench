@@ -45,7 +45,8 @@ Do not proceed until `/models` returns the model you intend to test.
 pip install -e .
 ./bench validate                  # must print 28/28
 ./bench validate --suite agentic-all   # must print 16/16
-./bench validate --suite system1       # must print 200/200 (data lint, v2)
+./bench validate --suite system1        # must print 200/200 (data lint, v3)
+./bench validate --suite system1-v2     # must print 200/200 (v2 reference)
 ./bench validate --suite system1-legacy # must print 23/23 (historical v1)
 ```
 
@@ -106,10 +107,11 @@ with `--max-turns` bounding each task exactly as in `./bench run`.
 
 Otherwise point `BENCH_BASE_URL` at each endpoint in turn and use `./bench run`.
 
-For `system1` candidates specifically: re-measure the TypeSafe Jev baseline on
-the current 200-scenario / 400-question v2 suite. The historical baseline
-(`results/2026-09-30/typesafe-jev-1-13-s1.json`, 98.0 %) belongs to
-`system1-legacy` (23 scenarios / 49 questions) and cannot be compared with v2.
+For `system1` candidates specifically: compare against the TypeSafe Jev v3
+baseline (95.5 %, `results/2026-10-10-system1-v3-200/`) measured with the same
+settings: `--samples 1 --concurrency 1`, 200 calls. v2 (`system1-v2`, Jev 79.5 %)
+and v1 (`system1-legacy`, Jev 98.0 %) baselines belong to different datasets and
+cannot be compared with v3 (`docs/SYSTEM1-DATASET.md`).
 Serve the candidate
 behind the **standard s1 endpoint** — `configs/s1_gateway.py` on :8123, same
 URL for every backend (`typesafe`, `proxy` to any OpenAI-native model, `laya`
@@ -289,9 +291,10 @@ Both kinds require proof the task is winnable before any model is judged:
   then `./bench validate` stays at 100 %.
 - agentic: a task in `benchkit/agentic/tasks*.py` with `files`, `check(ws)` and an
   `oracle(ws)`, then `./bench validate --suite agentic-all` stays at 100 %.
-- system1: a task in `benchkit/suites/system1.py` with `state` and `questions`
-  (`{question, options, answer}`; `answer` ∈ `options`, or `options` omitted for an
-  open short answer), then `./bench validate --suite system1` data-lints 200/200.
+- system1: a task in `benchkit/suites/system1_v3.py` (exported by `system1.py`) with `state` and `questions`
+  (`{question, options, answer}`; `answer` ∈ `options`; v3 asks one combined
+  decision-and-reason question per scenario), then `./bench validate --suite system1`
+  data-lints 200/200 and `tests/test_system1_v3_dataset.py` pins the new key.
   Dataset design and independent answer-key checks: `docs/SYSTEM1-DATASET.md`.
 
 The oracle also sets **par** — the minimum tool calls — which is what efficiency is

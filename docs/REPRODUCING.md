@@ -65,7 +65,7 @@ Useful flags:
 
 | Flag | Default | Notes |
 |---|---|---|
-| `--suite` | `all` | `core16`, `hard12`, `all`, `system1`, `system1-legacy`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
+| `--suite` | `all` | `core16`, `hard12`, `all`, `system1`, `system1-v2`, `system1-legacy`, `agentic`, `agentic-hard`, `agentic-all` — see `./bench suites -v` |
 | `--thinking` | off | Enables the model's reasoning block via `chat_template_kwargs` |
 | `--max-tokens` | 6000 | Raise to ~16000 with `--thinking`, or reasoning eats the budget |
 | `--samples` | 2 | Generations per task (`bench harness run` / `bench setup run`: 3). 2 is cheap; 5+ before trusting small gaps |
@@ -236,20 +236,24 @@ OpenAI-compatible server or shim — the bench only needs `BENCH_BASE_URL`).
 
 ```bash
 ./bench validate --suite system1          # 200/200 — data lint, see below
+./bench validate --suite system1-v2       # 200/200 — v2 reference dataset
 ./bench validate --suite system1-legacy   # 23/23 — original historical dataset
-./bench run --suite system1 --samples 2 --label "nimble-9b"
+./bench run --suite system1 --samples 1 --concurrency 1 --label "nimble-9b"   # 200 calls
 ```
 
-The v2 dataset contains 200 distinct scenarios with two questions each (400
-scored questions): 380 multiple choice and 20 open extraction. Ten equally sized
-families cover exceptions, thresholds, state changes, time, exact arithmetic,
-permissions, conflicting evidence and joins. Rules and facts are self-contained;
-near misses and counterfactuals target decision boundaries. See
+The default v3 dataset contains 200 scenarios with one combined
+decision-and-reason question each, every question with listed options. Ten
+families cover returns, triage, access, credentials, billing, routing, evidence,
+moderation, phishing and prompt injection. Quantities arrive precomputed and
+facts arrive in prose, so the suite measures decisions rather than arithmetic.
+Six families state each case twice in different wording; `group_accuracy` in the
+summary counts pairs answered right both times. See
 [the dataset design](SYSTEM1-DATASET.md) for coverage and validation.
 
-The original 23 scenarios / 49 questions remain in `system1-legacy`. Historical
-98% s1 scores belong to that saturated dataset. Re-measure the incumbent on v2
-before comparing candidates; repetitions do not add distinct cases.
+v2 (400 arithmetic-heavy questions) remains as `system1-v2`, and the original
+23 scenarios / 49 questions as `system1-legacy`. Scores from different versions
+are not comparable. Compare candidates with the incumbent on the same version
+and settings; to separate close results, add distinct cases rather than samples.
 
 Each question is one chat completion scored by **exact match** against its
 answer key — the option letter counts the same as the full option text, since

@@ -44,9 +44,10 @@ Semantics — what an application may rely on:
 ## The baseline: TypeSafe Jev
 
 The measurements in this section use the original 49-question suite, now
-`system1-legacy`. The default `system1` is v2 (200 scenarios / 400 questions).
-Re-measure Jev on v2 before comparing a new candidate; historical scores cannot
-serve as its baseline. See [the dataset design](SYSTEM1-DATASET.md).
+`system1-legacy`. The default `system1` is v3 (200 scenarios / 200 questions):
+there Jev scores **95.5 %** (CI 91.7–97.6) at 0.22 s/question
+(`results/2026-10-10-system1-v3-200/`). That is the baseline for new candidates;
+the scores below cannot serve as it. See [the dataset design](SYSTEM1-DATASET.md).
 
 `S1_BACKEND=typesafe` (the default) serves Jev — the measured reference every
 candidate is compared against.
@@ -165,8 +166,8 @@ model limit. The system1 runner disables redundant OpenAI SDK retries;
 other runners are unchanged. Reasoning on/off flags are not applicable to these
 prefill-only typed decision endpoints.
 
-Budget requests before starting: v2 `system1` has 400 questions, so `--samples 2`
-needs 800 successful calls per model. `system1-legacy` has 49 questions and needs
+Budget requests before starting: v3 `system1` has 200 questions, so `--samples 1`
+needs 200 successful calls per model (v2, `system1-v2`, needed 800 at two samples). `system1-legacy` has 49 questions and needs
 98 calls at two samples. The full phishing corpus adds 16 calls, plus smoke
 checks and retries. A fresh 50-request daily free allowance cannot cover either.
 Quota limits may vary: check the API's current allowance rather than assuming
@@ -283,13 +284,13 @@ Same URL, same transport, same suite — the only thing that varies is the model
 
 ```bash
 # incumbent serving behind :8123; set BENCH_MODEL to its /models ID
-./bench run --suite system1 --samples 2 --label "jev system1-v2 baseline"
+./bench run --suite system1 --samples 1 --concurrency 1 --label "jev system1-v3 baseline"
 # candidate serving behind the same URL; set BENCH_MODEL to its /models ID
-./bench run --suite system1 --samples 2 \
-    --label "candidate-x system1-v2" \
+./bench run --suite system1 --samples 1 --concurrency 1 \
+    --label "candidate-x system1-v3" \
     # BENCH_BASE_URL=http://localhost:8123/v1 BENCH_MODEL=<id /v1/models reports>
-./bench report results/<date>/jev-system1-v2-baseline.json \
-    results/<date>/candidate-x-system1-v2.json \
+./bench report results/<date>/jev-system1-v3-baseline.json \
+    results/<date>/candidate-x-system1-v3.json \
     --title "candidate-x vs Jev baseline on system1" \
     --question "Should candidate-x replace Jev behind the s1 endpoint?" \
     --verdict "..."

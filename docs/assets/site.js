@@ -1,7 +1,8 @@
 /* ==========================================================================
    m-bench — shared render layer for the versioned landing pages.
    index.html      <body data-page="llm"        data-suites="all,agentic-hard,agentic-all">
-   system-one.html <body data-page="system-one" data-suites="system1">
+   system-one.html <body data-page="system-one" data-suites="system1">            (benchmark v3)
+   system-one-v2.html <body data-page="system-one-v2" data-suites="system1-v2">
    system-one-v1.html <body data-page="system-one-v1" data-suites="system1-legacy,phishing-eval">
 
    All pages read the same data.json and share these helpers; each page only
@@ -40,12 +41,14 @@
   const modelVisible = (row) => !hiddenModels.has(row.modelKey || row.model);
   // every row this page owns — the ledger, the strip plot and the derived
   // comparisons are all computed from this pool, never from the whole file
-  // Old runs originally used the same suite name. Explicit v2 provenance keeps
-  // an accidentally unversioned row out of the current comparison.
+  // Every dataset version originally ran under the suite name `system1`.
+  // Explicit version + hash provenance keeps a mislabelled row out of a board.
   const pageRows = () => data.results.filter((r) =>
     (!PAGE_SUITES.length || PAGE_SUITES.includes(r.suite)) &&
-    (r.suite !== "system1" || (r.datasetVersion === 2 && r.suiteHash === data.systemOne.suiteHash)));
-  const systemOneData = () => PAGE === "system-one-v1" ? data.systemOneV1 : data.systemOne;
+    (r.suite !== "system1" || (r.datasetVersion === 3 && r.suiteHash === data.systemOne.suiteHash)) &&
+    (r.suite !== "system1-v2" || (r.datasetVersion === 2 && r.suiteHash === data.systemOneV2.suiteHash)));
+  const systemOneData = () => ({ "system-one-v1": data.systemOneV1, "system-one-v2": data.systemOneV2 })[PAGE] ||
+    data.systemOne;
 
   /* —— nav: page switcher + mobile menu —— */
   function initNav() {
@@ -396,9 +399,10 @@
     const tokPerSec = (r) => (r.outTok >= 10 && r.secPerQ > 0 ? Math.round(r.outTok / r.secPerQ) + " tok/s" : "tok/s n/a");
     bars.innerHTML = rows.length ? rows.map((r, i) => barRow({
       i, lead, isLead: r.score === lead, isBest: r === best, label: r.model, value: r.score.toFixed(1),
-      // V2 shows measured uncertainty, rather than the v1 heuristic tie band.
-      band: s.version === 2 && best ? best.ciBounds : null,
-      meta: `${r.secPerQ}s/question · ${s.version === 2 ? r.outTok + " reported out-tok" : tokPerSec(r)} · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci} — ${r.note}`,
+      // V2+ shows measured uncertainty, rather than the v1 heuristic tie band.
+      band: s.version >= 2 && best ? best.ciBounds : null,
+      meta: `${r.secPerQ}s/question · ${s.version >= 2 ? r.outTok + " reported out-tok" : tokPerSec(r)} · wall ${r.wall}s · ${r.serving} · 95% CI ${r.ci}` +
+        (r.groupAcc != null ? ` · both wordings right ${r.groupAcc.toFixed(1)}%` : "") + ` — ${r.note}`,
     })).join("") : '<p class="chart-note">No models selected. Use Show all above to restore comparisons.</p>';
     paintMultiples($("#s1-multiples"), rows, [
       { title: "Seconds / question", sub: "mean · lower is better", get: (r) => r.secPerQ, fmt: (v) => v + "s" },
@@ -406,7 +410,7 @@
       { title: "Suite wall-clock", sub: s.wallNote || `${s.generations} responses per model`, get: (r) => r.wall, fmt: (v) => v + "s" },
     ], (r) => r.model);
     $("#s1-note").innerHTML = esc(s.note) +
-      ` <a href="${gh(s.report)}" rel="noopener">${s.version === 2 ? "V2 measured comparison" : "Historical comparison"} →</a>` +
+      ` <a href="${gh(s.report)}" rel="noopener">${s.version >= 2 ? `V${s.version} measured comparison` : "Historical comparison"} →</a>` +
       (s.latestReport ? ` <a href="${gh(s.latestReport)}" rel="noopener">Latest results →</a>` : "");
 
     const r = s.realUseCase;
@@ -442,6 +446,28 @@
         <div class="suite-tasks">${family.scenarios} scenarios · ${family.questions} questions</div>
         <p class="suite-desc">${esc(family.desc)}</p>
       </div>`).join("");
+  }
+
+  /* —— v3: accuracy per decision family, one column per model —— */
+  function renderFamilyScores() {
+    const table = $("#s1-family-scores");
+    const s = systemOneData();
+    if (!table || !s || !s.familyScores) return;
+    const rows = s.rows.filter(modelVisible).slice()
+      .sort((a, b) => b.score - a.score || a.secPerQ - b.secPerQ);
+    if (!rows.length) {
+      table.innerHTML = '<caption class="chart-note">No models selected. Use Show all above to restore comparisons.</caption>';
+      return;
+    }
+    const head = `<thead><tr><th scope="col">Family</th>${rows.map((r) =>
+      `<th scope="col" class="num">${esc(r.model)}</th>`).join("")}</tr></thead>`;
+    const body = s.families.map((f) => {
+      const vals = rows.map((r) => s.familyScores[r.modelKey][f.id]);
+      const top = Math.max(...vals);
+      return `<tr><th scope="row">${esc(f.name)}</th>${vals.map((v) =>
+        `<td class="num${v === top ? " best" : ""}">${v.toFixed(0)}</td>`).join("")}</tr>`;
+    }).join("");
+    table.innerHTML = head + `<tbody>${body}</tbody>`;
   }
 
   /* —— ledger filters (both pages, each over its own suites) —— */
@@ -525,6 +551,7 @@
     syncModelPickers();
     renderResults();
     renderSystemOne();
+    renderFamilyScores();
     renderPairs();
   }
 
@@ -578,7 +605,9 @@
     });
     $("#result-count").textContent =
       rows.length + " of " + pageRows().length + " runs in view · " +
-      (PAGE === "system-one" ? "benchmark v2 · 400 questions · 95% intervals describe scored attempts" : "noise " + data.noiseFloor);
+      (PAGE === "system-one" ? "benchmark v3 · 200 questions · 1 sample · 95% intervals describe scored attempts"
+        : PAGE === "system-one-v2" ? "benchmark v2 · 400 questions · 95% intervals describe scored attempts"
+        : "noise " + data.noiseFloor);
   }
 
   /* —— strip plot: the filtered ledger as dots, one row per suite —— */
@@ -671,10 +700,12 @@
   // every page renders the whole suite catalogue, but a suite that belongs to
   // the other page's family is tagged and cross-linked, so the grid never
   // contradicts the copy that says those runs live on their own page
-  const SUITE_FAMILY = { system1: "system-one", "system1-legacy": "system-one-v1", "phishing-eval": "system-one-v1" };
+  const SUITE_FAMILY = { system1: "system-one", "system1-v2": "system-one-v2",
+    "system1-legacy": "system-one-v1", "phishing-eval": "system-one-v1" };
   const SUITE_PAGE = {
     llm: { href: "index.html", label: "LLM setups" },
-    "system-one": { href: "system-one.html", label: "System One v2" },
+    "system-one": { href: "system-one.html", label: "System One v3" },
+    "system-one-v2": { href: "system-one-v2.html", label: "v2 reference" },
     "system-one-v1": { href: "system-one-v1.html", label: "v1 reference" },
   };
 
@@ -700,6 +731,7 @@
   const RENDERERS = {
     llm: [renderHero, renderMachineTabs, renderMachinePanel, renderHarness, renderThinking],
     "system-one": [renderSystemOneHero],
+    "system-one-v2": [renderSystemOneHero],
     "system-one-v1": [renderSystemOneHero],
   };
 
@@ -746,6 +778,7 @@
       (RENDERERS[PAGE] || RENDERERS.llm).forEach((fn) => fn());
       renderSystemOne();
       renderSystemOneDataset();
+      renderFamilyScores();
       renderPairs();
       fillFilters();
       fillModelPickers();

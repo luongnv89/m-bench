@@ -1,7 +1,7 @@
 /* ==========================================================================
    m-bench — shared design system for the landing pages.
    index.html       LLM setups (harness · model · thinking)
-   system-one.html  System One benchmark v2
+   system-one.html  System One benchmark v3 · system-one-v2.html  v2 reference
    system-one-v1.html  System One v1 reference
 
    One palette: near-black canvas, white ink, a single bright-green accent
@@ -597,6 +597,18 @@ table.results .score-cell .unit { display: inline-block; min-width: 2.7rem; text
 .model-picker :focus-visible { outline: 2px solid var(--volt); outline-offset: 3px; }
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--line-strong); background: var(--surface); }
+/* v3 family × model accuracy grid: always scrolls sideways on narrow screens */
+.family-wrap { overflow-x: auto; border: 1px solid var(--line-strong); background: var(--surface); margin-top: 1.25rem; }
+table.family-scores { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 560px; }
+table.family-scores th, table.family-scores td { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--line); text-align: left; }
+table.family-scores thead th {
+  font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-dim); background: var(--surface-2); border-bottom: 1px solid var(--line-strong); vertical-align: bottom;
+}
+table.family-scores tbody th { color: var(--ink); font-weight: 500; white-space: nowrap; }
+table.family-scores .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink-muted); }
+table.family-scores td.best { color: var(--volt); font-weight: 600; }
+table.family-scores tr:last-child th, table.family-scores tr:last-child td { border-bottom: none; }
 table.results { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 720px; }
 table.results th {
   font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em;

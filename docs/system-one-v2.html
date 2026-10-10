@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="System One benchmark v3: 200 decision scenarios with the arithmetic removed. Jev, Kev-4B, Qwen3.6 with thinking off and on, and two frontier OpenAI models, at 200 calls per model." />
-  <title>m-bench — System One benchmark v3</title>
+  <meta name="description" content="System One benchmark v2 reference: 200 scenarios, 400 scored questions and ten decision families, superseded by v3. Its multi-step arithmetic favoured thinking models." />
+  <title>m-bench — System One benchmark v2 reference</title>
   <meta name="theme-color" content="#0A0A0B" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="m-bench — System One benchmark v3" />
-  <meta property="og:description" content="200 scenarios. 200 calls per model. Decisions, not arithmetic: facts in prose, claims vs confirmations, planted instructions and reworded cases." />
+  <meta property="og:title" content="m-bench — System One benchmark v2 reference" />
+  <meta property="og:description" content="200 scenarios. 400 questions. Ten decision families. Compare freshly measured models on benchmark v2 and explore the v1 reference separately." />
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/site.css" />
 </head>
-<body data-page="system-one" data-suites="system1">
+<body data-page="system-one-v2" data-suites="system1-v2">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="nav">
@@ -27,8 +27,8 @@
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" id="nav-toggle">Menu</button>
       <ul class="nav-links" id="nav-menu">
-        <li><a class="nav-page" href="system-one.html" aria-current="page">System One v3</a></li>
-        <li><a class="nav-page" href="system-one-v2.html">v2 reference</a></li>
+        <li><a class="nav-page" href="system-one.html">System One v3</a></li>
+        <li><a class="nav-page" href="system-one-v2.html" aria-current="page">v2 reference</a></li>
         <li><a class="nav-page" href="system-one-v1.html">v1 reference</a></li>
         <li><a class="nav-page" href="index.html">LLM ranking</a></li>
         <li><a href="#s1">Models</a></li>
@@ -48,18 +48,18 @@
       <div class="wrap">
         <div class="hero-grid">
           <div class="reveal">
-            <p class="kicker">System One · benchmark v3</p>
-            <h1 id="hero-title">System One.<br />Benchmark v3.</h1>
+            <p class="kicker">System One · benchmark v2 · reference</p>
+            <h1 id="hero-title">System One.<br />Benchmark v2.</h1>
             <p class="lead" style="margin-top:1.5rem;" id="s1-hero-question"></p>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#s1">Compare the models ↓</a>
-              <a class="btn btn-ghost" href="system-one-v2.html">View the v2 reference →</a>
+              <a class="btn btn-ghost" href="system-one.html">Open benchmark v3 →</a>
             </div>
             <div class="hero-meta" id="s1-hero-meta"></div>
             <p class="crosslink">Ranking coding agents instead? <a href="index.html">LLM setups — harness, model, thinking →</a></p>
           </div>
           <aside class="gauge reveal" aria-labelledby="s1-board-label">
-            <div class="gauge-label" id="s1-board-label">Accuracy · benchmark v3 (%)</div>
+            <div class="gauge-label" id="s1-board-label">Accuracy · benchmark v2 (%)</div>
             <div class="board-rows" id="s1-hero-board"></div>
           </aside>
         </div>
@@ -71,13 +71,13 @@
       <div class="wrap">
         <header class="section-head">
           <p class="kicker">Typed decisions</p>
-          <h2 id="s1-title">Decisions, not arithmetic.</h2>
-          <p>On <a href="system-one-v2.html">benchmark v2</a>, about three quarters of the gap between Jev and
-            reasoning models came from multi-step calculation: time-zone conversion, cent rounding, stock sums.
-            Benchmark v3 hands over those quantities already computed and tests the decision on top:
-            <strong>200 scenarios, one combined decision-and-reason question each, 200 calls per model</strong>.
-            Typed decision services, local models and thinking models answer the same prompts, at one sample and
-            concurrency 1. v3 is the default <span class="mono">system1</span> suite; v2 remains as a reference.</p>
+          <h2 id="s1-title">Fresh measurements on a harder dataset.</h2>
+          <p>Benchmark v2 contains <strong>200 distinct scenarios and 400 scored questions</strong>.
+            Each question supplies the facts and rules needed for a short decision. Jev, local Nimble-9B and
+            local Kev-4B were measured through the same gateway, with two samples per question and concurrency 1.
+            v2 has been superseded by <a href="system-one.html">benchmark v3</a>: about three quarters of the
+            gap between decision models and thinking models here came from multi-step arithmetic, which v3
+            precomputes. The <a href="system-one-v1.html">v1 rankings</a> remain a separate historical reference.</p>
         </header>
         <details class="model-picker" data-model-picker></details>
 
@@ -92,37 +92,19 @@
       </div>
     </section>
 
-    <!-- FAMILY BREAKDOWN -->
-    <section id="families" aria-labelledby="families-title">
-      <div class="wrap">
-        <header class="section-head">
-          <p class="kicker">Where models differ</p>
-          <h2 id="families-title">Accuracy by decision family.</h2>
-          <p>Twenty scenarios per family, so one miss moves a cell by 5 points. Read gaps under about
-            15 points as indicative only. <span class="volt">Green</span> marks the best score in each row.
-            Families where every model scores near 100% no longer separate them.</p>
-        </header>
-        <div class="family-wrap">
-          <table class="family-scores" id="s1-family-scores" aria-label="Accuracy by family and model, percent"></table>
-        </div>
-      </div>
-    </section>
-
     <!-- DATASET V2 -->
     <section id="dataset" aria-labelledby="dataset-title">
       <div class="wrap">
         <header class="section-head">
-          <p class="kicker">Dataset v3</p>
-          <h2 id="dataset-title">200 scenarios. 200 calls.</h2>
-          <p>Ten families of 20 scenarios. Facts arrive in prose: customer emails, chat transcripts, staff
-            notes. Models must tell claims from confirmations, notice when a case cannot be decided yet, and
-            ignore instructions planted in untrusted text. Every question has listed options, and each answer
-            names the decision and its reason together. Six families state each case twice in different
-            wording; a model must answer both versions correctly.</p>
+          <p class="kicker">Dataset v2</p>
+          <h2 id="dataset-title">200 scenarios. 400 decisions.</h2>
+          <p>Ten equally sized families test exceptions, close boundaries and conflicting evidence.
+            The dataset has 380 multiple-choice questions and 20 open code-extraction questions,
+            with two scored questions per scenario. All necessary rules and facts are supplied.</p>
         </header>
-        <div class="suite-grid" id="s1-family-grid" role="list" aria-label="Ten benchmark v3 decision families"></div>
-        <p class="chart-note">One sample per question gives 200 responses per model. With 200 items a 95% interval is about
-          ±5 points near 85%, so smaller margins are noise. Paraphrase pairs are correlated, so intervals describe scored attempts.
+        <div class="suite-grid" id="s1-family-grid" role="list" aria-label="Ten benchmark v2 decision families"></div>
+        <p class="chart-note">Two samples per question produce 800 responses per model; repeated samples do not add new scenarios.
+          Questions sharing a scenario are correlated, so confidence intervals describe scored attempts.
           <a href="https://github.com/luongnv89/m-bench/blob/main/docs/SYSTEM1-DATASET.md" rel="noopener">Read the dataset design →</a></p>
       </div>
     </section>
@@ -132,9 +114,9 @@
       <div class="wrap">
         <header class="section-head">
           <p class="kicker">Ledger</p>
-          <h2 id="results-title">Every benchmark v3 run, filterable.</h2>
-          <p>Runs on the 200-question <span class="mono">system1</span> v3 dataset.
-            <a href="system-one-v2.html">v2 results</a> and <a href="system-one-v1.html">v1 and phishing results</a> have their own pages.
+          <h2 id="results-title">Every benchmark v2 run, filterable.</h2>
+          <p>Runs on the 400-question v2 dataset, now <span class="mono">system1-v2</span>.
+            <a href="system-one-v1.html">Historical v1 and phishing results</a> have their own page.
             Click a column to sort, click a model to open its report. <span class="volt">Green</span> marks the best score per suite in view.
             Coding-agent runs live on the <a href="index.html">LLM ranking page</a>.</p>
         </header>
@@ -205,9 +187,9 @@
         <div class="cta-band">
           <div>
             <p class="kicker">Reproduce it</p>
-            <h2 id="cta-title">Run benchmark v3 on your endpoint.</h2>
+            <h2 id="cta-title">Reproduce benchmark v2.</h2>
             <p class="lead">One endpoint, any backend: <span class="mono">configs/s1_gateway.py</span> on :8123. Swap the backend by environment variable; the application never sees the change.</p>
-            <div class="cmd" style="margin-top:1rem;"><code id="cmd-text">./bench run --suite system1 --samples 1 --concurrency 1</code><button type="button" class="copy-btn" id="copy-cmd">Copy</button></div>
+            <div class="cmd" style="margin-top:1rem;"><code id="cmd-text">./bench run --suite system1-v2 --samples 2</code><button type="button" class="copy-btn" id="copy-cmd">Copy</button></div>
           </div>
           <div class="cta-actions">
             <a class="btn btn-primary" href="https://github.com/luongnv89/m-bench/blob/main/docs/S1-ENDPOINT.md" rel="noopener">Endpoint contract</a>
@@ -223,7 +205,7 @@
     <div class="wrap footer-inner">
       <div>© m-bench · MIT · measured where it runs</div>
       <div class="footer-links">
-        <a href="system-one-v2.html">v2 reference</a>
+        <a href="system-one.html">System One v3</a>
         <a href="system-one-v1.html">v1 reference</a>
         <a href="index.html">LLM ranking</a>
         <a href="https://github.com/luongnv89/m-bench/blob/main/docs/S1-ENDPOINT.md" rel="noopener">S1 endpoint</a>

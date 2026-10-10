@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-09",
+  "generated": "2026-10-10",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -221,6 +221,275 @@
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
   },
   "systemOne": {
+    "version": 3,
+    "scenarios": 200,
+    "questions": 200,
+    "samples": 1,
+    "generations": 200,
+    "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+    "setup": "system1 v3 · 200 scenarios · 200 questions · 1 sample · concurrency 1 · typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls",
+    "question": "With the arithmetic removed, which model makes the best System One decisions, and at what speed?",
+    "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+    "wallNote": "200 responses per model · concurrency 1",
+    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking answers all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. Mercury Decide is not on the v3 roster.",
+    "families": [
+      {
+        "id": "returns",
+        "name": "Returns",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Recalls, proof of purchase, claimed vs confirmed damage, final sale, pressure from the customer."
+      },
+      {
+        "id": "triage",
+        "name": "Incident triage",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Confirmed vs suspected security, ongoing vs resolved vs staging outages, 'URGENT' noise."
+      },
+      {
+        "id": "access",
+        "name": "Access",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Explicit denies, project boundaries, approved vs pending vs expired grants, viewers holding grants."
+      },
+      {
+        "id": "credentials",
+        "name": "Credentials",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Completed vs requested vs suggested revocation, validity windows and maintenance, already computed."
+      },
+      {
+        "id": "billing",
+        "name": "Billing",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Bank-confirmed vs claimed payment, pending transfers, disputes and overpayment."
+      },
+      {
+        "id": "routing",
+        "name": "Routing",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Route by the action needed, not the topic; multi-intent precedence; when a human is needed."
+      },
+      {
+        "id": "evidence",
+        "name": "Evidence",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Self-corrections, hedges and hearsay, plans and promises, time, place and item scope."
+      },
+      {
+        "id": "moderation",
+        "name": "Moderation",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Threats vs hyperbole, insults vs criticism, reported threats and self-harm."
+      },
+      {
+        "id": "phishing",
+        "name": "Phishing",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Authentication failures, lookalike domains and links vs authentic but risky requests."
+      },
+      {
+        "id": "injection",
+        "name": "Prompt injection",
+        "scenarios": 20,
+        "questions": 20,
+        "desc": "Instructions planted in untrusted text, including plants that agree with the right answer."
+      }
+    ],
+    "familyScores": {
+      "gpt-6.1-sol (pi think-medium)": {
+        "returns": 100.0,
+        "triage": 100.0,
+        "access": 100.0,
+        "credentials": 100.0,
+        "billing": 100.0,
+        "routing": 100.0,
+        "evidence": 100.0,
+        "moderation": 100.0,
+        "phishing": 100.0,
+        "injection": 100.0
+      },
+      "gpt-6-luna (pi think-max)": {
+        "returns": 100.0,
+        "triage": 100.0,
+        "access": 100.0,
+        "credentials": 100.0,
+        "billing": 100.0,
+        "routing": 100.0,
+        "evidence": 100.0,
+        "moderation": 100.0,
+        "phishing": 95.0,
+        "injection": 100.0
+      },
+      "Qwen3.6-35B-A3B (vLLM think-ON)": {
+        "returns": 100.0,
+        "triage": 100.0,
+        "access": 85.0,
+        "credentials": 100.0,
+        "billing": 95.0,
+        "routing": 100.0,
+        "evidence": 100.0,
+        "moderation": 95.0,
+        "phishing": 95.0,
+        "injection": 100.0
+      },
+      "TypeSafe Jev (jev-1.13.0)": {
+        "returns": 85.0,
+        "triage": 100.0,
+        "access": 90.0,
+        "credentials": 100.0,
+        "billing": 90.0,
+        "routing": 100.0,
+        "evidence": 95.0,
+        "moderation": 100.0,
+        "phishing": 95.0,
+        "injection": 100.0
+      },
+      "Qwen3.6-35B-A3B (vLLM think-OFF)": {
+        "returns": 70.0,
+        "triage": 100.0,
+        "access": 75.0,
+        "credentials": 85.0,
+        "billing": 90.0,
+        "routing": 75.0,
+        "evidence": 90.0,
+        "moderation": 100.0,
+        "phishing": 75.0,
+        "injection": 90.0
+      },
+      "Kev-4B (kev.serve bf16)": {
+        "returns": 60.0,
+        "triage": 75.0,
+        "access": 85.0,
+        "credentials": 85.0,
+        "billing": 80.0,
+        "routing": 55.0,
+        "evidence": 65.0,
+        "moderation": 100.0,
+        "phishing": 75.0,
+        "injection": 30.0
+      }
+    },
+    "rows": [
+      {
+        "model": "gpt-6.1-sol · think-medium",
+        "modelKey": "gpt-6.1-sol (pi think-medium)",
+        "score": 100.0,
+        "ci": "98.1–100.0",
+        "ciBounds": [
+          98.11546736227335,
+          100.0
+        ],
+        "groupAcc": 100.0,
+        "secPerQ": 3.243,
+        "outTok": 6.25,
+        "wall": 648.69,
+        "serving": "hosted OpenAI via pi CLI · thinking medium",
+        "note": "200/200 correct · 0 generation errors",
+        "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-1-sol-thinkmedium-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "gpt-6-luna · think-max",
+        "modelKey": "gpt-6-luna (pi think-max)",
+        "score": 99.5,
+        "ci": "97.2–99.9",
+        "ciBounds": [
+          97.22262956021069,
+          99.91168312843989
+        ],
+        "groupAcc": 100.0,
+        "secPerQ": 4.914,
+        "outTok": 76.15,
+        "wall": 982.94,
+        "serving": "hosted OpenAI via pi CLI · thinking max",
+        "note": "199/200 correct · misses: phishing 1 · 0 generation errors",
+        "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-luna-thinkmax-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "Qwen3.6-35B-A3B · think-ON",
+        "modelKey": "Qwen3.6-35B-A3B (vLLM think-ON)",
+        "score": 97.0,
+        "ci": "93.6–98.6",
+        "ciBounds": [
+          93.61057075454808,
+          98.61796856598886
+        ],
+        "groupAcc": 93.3,
+        "secPerQ": 9.614,
+        "outTok": 796.64,
+        "wall": 1922.81,
+        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning enabled",
+        "note": "194/200 correct · misses: access 3, billing 1, moderation 1, phishing 1 · 0 generation errors",
+        "sourceJson": "results/2026-10-10-system1-v3-200/qwen3-6-35b-a3b-nvfp4-thinkon-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "TypeSafe Jev · jev-1.13.0",
+        "modelKey": "TypeSafe Jev (jev-1.13.0)",
+        "score": 95.5,
+        "ci": "91.7–97.6",
+        "ciBounds": [
+          91.67032959981803,
+          97.6147456998507
+        ],
+        "groupAcc": 93.3,
+        "secPerQ": 0.22,
+        "outTok": 84.78,
+        "wall": 44.03,
+        "serving": "hosted TypeSafe API · typesafe backend · private :8124 gateway",
+        "note": "191/200 correct · misses: returns 3, access 2, billing 2, evidence 1, phishing 1 · 0 generation errors",
+        "sourceJson": "results/2026-10-10-system1-v3-200/typesafe-jev-1-13-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "Qwen3.6-35B-A3B · think-OFF",
+        "modelKey": "Qwen3.6-35B-A3B (vLLM think-OFF)",
+        "score": 85.0,
+        "ci": "79.4–89.3",
+        "ciBounds": [
+          79.39442071583333,
+          89.286406437758
+        ],
+        "groupAcc": 75.0,
+        "secPerQ": 0.233,
+        "outTok": 7.01,
+        "wall": 46.59,
+        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning disabled",
+        "note": "170/200 correct · misses: returns 6, access 5, routing 5, phishing 5, credentials 3, billing 2, evidence 2, injection 2 · 0 generation errors",
+        "sourceJson": "results/2026-10-10-system1-v3-200/qwen3-6-35b-a3b-nvfp4-thinkoff-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "Kev-4B · bf16",
+        "modelKey": "Kev-4B (kev.serve bf16)",
+        "score": 71.0,
+        "ci": "64.4–76.8",
+        "ciBounds": [
+          64.36252189922268,
+          76.84597439293212
+        ],
+        "groupAcc": 68.3,
+        "secPerQ": 0.151,
+        "outTok": 136.66,
+        "wall": 30.13,
+        "serving": "local kev.serve bf16 · shared :8123 gateway",
+        "note": "142/200 correct · misses: injection 14, routing 9, returns 8, evidence 7, triage 5, phishing 5, billing 4, access 3, credentials 3 · 0 generation errors",
+        "sourceJson": "results/2026-10-10-system1-v3-200/kev-4b-kevserve-bf16-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      }
+    ]
+  },
+  "systemOneV2": {
     "version": 2,
     "scenarios": 200,
     "questions": 400,
@@ -387,7 +656,7 @@
     ],
     "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
     "wallNote": "800 responses per model · concurrency 1",
-    "note": "Every v1-board model re-measured on v2, plus two frontier OpenAI models through pi. gpt-6.1-sol at high thinking saturates the suite outright (800/800 — v2 has stopped measuring this tier; the remaining headroom is in harder states, not better models); gpt-6-luna at max misses only 7 records questions. The incumbent Qwen3.6-35B with reasoning enabled scores 98.6% — the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included.",
+    "note": "Every v1-board model re-measured on v2, plus two frontier OpenAI models through pi. gpt-6.1-sol at high thinking saturates the suite outright (800/800 — v2 has stopped measuring this tier; the remaining headroom is in harder states, not better models); gpt-6-luna at max misses only 7 records questions. The incumbent Qwen3.6-35B with reasoning enabled scores 98.6% — the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included. Superseded by benchmark v3, which precomputes the multi-step arithmetic that decided most of v2.",
     "families": [
       {
         "id": "policy",
@@ -469,7 +738,7 @@
       "harness": "s1-gateway",
       "mode": "isolated",
       "thinking": "—",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 79.5,
@@ -484,7 +753,7 @@
       "harness": "s1-gateway",
       "mode": "isolated",
       "thinking": "—",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 59.8,
@@ -499,7 +768,7 @@
       "harness": "s1-gateway",
       "mode": "isolated",
       "thinking": "—",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 68.0,
@@ -514,7 +783,7 @@
       "harness": "built-in",
       "mode": "isolated",
       "thinking": "ON",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 98.6,
@@ -529,7 +798,7 @@
       "harness": "s1-gateway",
       "mode": "isolated",
       "thinking": "—",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 86.5,
@@ -544,7 +813,7 @@
       "harness": "built-in",
       "mode": "isolated",
       "thinking": "OFF",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 61.8,
@@ -559,7 +828,7 @@
       "harness": "s1-gateway",
       "mode": "isolated",
       "thinking": "—",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 33.5,
@@ -574,7 +843,7 @@
       "harness": "pi",
       "mode": "isolated",
       "thinking": "high",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 100.0,
@@ -589,7 +858,7 @@
       "harness": "pi",
       "mode": "isolated",
       "thinking": "max",
-      "suite": "system1",
+      "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
       "score": 99.1,
@@ -1208,9 +1477,105 @@
       "score": 44.1,
       "unit": "agent",
       "report": "results/2026-08-26/REPORT-live.md"
+    },
+    {
+      "date": "2026-10-10",
+      "machine": "dgx-spark",
+      "model": "gpt-6.1-sol (pi think-medium)",
+      "harness": "pi",
+      "mode": "isolated",
+      "thinking": "medium",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 100.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+      "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-1-sol-thinkmedium-system1-v3.json"
+    },
+    {
+      "date": "2026-10-10",
+      "machine": "dgx-spark",
+      "model": "gpt-6-luna (pi think-max)",
+      "harness": "pi",
+      "mode": "isolated",
+      "thinking": "max",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 99.5,
+      "unit": "accuracy",
+      "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+      "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-luna-thinkmax-system1-v3.json"
+    },
+    {
+      "date": "2026-10-10",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B (vLLM think-ON)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 97.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+      "sourceJson": "results/2026-10-10-system1-v3-200/qwen3-6-35b-a3b-nvfp4-thinkon-system1-v3.json"
+    },
+    {
+      "date": "2026-10-10",
+      "machine": "dgx-spark",
+      "model": "TypeSafe Jev (jev-1.13.0)",
+      "harness": "s1-gateway",
+      "mode": "isolated",
+      "thinking": "—",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 95.5,
+      "unit": "accuracy",
+      "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+      "sourceJson": "results/2026-10-10-system1-v3-200/typesafe-jev-1-13-system1-v3.json"
+    },
+    {
+      "date": "2026-10-10",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B (vLLM think-OFF)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 85.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+      "sourceJson": "results/2026-10-10-system1-v3-200/qwen3-6-35b-a3b-nvfp4-thinkoff-system1-v3.json"
+    },
+    {
+      "date": "2026-10-10",
+      "machine": "dgx-spark",
+      "model": "Kev-4B (kev.serve bf16)",
+      "harness": "s1-gateway",
+      "mode": "isolated",
+      "thinking": "—",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 71.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-10-system1-v3-200/REPORT.md",
+      "sourceJson": "results/2026-10-10-system1-v3-200/kev-4b-kevserve-bf16-system1-v3.json"
     }
   ],
   "campaigns": [
+    {
+      "date": "2026-10-10",
+      "question": "Does Jev still trail reasoning models once the arithmetic is removed?",
+      "answer": "Mostly no. With quantities precomputed, Jev scores 95.5%: tied with local Qwen3.6 think-ON (97.0%) at 44x lower latency, and about 4 points behind gpt-6.1-sol medium (100%) and gpt-6-luna max (99.5%), down from about 20 points on v2. v3 is saturated at the frontier; it ranks System One candidates, not frontier models.",
+      "link": "results/2026-10-10-system1-v3-200/REPORT.md"
+    },
     {
       "date": "2026-10-09",
       "question": "Can frontier OpenAI models through pi beat the local winner on benchmark v2?",
@@ -1354,7 +1719,12 @@
     {
       "name": "system1",
       "tasks": 200,
-      "desc": "Benchmark v2 · 400 scored questions across ten decision families · accuracy + latency"
+      "desc": "Benchmark v3 · 200 decision questions, arithmetic precomputed · 200 calls per model"
+    },
+    {
+      "name": "system1-v2",
+      "tasks": 200,
+      "desc": "Benchmark v2 reference · 400 questions, arithmetic-heavy · superseded by v3"
     },
     {
       "name": "phishing-eval",

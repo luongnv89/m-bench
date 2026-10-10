@@ -124,7 +124,37 @@ def run(tasks, cfg, on_result=None, keep_code=False):
     with cf.ThreadPoolExecutor(max_workers=cfg.concurrency) as ex:
         results = list(ex.map(work, work_items))
     wall = time.perf_counter() - t0
-    return stamp(summarize(results, cfg, wall, len(questions)), tasks), results
+    summary = summarize(results, cfg, wall, len(questions))
+    summary.update(scenario_metrics(results, tasks))
+    return stamp(summary, tasks), results
+
+
+def scenario_metrics(results, tasks):
+    """Stricter views of the same attempts; per-question accuracy still ranks.
+
+    `scenario_accuracy`: share of (scenario, sample) pairs whose questions all
+    passed — sibling questions share a state, so this counts each decision once.
+    `group_accuracy`: share of (group, sample) pairs, over groups with several
+    scenarios (paraphrases of one case), whose every question passed — a
+    decision that flips under rewording does not count. None without groups.
+    """
+    group_of = {t["id"]: t.get("group", t["id"]) for t in tasks}
+    sizes = {}
+    for g in group_of.values():
+        sizes[g] = sizes.get(g, 0) + 1
+    scenario, group = {}, {}
+    for r in results:
+        tid = r["task"].rsplit("/", 1)[0]
+        key = (tid, r["sample"])
+        scenario[key] = scenario.get(key, True) and bool(r["passed"])
+        g = group_of.get(tid, tid)
+        if sizes.get(g, 1) > 1:
+            gkey = (g, r["sample"])
+            group[gkey] = group.get(gkey, True) and bool(r["passed"])
+
+    def share(d):
+        return sum(d.values()) / len(d) if d else None
+    return {"scenario_accuracy": share(scenario), "group_accuracy": share(group)}
 
 
 def summarize(results, cfg, wall, n_questions):

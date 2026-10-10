@@ -14,12 +14,15 @@ from .core16 import TASKS as CORE16
 from .hard12 import TASKS as HARD12
 from .system1 import TASKS as SYSTEM1
 from .system1_legacy import TASKS as SYSTEM1_LEGACY
+from .system1_v2 import TASKS as SYSTEM1_V2
 
 SUITES = {
     "core16": CORE16,
     "hard12": HARD12,
     "all": CORE16 + HARD12,
     "system1": SYSTEM1,
+    "system1-v3": SYSTEM1,  # alias: the name v3 was measured under before promotion
+    "system1-v2": SYSTEM1_V2,
     "system1-legacy": SYSTEM1_LEGACY,
     "agentic": AGENTIC,
     "agentic-hard": AGENTIC_HARD,
@@ -30,7 +33,7 @@ SUITES = {
 # "agentic": multi-turn tool calling, scored by a predicate over the final workspace.
 # "s1":      one-shot decision questions over a state, scored by exact match.
 KINDS = {"core16": "codegen", "hard12": "codegen", "all": "codegen",
-         "system1": "s1", "system1-legacy": "s1",
+         "system1": "s1", "system1-v3": "s1", "system1-v2": "s1", "system1-legacy": "s1",
          "agentic": "agentic", "agentic-hard": "agentic", "agentic-all": "agentic"}
 
 DESCRIPTIONS = {
@@ -38,8 +41,13 @@ DESCRIPTIONS = {
     "hard12": "12 hard tasks — built when core16 saturated; parsers, DP, cron, bigint, transactions",
     "all": "core16 + hard12, 28 tasks",
     "system1": f"{len(SYSTEM1)} decision scenarios "
-               f"({sum(len(t['questions']) for t in SYSTEM1)} questions), v2 — "
-               "exceptions, boundaries, evidence and state; exact-match accuracy + speed",
+               f"({sum(len(t['questions']) for t in SYSTEM1)} questions), v3 — "
+               "precomputed facts in prose, claims vs confirmations, injection, "
+               "paraphrase pairs; 200 calls per model at --samples 1",
+    "system1-v3": "alias of system1 (v3), the name its first runs used",
+    "system1-v2": f"{len(SYSTEM1_V2)} decision scenarios "
+                  f"({sum(len(t['questions']) for t in SYSTEM1_V2)} questions), v2 — "
+                  "arithmetic-heavy predecessor; retained for reproducing its results",
     "system1-legacy": "23 decision scenarios (49 questions), v1 — saturated; "
                       "retained for reproducing historical results",
     "agentic": "8 multi-turn tool-calling tasks — read/edit/run files to reach a goal state",
