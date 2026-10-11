@@ -1,6 +1,6 @@
 # m-bench docs (GitHub Pages)
 
-Static site for measured benchmark results: four pages over one shared design system.
+Static site for measured benchmark results: five pages over one shared design system.
 
 | Page | `<body data-page>` | Suites it renders | Owns |
 |---|---|---|---|
@@ -8,6 +8,7 @@ Static site for measured benchmark results: four pages over one shared design sy
 | `system-one.html` | `system-one` | `system1` | Benchmark v3 (default): 200 scenarios / 200 questions, accuracy, latency, paraphrase stability, accuracy by family |
 | `system-one-v2.html` | `system-one-v2` | `system1-v2` | Benchmark v2 reference: 200 scenarios / 400 questions, arithmetic-heavy, superseded by v3 |
 | `system-one-v1.html` | `system-one-v1` | `system1-legacy,phishing-eval` | Benchmark v1 reference: 23 scenarios / 49 questions, historical rankings and the phishing workload |
+| `others.html` | `others` | — (no ledger rows) | Non-LLM tool benchmarks on the reference machine, written as static markup with raw data under `results/` (first entry: grep vs ripgrep vs ugrep, `results/2026-10-12-grep-ripgrep-ugrep/`) |
 
 - `assets/site.css` — the one design system: tokens, layout, nav, charts, ledger, responsive and reduced-motion rules
 - `assets/site.js` — the one render layer: reads `<body data-page data-suites>` and renders only that page's sections and the suites it owns
