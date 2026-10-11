@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Other benchmarks measured on the m-bench reference machine. GNU grep vs ripgrep vs ugrep on the Linux kernel source, DGX Spark, October 2026." />
+  <title>m-bench — Other benchmarks</title>
+  <meta name="theme-color" content="#0A0A0B" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="m-bench — Other benchmarks" />
+  <meta property="og:description" content="GNU grep vs ripgrep vs ugrep on the Linux kernel: ripgrep 11–20× faster than grep across the tree, ugrep close behind." />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/site.css" />
+</head>
+<body data-page="others">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="index.html" aria-label="m-bench home">
+        <img src="assets/logo-mark.svg" alt="" width="28" height="28" />
+        <span class="brand-name">m<span>-</span>bench</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" id="nav-toggle">Menu</button>
+      <ul class="nav-links" id="nav-menu">
+        <li><a class="nav-page" href="index.html">LLM ranking</a></li>
+        <li><a class="nav-page" href="system-one.html">System One</a></li>
+        <li><a class="nav-page" href="others.html" aria-current="page">Others</a></li>
+        <li><a href="#grep">grep vs rg vs ugrep</a></li>
+        <li><a href="#grep-method">Method</a></li>
+        <li><a class="nav-cta" href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <!-- HERO -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="kicker">Other benchmarks · measured on the reference machine</p>
+          <h1 id="hero-title">Everything else<br />an agent waits on.</h1>
+          <p class="lead" style="margin-top:1.5rem;">A coding agent spends time on more than tokens. It also waits
+            for searches, builds and tests to run. This page holds benchmarks of those tools, measured on
+            the DGX Spark that serves the LLM rankings. Each entry links to its raw numbers and a script you
+            can rerun.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#grep">grep vs ripgrep vs ugrep ↓</a>
+            <a class="btn btn-ghost" href="https://github.com/luongnv89/m-bench/tree/main/results/2026-10-12-grep-ripgrep-ugrep" rel="noopener">Raw results →</a>
+          </div>
+          <p class="crosslink">Ranking coding agents instead? <a href="index.html">LLM setups — harness, model, thinking →</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GREP: CONTEXT -->
+    <section id="grep" aria-labelledby="grep-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">Code search · 2026-10-12 · DGX Spark</p>
+          <h2 id="grep-title">grep vs ripgrep vs ugrep.</h2>
+          <p>Agents search code all the time, and harnesses use different tools for it. In Claude Code 2.1.296
+            on this machine, the shell's <span class="mono">grep</span> is a function that runs the
+            <a href="https://github.com/Genivia/ugrep" rel="noopener">ugrep</a> built into the Claude Code
+            binary, not GNU grep. <a href="https://github.com/BurntSushi/ripgrep" rel="noopener">ripgrep</a>
+            is the de facto fast code-search tool; VS Code's search runs on it. This benchmark measures all of them on the
+            corpus ripgrep's own benchmarks use: the Linux kernel source.</p>
+        </header>
+        <div class="suite-grid" role="list" aria-label="Tools under test">
+          <div class="suite" role="listitem">
+            <div class="suite-name">GNU grep 3.11</div>
+            <div class="suite-tasks">baseline · single-threaded</div>
+            <p class="suite-desc">The standard Unix grep from the Ubuntu package. Recursive search with <span class="mono">-r</span>
+              runs on one thread, and case-insensitive search is slow under a UTF-8 locale.</p>
+          </div>
+          <div class="suite" role="listitem">
+            <div class="suite-name">ripgrep 14.1.0</div>
+            <div class="suite-tasks">Rust · parallel · respects .gitignore</div>
+            <p class="suite-desc">Andrew Gallant's line-oriented search tool, built on Rust's regex engine. It searches
+              directories in parallel and skips gitignored, hidden and binary files by default.</p>
+          </div>
+          <div class="suite" role="listitem">
+            <div class="suite-name">ugrep 7.8.5 · 7.8.4</div>
+            <div class="suite-tasks">C++ · parallel · grep-compatible</div>
+            <p class="suite-desc">Robert van Engelen's grep-compatible search tool. 7.8.5 was built from the upstream tag.
+              7.8.4 is the copy built into Claude Code, which the shell's <span class="mono">grep</span> runs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GREP: RESULTS -->
+    <section id="grep-results" aria-labelledby="grep-results-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">Results · median seconds · lower is faster</p>
+          <h2 id="grep-results-title">ripgrep leads. ugrep is close behind.</h2>
+          <p>Across the whole 1.8 GB kernel tree, ripgrep is <strong>11–20× faster</strong> than GNU grep and
+            ugrep is <strong>8–16× faster</strong>. In a single 1.4 GB file, ripgrep is <strong>4.8–7.0×</strong> faster
+            than GNU grep and ugrep is <strong>3.1–6.4×</strong> faster. Every tool returned the same number of matches
+            in every row. <span class="volt">Green</span> marks the fastest time in each row.</p>
+        </header>
+        <div class="family-wrap">
+          <table class="family-scores" id="grep-table" aria-label="Median wall-clock seconds per search, by tool">
+            <thead>
+              <tr>
+                <th scope="col">Search</th>
+                <th scope="col" class="num">GNU grep</th>
+                <th scope="col" class="num">ripgrep</th>
+                <th scope="col" class="num">rg -j1</th>
+                <th scope="col" class="num">ugrep</th>
+                <th scope="col" class="num">ugrep -J1</th>
+                <th scope="col" class="num">ugrep · Claude Code</th>
+                <th scope="col" class="num">Matches</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">tree · literal <span class="mono">PM_RESUME</span></th><td class="num">1.188</td><td class="num best">0.097</td><td class="num">0.636</td><td class="num">0.132</td><td class="num">0.612</td><td class="num">0.129</td><td class="num">38</td></tr>
+              <tr><th scope="row">tree · case-insensitive <span class="mono">-i</span></th><td class="num">2.082</td><td class="num best">0.103</td><td class="num">0.705</td><td class="num">0.134</td><td class="num">0.628</td><td class="num">0.131</td><td class="num">697</td></tr>
+              <tr><th scope="row">tree · word regex <span class="mono">-w [A-Z]+_SUSPEND</span></th><td class="num">1.153</td><td class="num best">0.096</td><td class="num">0.631</td><td class="num">0.132</td><td class="num">0.600</td><td class="num">0.129</td><td class="num">577</td></tr>
+              <tr><th scope="row">tree · 4-way alternation</th><td class="num">1.820</td><td class="num best">0.103</td><td class="num">0.724</td><td class="num">0.141</td><td class="num">0.734</td><td class="num">0.137</td><td class="num">181</td></tr>
+              <tr><th scope="row">tree · no match</th><td class="num">1.007</td><td class="num best">0.094</td><td class="num">0.621</td><td class="num">0.131</td><td class="num">0.587</td><td class="num">0.128</td><td class="num">0</td></tr>
+              <tr><th scope="row">file · literal <span class="mono">PM_RESUME</span></th><td class="num">0.861</td><td class="num best">0.164</td><td class="num">—</td><td class="num">0.236</td><td class="num">—</td><td class="num">0.231</td><td class="num">29</td></tr>
+              <tr><th scope="row">file · case-insensitive <span class="mono">-i</span></th><td class="num">1.694</td><td class="num best">0.241</td><td class="num">—</td><td class="num">0.263</td><td class="num">—</td><td class="num">0.246</td><td class="num">672</td></tr>
+              <tr><th scope="row">file · regex <span class="mono">\w+_init\(</span></th><td class="num">0.887</td><td class="num best">0.183</td><td class="num">—</td><td class="num">0.250</td><td class="num">—</td><td class="num">0.256</td><td class="num">87,033</td></tr>
+              <tr><th scope="row">file · no match</th><td class="num">0.681</td><td class="num best">0.119</td><td class="num">—</td><td class="num">0.217</td><td class="num">—</td><td class="num">0.217</td><td class="num">0</td></tr>
+              <tr><th scope="row">startup · tiny file</th><td class="num best">0.002</td><td class="num">0.003</td><td class="num">—</td><td class="num">0.003</td><td class="num">—</td><td class="num">0.004</td><td class="num">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="chart-note"><strong>tree</strong> is the Linux kernel at <span class="mono">d6d3455d8</span>: 96,080 files, 1.8 GB.
+          <strong>file</strong> is every <span class="mono">*.c</span> and <span class="mono">*.h</span> joined into one file: 1.45 GB, 37.7 M lines.
+          <span class="mono">-j1</span> / <span class="mono">-J1</span> limit a tool to one thread. A single file is searched on one thread anyway, so those cells are empty.</p>
+
+        <div class="suite-grid" role="list" aria-label="What the numbers say" style="margin-top:2.5rem;">
+          <div class="suite" role="listitem">
+            <div class="suite-name">The lead comes from cores</div>
+            <div class="suite-tasks">tree · 20 threads</div>
+            <p class="suite-desc">GNU grep searches the tree on one thread. Limited to one thread, ripgrep is only
+              1.6–3.0× faster than grep. Most of its 11–20× lead comes from searching on all 20 threads.</p>
+          </div>
+          <div class="suite" role="listitem">
+            <div class="suite-name">ugrep's engine keeps up</div>
+            <div class="suite-tasks">single thread · tree</div>
+            <p class="suite-desc">On one thread, ugrep matches or slightly beats ripgrep (0.59–0.73 s vs 0.62–0.72 s).
+              On all cores, ripgrep's parallel directory walk scales better, which gives it a lead of about 1.35×.</p>
+          </div>
+          <div class="suite" role="listitem">
+            <div class="suite-name">Claude Code's grep is fast</div>
+            <div class="suite-tasks">embedded ugrep 7.8.4</div>
+            <p class="suite-desc">The ugrep built into Claude Code runs within noise of the standalone build,
+              with startup of 4 ms vs 3 ms. Typing <span class="mono">grep</span> there gives near-ripgrep speed,
+              not GNU grep speed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GREP: METHOD + REFERENCES -->
+    <section id="grep-method" aria-labelledby="grep-method-title">
+      <div class="wrap">
+        <header class="section-head">
+          <p class="kicker">Method &amp; references</p>
+          <h2 id="grep-method-title">How it was measured.</h2>
+          <p>Each command ran once as a warmup, then 7 timed runs. The table shows the median. The page cache was
+            warm, and the corpus fits in RAM. Output went to <span class="mono">wc -l</span>, not
+            <span class="mono">/dev/null</span>, because GNU grep stops at the first match when writing to
+            <span class="mono">/dev/null</span>. grep and ugrep ran with <span class="mono">-rnI --exclude-dir=.git</span>
+            to match ripgrep's defaults, so all three searched the same files. In ripgrep, <span class="mono">-E</span> means
+            <span class="mono">--encoding</span>, so regex cases pass the pattern to ripgrep without it.
+            Machine: NVIDIA DGX Spark, Cortex-X925 + A725 with 20 threads, Ubuntu 24.04 aarch64,
+            <span class="mono">LANG=en_US.utf8</span>. These are single-machine numbers, so treat gaps under about 5% as noise.</p>
+        </header>
+        <div class="suite-grid" role="list" aria-label="References">
+          <div class="suite" role="listitem">
+            <div class="suite-name"><a href="https://github.com/BurntSushi/ripgrep" rel="noopener">BurntSushi/ripgrep ↗</a></div>
+            <div class="suite-tasks">tool · MIT / Unlicense</div>
+            <p class="suite-desc">Source, docs and the <a href="https://github.com/BurntSushi/ripgrep/tree/master/benchsuite" rel="noopener">benchsuite</a>
+              this method is based on. The tool was introduced in <a href="https://burntsushi.net/ripgrep/" rel="noopener">“ripgrep is faster than {grep, ag, git grep, ucg, pt, sift}”</a>.</p>
+          </div>
+          <div class="suite" role="listitem">
+            <div class="suite-name"><a href="https://github.com/Genivia/ugrep" rel="noopener">Genivia/ugrep ↗</a></div>
+            <div class="suite-tasks">tool · BSD-3-Clause</div>
+            <p class="suite-desc">Source and the release built for this benchmark,
+              <a href="https://github.com/Genivia/ugrep/releases/tag/v7.8.5" rel="noopener">v7.8.5</a>.
+              The project publishes its own <a href="https://github.com/Genivia/ugrep-benchmarks" rel="noopener">ugrep-benchmarks</a>.</p>
+          </div>
+          <div class="suite" role="listitem">
+            <div class="suite-name"><a href="https://github.com/luongnv89/m-bench/tree/main/results/2026-10-12-grep-ripgrep-ugrep" rel="noopener">Raw results &amp; script ↗</a></div>
+            <div class="suite-tasks">results/2026-10-12-grep-ripgrep-ugrep</div>
+            <p class="suite-desc"><span class="mono">results.tsv</span> holds every median and match count, <span class="mono">run.py</span> reruns the
+              benchmark, and the README lists exact versions and the kernel commit.
+              GNU grep: <a href="https://www.gnu.org/software/grep/" rel="noopener">gnu.org/software/grep</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div>© m-bench · MIT · measured where it runs</div>
+      <div class="footer-links">
+        <a href="index.html">LLM ranking</a>
+        <a href="system-one.html">System One v3</a>
+        <a href="https://github.com/luongnv89/m-bench" rel="noopener">GitHub</a>
+        <a href="https://github.com/luongnv89/m-bench/blob/main/README.md" rel="noopener">README</a>
+      </div>
+      <div id="data-stamp">data · loading…</div>
+    </div>
+  </footer>
+
+  <script src="assets/site.js"></script>
+</body>
+</html>

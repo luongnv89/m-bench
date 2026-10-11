@@ -12,6 +12,8 @@ from benchkit.suites import SUITES
 ROOT = Path(__file__).parents[1]
 DOCS = ROOT / "docs"
 PAGES = ("index.html", "system-one.html", "system-one-v2.html", "system-one-v1.html")
+# pages that own no ledger suites but share the shell and design system
+STATIC_PAGES = ("others.html",)
 ASSETS = ("assets/site.css", "assets/site.js")
 
 
@@ -177,8 +179,29 @@ class LandingPageTests(unittest.TestCase):
         self.assertNotIn("98.0%", main)
         self.assertNotIn('id="s1-real"', main)
 
-    def test_pages_share_the_design_system_without_inline_code(self):
+    def test_others_page_is_linked_from_every_page(self):
         for page in PAGES:
+            with self.subTest(page=page):
+                self.assertIn('href="others.html"', (DOCS / page).read_text())
+        others = (DOCS / "others.html").read_text()
+        self.assertIn('data-page="others"', others)
+        self.assertNotIn("data-suites", others)
+        self.assertIn('href="others.html" aria-current="page"', others)
+
+    def test_grep_table_matches_archived_results(self):
+        lines = (ROOT / "results/2026-10-12-grep-ripgrep-ugrep/results.tsv").read_text().splitlines()
+        archived = [line.split("\t")[1:8] for line in lines[1:]]
+        html = (DOCS / "others.html").read_text()
+        body = re.search(r'id="grep-table".*?<tbody>(.*?)</tbody>', html, flags=re.DOTALL).group(1)
+        published = [
+            [re.sub(r"<[^>]+>", "", cell).replace(",", "").replace("—", "-")
+             for cell in re.findall(r"<td[^>]*>(.*?)</td>", row)]
+            for row in re.findall(r"<tr>(.*?)</tr>", body, flags=re.DOTALL)
+        ]
+        self.assertEqual(published, archived)
+
+    def test_pages_share_the_design_system_without_inline_code(self):
+        for page in PAGES + STATIC_PAGES:
             with self.subTest(page=page):
                 html = (DOCS / page).read_text()
                 self.assertIn('<link rel="stylesheet" href="assets/site.css"', html)
@@ -201,7 +224,7 @@ class LandingPageTests(unittest.TestCase):
                     result = subprocess.run(["node", "--check", str(DOCS / asset)],
                                             capture_output=True, text=True, timeout=10, check=False)
                     self.assertEqual(result.returncode, 0, result.stderr)
-        for page in PAGES:
+        for page in PAGES + STATIC_PAGES:
             with self.subTest(page=page):
                 html = (DOCS / page).read_text()
                 scripts = re.findall(r"<script>(.*?)</script>", html, flags=re.DOTALL)

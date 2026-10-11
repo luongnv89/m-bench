@@ -4,6 +4,7 @@
    system-one.html <body data-page="system-one" data-suites="system1">            (benchmark v3)
    system-one-v2.html <body data-page="system-one-v2" data-suites="system1-v2">
    system-one-v1.html <body data-page="system-one-v1" data-suites="system1-legacy,phishing-eval">
+   others.html     <body data-page="others">                                  (static tool benchmarks, no ledger rows)
 
    All pages read the same data.json and share these helpers; each page only
    renders the sections its markup provides and only shows the suites its
@@ -733,6 +734,7 @@
     "system-one": [renderSystemOneHero],
     "system-one-v2": [renderSystemOneHero],
     "system-one-v1": [renderSystemOneHero],
+    others: [],
   };
 
   function wire() {
