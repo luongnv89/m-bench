@@ -227,11 +227,11 @@
     "samples": 1,
     "generations": 200,
     "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
-    "setup": "system1 v3 · 200 scenarios · 200 questions · 1 sample · concurrency 1 · typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls, Claude Haiku 5.5 through isolated Claude Code calls",
+    "setup": "system1 v3 · 200 scenarios · 200 questions · 1 sample · concurrency 1 · typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls, Claude Haiku 5.5 (low and high effort) through isolated Claude Code calls",
     "question": "With the arithmetic removed, which model makes the best System One decisions, and at what speed?",
     "report": "results/2026-10-10-system1-v3-200/REPORT.md",
     "wallNote": "200 responses per model · concurrency 1",
-    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking answers all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. claude-haiku-5-5 through Claude Code at low effort scores 91.0%, statistically tied with Jev (−4.5 points) and Qwen3.6 think-OFF (+6.0), and below Qwen3.6 think-ON and the frontier tier; its weakest family is routing (70%). Only the low effort level has been run. Mercury Decide is not on the v3 roster.",
+    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking answers all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. claude-haiku-5-5 through Claude Code scores 95.5% at high effort and 91.0% at low (a 4.5-point gain that is still inside noise). At high effort it matches Jev exactly and is tied with Qwen3.6 think-ON (−1.5), about 4 points behind the frontier tier, at 2.5 s/question; routing (80%) and injection (85%) remain its weakest families. Mercury Decide is not on the v3 roster.",
     "families": [
       {
         "id": "returns",
@@ -388,6 +388,18 @@
         "moderation": 100.0,
         "phishing": 95.0,
         "injection": 80.0
+      },
+      "claude-haiku-5-5 (claude-code effort-high)": {
+        "returns": 100.0,
+        "triage": 95.0,
+        "access": 100.0,
+        "credentials": 100.0,
+        "billing": 100.0,
+        "routing": 80.0,
+        "evidence": 95.0,
+        "moderation": 100.0,
+        "phishing": 100.0,
+        "injection": 85.0
       }
     },
     "rows": [
@@ -461,6 +473,24 @@
         "serving": "hosted TypeSafe API · typesafe backend · private :8124 gateway",
         "note": "191/200 correct · misses: returns 3, access 2, billing 2, evidence 1, phishing 1 · 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/typesafe-jev-1-13-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "claude-haiku-5-5 · effort-high",
+        "modelKey": "claude-haiku-5-5 (claude-code effort-high)",
+        "score": 95.5,
+        "ci": "91.7–97.6",
+        "ciBounds": [
+          91.67032959981803,
+          97.6147456998507
+        ],
+        "groupAcc": 93.3,
+        "secPerQ": 2.48,
+        "outTok": 70.02,
+        "wall": 496.0,
+        "serving": "hosted Anthropic via Claude Code CLI · effort high",
+        "note": "191/200 correct · misses: routing 4, injection 3, triage 1, evidence 1 · one is a format miss (triage_05: right option after a reasoning preamble) · 0 generation errors",
+        "sourceJson": "results/2026-10-13-system1-v3-claude-code/claude-haiku-5-5-efforthigh-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
@@ -1511,6 +1541,21 @@
     {
       "date": "2026-10-13",
       "machine": "dgx-spark",
+      "model": "claude-haiku-5-5 (claude-code effort-high)",
+      "harness": "claude-code",
+      "mode": "isolated",
+      "thinking": "high",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 95.5,
+      "unit": "accuracy",
+      "report": "results/2026-10-13-system1-v3-claude-code/NOTES.md",
+      "sourceJson": "results/2026-10-13-system1-v3-claude-code/claude-haiku-5-5-efforthigh-system1-v3.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
       "model": "claude-haiku-5-5 (claude-code effort-low)",
       "harness": "claude-code",
       "mode": "isolated",
@@ -1618,7 +1663,7 @@
     {
       "date": "2026-10-13",
       "question": "Where does Claude Haiku 5.5 through Claude Code land on benchmark v3?",
-      "answer": "At low effort it scores 91.0% (CI 86.2–94.2) at 2.3 s/question and $0.04 for 200 calls: statistically tied with Jev (95.5%) and Qwen3.6 think-OFF (85.0%), clearly behind Qwen3.6 think-ON (97.0%) and the frontier OpenAI tier. Routing (70%) and injection (80%) are its weak families. Each call is an isolated claude -p with tools, MCP, skills, hooks and CLAUDE.md off; latency includes about 1 s of CLI start-up.",
+      "answer": "At high effort it scores 95.5% (CI 91.7–97.6), the same as Jev and statistically tied with Qwen3.6 think-ON (97.0%), about 4 points behind the frontier OpenAI tier; at low effort 91.0% (CI 86.2–94.2). The low-to-high gain of 4.5 points is inside noise. Both cost about $0.05 for 200 calls at 2.3–2.5 s/question. Routing and injection are its weak families at both levels. Each call is an isolated claude -p with tools, MCP, skills, hooks and CLAUDE.md off; latency includes about 1 s of CLI start-up.",
       "link": "results/2026-10-13-system1-v3-claude-code/NOTES.md"
     },
     {
