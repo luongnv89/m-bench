@@ -1,0 +1,202 @@
+  PASS  returns_01/q1      s0      9tok    3.1s  
+  PASS  returns_02/q1      s0    143tok    3.8s  
+  PASS  returns_03/q1      s0    151tok    2.7s  
+  PASS  returns_04/q1      s0    155tok    2.9s  
+  FAIL  returns_05/q1      s0      9tok    2.5s  expected 'reject — R6'
+  PASS  returns_06/q1      s0    132tok    2.6s  
+  PASS  returns_07/q1      s0    159tok    2.2s  
+  PASS  returns_08/q1      s0    106tok    2.5s  
+  PASS  returns_09/q1      s0    103tok    2.2s  
+  PASS  returns_10/q1      s0    117tok    3.8s  
+  PASS  returns_11/q1      s0     10tok    2.7s  
+  PASS  returns_12/q1      s0     80tok    2.5s  
+  PASS  returns_13/q1      s0     36tok    1.9s  
+  PASS  returns_14/q1      s0     39tok    2.6s  
+  PASS  returns_15/q1      s0    189tok    2.7s  
+  PASS  returns_16/q1      s0    202tok    2.5s  
+  PASS  returns_17/q1      s0     10tok    5.6s  
+  PASS  returns_18/q1      s0    111tok    2.4s  
+  PASS  returns_19/q1      s0    128tok    2.0s  
+  PASS  returns_20/q1      s0     10tok    1.8s  
+  PASS  triage_01/q1       s0     10tok    1.7s  
+  FAIL  triage_02/q1       s0      3tok    1.8s  expected 'P0, security queue'
+  PASS  triage_03/q1       s0     10tok    2.2s  
+  PASS  triage_04/q1       s0     10tok    2.8s  
+  PASS  triage_05/q1       s0      3tok    1.8s  
+  PASS  triage_06/q1       s0     11tok    1.9s  
+  PASS  triage_07/q1       s0      3tok    1.7s  
+  PASS  triage_08/q1       s0     73tok    2.0s  
+  PASS  triage_09/q1       s0      3tok    2.5s  
+  PASS  triage_10/q1       s0     10tok    1.8s  
+  PASS  triage_11/q1       s0     10tok    1.8s  
+  PASS  triage_12/q1       s0      3tok    1.8s  
+  PASS  triage_13/q1       s0      3tok    2.5s  
+  PASS  triage_14/q1       s0     66tok    5.6s  
+  PASS  triage_15/q1       s0    120tok    2.8s  
+  PASS  triage_16/q1       s0      3tok    1.9s  
+  PASS  triage_17/q1       s0      3tok    1.8s  
+  PASS  triage_18/q1       s0      3tok    1.9s  
+  PASS  triage_19/q1       s0     10tok    3.9s  
+  PASS  triage_20/q1       s0      3tok    1.9s  
+  PASS  access_01/q1       s0     13tok    2.5s  
+  PASS  access_02/q1       s0     13tok    2.2s  
+  PASS  access_03/q1       s0     10tok    1.8s  
+  PASS  access_04/q1       s0     10tok    1.7s  
+  PASS  access_05/q1       s0     89tok    2.2s  
+  PASS  access_06/q1       s0     12tok    2.2s  
+  PASS  access_07/q1       s0     13tok    2.0s  
+  FAIL  access_08/q1       s0      3tok    1.9s  expected 'deny — DEFAULT'
+  PASS  access_09/q1       s0    106tok    2.8s  
+  PASS  access_10/q1       s0    122tok    2.4s  
+  PASS  access_11/q1       s0    120tok    2.1s  
+  PASS  access_12/q1       s0    124tok    2.5s  
+  PASS  access_13/q1       s0     13tok    1.9s  
+  PASS  access_14/q1       s0     13tok    2.3s  
+  PASS  access_15/q1       s0     13tok    1.7s  
+  PASS  access_16/q1       s0    139tok    3.5s  
+  PASS  access_17/q1       s0    120tok    2.3s  
+  PASS  access_18/q1       s0    202tok    2.7s  
+  PASS  access_19/q1       s0    156tok    2.4s  
+  PASS  access_20/q1       s0    161tok    2.2s  
+  PASS  credentials_01/q1  s0      9tok    1.6s  
+  PASS  credentials_02/q1  s0      9tok    2.4s  
+  PASS  credentials_03/q1  s0      9tok    2.0s  
+  FAIL  credentials_04/q1  s0      8tok    2.7s  expected 'no — revoked'
+  PASS  credentials_05/q1  s0      9tok    2.3s  
+  PASS  credentials_06/q1  s0      9tok    1.9s  
+  PASS  credentials_07/q1  s0     11tok    2.4s  
+  PASS  credentials_08/q1  s0     11tok    2.3s  
+  PASS  credentials_09/q1  s0      8tok    1.7s  
+  PASS  credentials_10/q1  s0      8tok    1.7s  
+  PASS  credentials_11/q1  s0     10tok    2.0s  
+  PASS  credentials_12/q1  s0     10tok    1.8s  
+  PASS  credentials_13/q1  s0      9tok    2.6s  
+  PASS  credentials_14/q1  s0      9tok    1.9s  
+  PASS  credentials_15/q1  s0      8tok    1.7s  
+  PASS  credentials_16/q1  s0    122tok    3.9s  
+  PASS  credentials_17/q1  s0      9tok    3.3s  
+  PASS  credentials_18/q1  s0     39tok    1.8s  
+  PASS  credentials_19/q1  s0      9tok    2.5s  
+  PASS  credentials_20/q1  s0      9tok    1.7s  
+  PASS  billing_01/q1      s0      8tok    1.8s  
+  PASS  billing_02/q1      s0    121tok    2.2s  
+  PASS  billing_03/q1      s0      8tok    1.7s  
+  PASS  billing_04/q1      s0      8tok    2.0s  
+  PASS  billing_05/q1      s0      9tok    1.7s  
+  PASS  billing_06/q1      s0      9tok    2.0s  
+  PASS  billing_07/q1      s0     10tok    2.2s  
+  PASS  billing_08/q1      s0     10tok    1.8s  
+  PASS  billing_09/q1      s0      8tok    2.4s  
+  PASS  billing_10/q1      s0     92tok    2.7s  
+  PASS  billing_11/q1      s0    132tok    2.5s  
+  PASS  billing_12/q1      s0    148tok    2.2s  
+  PASS  billing_13/q1      s0      8tok    2.6s  
+  PASS  billing_14/q1      s0      8tok    1.7s  
+  PASS  billing_15/q1      s0     78tok    2.3s  
+  PASS  billing_16/q1      s0     10tok    4.4s  
+  PASS  billing_17/q1      s0     47tok    2.0s  
+  PASS  billing_18/q1      s0      8tok    2.4s  
+  PASS  billing_19/q1      s0     10tok    2.4s  
+  PASS  billing_20/q1      s0     60tok    2.0s  
+  FAIL  routing_01/q1      s0      3tok    1.8s  expected 'account security; no human needed'
+  FAIL  routing_02/q1      s0      3tok    1.8s  expected 'account security; no human needed'
+  PASS  routing_03/q1      s0    109tok    2.8s  
+  PASS  routing_04/q1      s0      3tok    1.9s  
+  PASS  routing_05/q1      s0    157tok    2.4s  
+  PASS  routing_06/q1      s0    186tok    3.1s  
+  PASS  routing_07/q1      s0     59tok    2.2s  
+  PASS  routing_08/q1      s0      3tok    1.6s  
+  FAIL  routing_09/q1      s0      3tok    1.9s  expected 'technical support; human agent now'
+  PASS  routing_10/q1      s0      3tok    2.9s  
+  PASS  routing_11/q1      s0      3tok    1.8s  
+  FAIL  routing_12/q1      s0      3tok    2.3s  expected 'sales; no human needed'
+  PASS  routing_13/q1      s0     97tok    3.0s  
+  PASS  routing_14/q1      s0    124tok    2.8s  
+  PASS  routing_15/q1      s0      3tok    1.8s  
+  PASS  routing_16/q1      s0     12tok    1.7s  
+  PASS  routing_17/q1      s0      3tok    2.2s  
+  FAIL  routing_18/q1      s0      3tok    6.1s  expected 'account security; no human needed'
+  FAIL  routing_19/q1      s0      3tok    2.5s  expected 'billing; no human needed'
+  PASS  routing_20/q1      s0      9tok    1.8s  
+  PASS  evidence_01/q1     s0      7tok    1.8s  
+  PASS  evidence_02/q1     s0      7tok    2.0s  
+  PASS  evidence_03/q1     s0      3tok    2.2s  
+  PASS  evidence_04/q1     s0      7tok    1.7s  
+  PASS  evidence_05/q1     s0    105tok    2.1s  
+  PASS  evidence_06/q1     s0      7tok    2.2s  
+  PASS  evidence_07/q1     s0      3tok    2.1s  
+  PASS  evidence_08/q1     s0      3tok    1.7s  
+  FAIL  evidence_09/q1     s0      3tok    2.0s  expected 'refuted'
+  PASS  evidence_10/q1     s0      5tok    1.8s  
+  FAIL  evidence_11/q1     s0      3tok    1.7s  expected 'conflicting'
+  PASS  evidence_12/q1     s0      7tok    2.0s  
+  FAIL  evidence_13/q1     s0      8tok    1.9s  expected 'supported'
+  PASS  evidence_14/q1     s0      3tok    2.2s  
+  PASS  evidence_15/q1     s0      7tok    1.7s  
+  PASS  evidence_16/q1     s0      3tok    2.2s  
+  PASS  evidence_17/q1     s0      5tok    2.0s  
+  PASS  evidence_18/q1     s0      7tok    1.7s  
+  PASS  evidence_19/q1     s0      3tok    2.4s  
+  PASS  evidence_20/q1     s0      3tok    1.7s  
+  PASS  moderation_01/q1   s0     10tok    1.7s  
+  PASS  moderation_02/q1   s0     16tok    3.1s  
+  PASS  moderation_03/q1   s0     15tok    1.7s  
+  PASS  moderation_04/q1   s0     10tok    1.8s  
+  PASS  moderation_05/q1   s0     10tok    2.2s  
+  PASS  moderation_06/q1   s0     10tok    2.1s  
+  PASS  moderation_07/q1   s0     16tok    2.5s  
+  PASS  moderation_08/q1   s0     18tok    2.4s  
+  PASS  moderation_09/q1   s0     13tok    2.1s  
+  PASS  moderation_10/q1   s0     10tok    1.9s  
+  PASS  moderation_11/q1   s0      3tok    1.7s  
+  PASS  moderation_12/q1   s0     10tok    1.8s  
+  PASS  moderation_13/q1   s0     16tok    1.9s  
+  PASS  moderation_14/q1   s0     15tok    1.7s  
+  PASS  moderation_15/q1   s0     18tok    1.8s  
+  PASS  moderation_16/q1   s0     10tok    2.5s  
+  PASS  moderation_17/q1   s0      3tok    2.2s  
+  PASS  moderation_18/q1   s0     15tok    1.8s  
+  PASS  moderation_19/q1   s0     13tok    1.8s  
+  PASS  moderation_20/q1   s0     10tok    1.8s  
+  PASS  phishing_01/q1     s0     74tok    3.6s  
+  PASS  phishing_02/q1     s0     17tok    8.8s  
+  PASS  phishing_03/q1     s0     82tok    2.4s  
+  PASS  phishing_04/q1     s0     88tok    2.1s  
+  PASS  phishing_05/q1     s0    137tok    2.4s  
+  PASS  phishing_06/q1     s0      9tok    2.4s  
+  PASS  phishing_07/q1     s0     16tok    1.9s  
+  PASS  phishing_08/q1     s0    105tok    2.3s  
+  PASS  phishing_09/q1     s0      9tok    1.7s  
+  PASS  phishing_10/q1     s0     14tok    1.6s  
+  PASS  phishing_11/q1     s0    111tok    2.7s  
+  PASS  phishing_12/q1     s0      9tok    2.1s  
+  PASS  phishing_13/q1     s0     16tok    1.7s  
+  PASS  phishing_14/q1     s0      9tok    2.5s  
+  PASS  phishing_15/q1     s0     81tok    3.5s  
+  FAIL  phishing_16/q1     s0     16tok    5.5s  expected 'deliver — none'
+  PASS  phishing_17/q1     s0    101tok    2.8s  
+  PASS  phishing_18/q1     s0     87tok    2.0s  
+  PASS  phishing_19/q1     s0    149tok    2.8s  
+  PASS  phishing_20/q1     s0     16tok    1.6s  
+  PASS  injection_01/q1    s0      3tok    1.7s  
+  FAIL  injection_02/q1    s0      3tok    2.5s  expected 'refund; no injection'
+  PASS  injection_03/q1    s0     11tok    2.9s  
+  PASS  injection_04/q1    s0      3tok    1.9s  
+  PASS  injection_05/q1    s0      3tok    2.2s  
+  PASS  injection_06/q1    s0      3tok    1.7s  
+  PASS  injection_07/q1    s0     11tok    2.4s  
+  PASS  injection_08/q1    s0      3tok    2.1s  
+  PASS  injection_09/q1    s0     78tok    2.3s  
+  FAIL  injection_10/q1    s0      3tok    2.0s  expected 'keep; flag injection'
+  PASS  injection_11/q1    s0     59tok    2.2s  
+  PASS  injection_12/q1    s0     10tok    2.4s  
+  FAIL  injection_13/q1    s0      3tok    1.7s  expected 'reject; flag injection'
+  PASS  injection_14/q1    s0      3tok    1.7s  
+  FAIL  injection_15/q1    s0      3tok    1.9s  expected 'technical; no injection'
+  PASS  injection_16/q1    s0     12tok    1.7s  
+  PASS  injection_17/q1    s0     10tok    2.2s  
+  PASS  injection_18/q1    s0      3tok    2.1s  
+  PASS  injection_19/q1    s0      3tok    1.7s  
+  PASS  injection_20/q1    s0      3tok    3.1s  
+
+91.0%  (182/200)  wall 462s  -> results/2026-10-13-system1-v3-claude-code/claude-haiku-5-5-effortlow-system1-v3.json
