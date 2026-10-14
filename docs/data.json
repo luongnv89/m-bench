@@ -227,11 +227,11 @@
     "samples": 1,
     "generations": 200,
     "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
-    "setup": "system1 v3 · 200 scenarios · 200 questions · 1 sample · concurrency 1 · typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls, Claude Haiku 5.5 (low and high effort) through isolated Claude Code calls",
+    "setup": "system1 v3 · 200 scenarios · 200 questions · 1 sample · concurrency 1 · typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls, Claude Haiku 5.5 and Sonnet 5.5 (low and high effort) through isolated Claude Code calls",
     "question": "With the arithmetic removed, which model makes the best System One decisions, and at what speed?",
     "report": "results/2026-10-10-system1-v3-200/REPORT.md",
     "wallNote": "200 responses per model · concurrency 1",
-    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking answers all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. claude-haiku-5-5 through Claude Code scores 95.5% at high effort and 91.0% at low (a 4.5-point gain that is still inside noise). At high effort it matches Jev exactly and is tied with Qwen3.6 think-ON (−1.5), about 4 points behind the frontier tier, at 2.5 s/question; routing (80%) and injection (85%) remain its weakest families. Mercury Decide is not on the v3 roster.",
+    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking and claude-sonnet-5-5 at both low and high effort answer all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. claude-haiku-5-5 through Claude Code scores 95.5% at high effort and 91.0% at low (a 4.5-point gain that is still inside noise). At high effort it matches Jev exactly and is tied with Qwen3.6 think-ON (−1.5), about 4 points behind the frontier tier, at 2.5 s/question; routing (80%) and injection (85%) remain its weakest families. Mercury Decide is not on the v3 roster.",
     "families": [
       {
         "id": "returns",
@@ -400,6 +400,30 @@
         "moderation": 100.0,
         "phishing": 100.0,
         "injection": 85.0
+      },
+      "claude-sonnet-5-5 (claude-code effort-low)": {
+        "returns": 100.0,
+        "triage": 100.0,
+        "access": 100.0,
+        "credentials": 100.0,
+        "billing": 100.0,
+        "routing": 100.0,
+        "evidence": 100.0,
+        "moderation": 100.0,
+        "phishing": 100.0,
+        "injection": 100.0
+      },
+      "claude-sonnet-5-5 (claude-code effort-high)": {
+        "returns": 100.0,
+        "triage": 100.0,
+        "access": 100.0,
+        "credentials": 100.0,
+        "billing": 100.0,
+        "routing": 100.0,
+        "evidence": 100.0,
+        "moderation": 100.0,
+        "phishing": 100.0,
+        "injection": 100.0
       }
     },
     "rows": [
@@ -419,6 +443,42 @@
         "serving": "hosted OpenAI via pi CLI · thinking medium",
         "note": "200/200 correct · 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-1-sol-thinkmedium-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "claude-sonnet-5-5 · effort-low",
+        "modelKey": "claude-sonnet-5-5 (claude-code effort-low)",
+        "score": 100.0,
+        "ci": "98.1–100.0",
+        "ciBounds": [
+          98.11546736227335,
+          100.0
+        ],
+        "groupAcc": 100.0,
+        "secPerQ": 3.883,
+        "outTok": 8.58,
+        "wall": 776.54,
+        "serving": "hosted Anthropic via Claude Code CLI · effort low",
+        "note": "200/200 correct; thinking used on 1 of 200 calls · 0 generation errors",
+        "sourceJson": "results/2026-10-14-system1-v3-claude-code-sonnet/claude-sonnet-5-5-effortlow-system1-v3.json",
+        "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
+      },
+      {
+        "model": "claude-sonnet-5-5 · effort-high",
+        "modelKey": "claude-sonnet-5-5 (claude-code effort-high)",
+        "score": 100.0,
+        "ci": "98.1–100.0",
+        "ciBounds": [
+          98.11546736227335,
+          100.0
+        ],
+        "groupAcc": 100.0,
+        "secPerQ": 4.343,
+        "outTok": 10.94,
+        "wall": 868.69,
+        "serving": "hosted Anthropic via Claude Code CLI · effort high",
+        "note": "200/200 correct; thinking used on 5 of 200 calls · 0 generation errors",
+        "sourceJson": "results/2026-10-14-system1-v3-claude-code-sonnet/claude-sonnet-5-5-efforthigh-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
@@ -1539,6 +1599,36 @@
       "report": "results/2026-08-26/REPORT-live.md"
     },
     {
+      "date": "2026-10-14",
+      "machine": "dgx-spark",
+      "model": "claude-sonnet-5-5 (claude-code effort-low)",
+      "harness": "claude-code",
+      "mode": "isolated",
+      "thinking": "low",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 100.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-14-system1-v3-claude-code-sonnet/NOTES.md",
+      "sourceJson": "results/2026-10-14-system1-v3-claude-code-sonnet/claude-sonnet-5-5-effortlow-system1-v3.json"
+    },
+    {
+      "date": "2026-10-14",
+      "machine": "dgx-spark",
+      "model": "claude-sonnet-5-5 (claude-code effort-high)",
+      "harness": "claude-code",
+      "mode": "isolated",
+      "thinking": "high",
+      "suite": "system1",
+      "datasetVersion": 3,
+      "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
+      "score": 100.0,
+      "unit": "accuracy",
+      "report": "results/2026-10-14-system1-v3-claude-code-sonnet/NOTES.md",
+      "sourceJson": "results/2026-10-14-system1-v3-claude-code-sonnet/claude-sonnet-5-5-efforthigh-system1-v3.json"
+    },
+    {
       "date": "2026-10-13",
       "machine": "dgx-spark",
       "model": "claude-haiku-5-5 (claude-code effort-high)",
@@ -1772,6 +1862,12 @@
     }
   ],
   "campaigns": [
+    {
+      "date": "2026-10-14",
+      "question": "Does Claude Sonnet 5.5 through Claude Code saturate benchmark v3?",
+      "answer": "Yes. At low and at high effort it answers all 200 correctly (CI 98.1–100) and keeps every paraphrase pair, joining gpt-6.1-sol at 100%. It barely uses its thinking budget (thinking on 1 of 200 calls at low effort, 5 at high), at 3.9 and 4.3 s/question. It is 4.5 points above Haiku 5.5 at high effort (+1.7 to +8.3, real). v3 cannot separate the top tier.",
+      "link": "results/2026-10-14-system1-v3-claude-code-sonnet/NOTES.md"
+    },
     {
       "date": "2026-10-13",
       "question": "Can LFM2.5-24B-A2B replace Qwen3.6-35B-A3B as the main model on the DGX Spark?",
