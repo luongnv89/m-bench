@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-13",
+  "generated": "2026-10-14",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -1657,9 +1657,127 @@
       "unit": "accuracy",
       "report": "results/2026-10-10-system1-v3-200/REPORT.md",
       "sourceJson": "results/2026-10-10-system1-v3-200/kev-4b-kevserve-bf16-system1-v3.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 82.1,
+      "unit": "pass@1",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-all-off.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 82.1,
+      "unit": "pass@1",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-all-on.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 46.7,
+      "unit": "agent",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-agentic-off.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 52.2,
+      "unit": "agent",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-agentic-on.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "LFM2.5-24B-A2B (FP8)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 60.7,
+      "unit": "pass@1",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/lfm2.5-24b-a2b-fp8-all-off.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "LFM2.5-24B-A2B (FP8)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 71.4,
+      "unit": "pass@1",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/lfm2.5-24b-a2b-fp8-all-on.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "LFM2.5-24B-A2B (FP8)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 39.6,
+      "unit": "agent",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/lfm2.5-24b-a2b-fp8-agentic-off.json"
+    },
+    {
+      "date": "2026-10-13",
+      "machine": "dgx-spark",
+      "model": "LFM2.5-24B-A2B (FP8)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 46.9,
+      "unit": "agent",
+      "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
+      "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/lfm2.5-24b-a2b-fp8-agentic-on.json"
     }
   ],
   "campaigns": [
+    {
+      "date": "2026-10-13",
+      "question": "Can LFM2.5-24B-A2B replace Qwen3.6-35B-A3B as the main model on the DGX Spark?",
+      "answer": "No. Through the built-in loop at 2 samples, LFM2.5 (official FP8, vLLM) trails on every arm: 71.4% vs 82.1% pass@1 on all with thinking, 87.5% vs 93.8% solved on agentic-hard in both modes. It always thinks, so its think-OFF arm truncates 23 of 56 answers at 6k tokens (60.7%, the only margin outside its 95% CI). It also emits 2–4× the output tokens per agentic task, makes 77–81% valid tool calls vs 96%, and decodes at 27–28 tok/s vs 44–47 on this box. Worth a re-test once an NVFP4 checkpoint or its drafter lands, and through pi or OpenCode.",
+      "link": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md"
+    },
     {
       "date": "2026-10-13",
       "question": "Where does Claude Haiku 5.5 through Claude Code land on benchmark v3?",
