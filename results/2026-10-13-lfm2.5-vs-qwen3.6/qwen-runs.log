@@ -1,0 +1,219 @@
+suite=all (28 tasks)  qwen3.6-35b-a3b think-OFF
+endpoint=http://localhost:8001/v1  samples=2  concurrency=4
+
+  PASS  two_sum              s0     70tok    3.9s  17.8tok/s
+  PASS  two_sum              s1     70tok    4.0s  17.5tok/s
+  PASS  balanced             s1    103tok    3.4s  29.9tok/s
+  PASS  roman                s0    186tok    7.6s  24.6tok/s
+  PASS  balanced             s0    117tok    3.8s  30.6tok/s
+  PASS  roman                s1    291tok    9.8s  29.7tok/s
+  PASS  word_freq            s0    140tok    3.2s  44.4tok/s
+  PASS  word_freq            s1    141tok    3.1s  45.4tok/s
+  PASS  merge_intervals      s0    151tok    3.2s  47.6tok/s
+  PASS  merge_intervals      s1    165tok    4.3s  38.1tok/s
+  PASS  lru_cache            s0    477tok   10.5s  45.3tok/s
+  PASS  edit_distance        s0    268tok    6.3s  42.2tok/s
+  PASS  edit_distance        s1    255tok    5.2s  49.3tok/s
+  PASS  lru_cache            s1    513tok   11.8s  43.3tok/s
+  PASS  version_cmp          s0    158tok    3.5s  45.4tok/s
+  PASS  flatten_json         s0    268tok    6.0s  44.4tok/s
+  PASS  flatten_json         s1    249tok    5.6s  44.9tok/s
+  PASS  retry_decorator      s0    118tok    2.7s  43.0tok/s
+  PASS  version_cmp          s1    237tok    5.1s  46.4tok/s
+  PASS  retry_decorator      s1    166tok    3.8s  44.1tok/s
+  PASS  topo_sort            s1    274tok    5.4s  51.2tok/s
+  PASS  sql_parse            s0    370tok    8.0s  46.3tok/s
+  PASS  topo_sort            s0    366tok    7.6s  48.2tok/s
+  PASS  word_ladder          s0    252tok    5.1s  49.0tok/s
+  PASS  sql_parse            s1    634tok   13.7s  46.2tok/s
+  PASS  word_ladder          s1    405tok    8.9s  45.7tok/s
+  FAIL  diff_lines           s0    541tok   10.8s  50.1tok/s   <AssertionError>
+  PASS  diff_lines           s1    556tok   11.4s  48.7tok/s
+  PASS  rate_limiter         s0    175tok    3.9s  45.1tok/s
+  PASS  expr_eval            s1    846tok   17.3s  48.9tok/s
+  PASS  expr_eval            s0   1145tok   23.7s  48.3tok/s
+  PASS  rate_limiter         s1    307tok    7.3s  41.8tok/s
+  PASS  regex_match          s0    436tok    9.2s  47.6tok/s
+  PASS  regex_match          s1    460tok    9.7s  47.5tok/s
+  PASS  weighted_intervals   s0    482tok   10.5s  46.0tok/s
+  PASS  weighted_intervals   s1    469tok   10.3s  45.3tok/s
+  PASS  topo_batches         s0    467tok    9.9s  47.0tok/s
+  PASS  topo_batches         s1    553tok   12.1s  45.8tok/s
+  FAIL  json5_parse          s0   2291tok   45.2s  50.7tok/s   <ValueError: Expected ',' or '}', got: ]>
+  PASS  wrap_min_raggedness  s1   1186tok   26.4s  45.0tok/s
+  PASS  json5_parse          s1   2493tok   49.0s  50.9tok/s
+  FAIL  unify                s0   1119tok   24.0s  46.7tok/s   <AssertionError>
+  PASS  unify                s1   1111tok   24.1s  46.1tok/s
+  PASS  wrap_min_raggedness  s0   2803tok   63.1s  44.4tok/s
+  PASS  range_module         s0   1805tok   40.7s  44.4tok/s
+  PASS  range_module         s1   1269tok   28.0s  45.3tok/s
+  FAIL  cron_next            s0   1727tok   36.8s  47.0tok/s   <AssertionError>
+  PASS  cron_next            s1   1718tok   35.9s  47.8tok/s
+  FAIL  bigint_div           s0   1448tok   30.6s  47.3tok/s   <AssertionError>
+  PASS  bigint_div           s1   1250tok   26.3s  47.5tok/s
+  FAIL  tx_dict              s0    879tok   19.1s  46.0tok/s   <AssertionError>
+  FAIL  tx_dict              s1    802tok   17.5s  45.8tok/s   <AssertionError>
+  PASS  running_median       s0   1429tok   30.2s  47.4tok/s
+  FAIL  running_median       s1   1764tok   37.1s  47.5tok/s   <AssertionError>
+  FAIL  sql_select           s0   3511tok   63.7s  55.1tok/s   <ParseError: Expected keyword FROM, got Token(IDENT, 'AS')>
+  FAIL  sql_select           s1   4771tok   77.9s  61.2tok/s   <AttributeError: 'tuple' object has no attribute 'type'>
+
+================================================================
+solve rate             82.1 %  (95% CI 70.2–90.0, n=56)
+tokens / task          138 in / 826 out
+time / task            17.3 s
+by difficulty          easy=100.0%  medium=93.8%  hard=71.9%
+wall                   266 s
+mean output tokens     826
+truncated / errored    0 / 0
+================================================================
+
+written to results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-all-off.json
+suite=all (28 tasks)  qwen3.6-35b-a3b think-ON
+endpoint=http://localhost:8001/v1  samples=2  concurrency=4
+
+  PASS  two_sum              s0    767tok   16.5s  46.5tok/s
+  PASS  roman                s0   1049tok   21.6s  48.6tok/s
+  PASS  two_sum              s1   1071tok   22.6s  47.3tok/s
+  PASS  roman                s1   1303tok   26.8s  48.6tok/s
+  PASS  balanced             s0    840tok   17.7s  47.5tok/s
+  PASS  balanced             s1    813tok   17.0s  47.8tok/s
+  PASS  word_freq            s1   1768tok   37.0s  47.7tok/s
+  PASS  word_freq            s0   2142tok   45.5s  47.1tok/s
+  PASS  merge_intervals      s0   1302tok   27.7s  47.1tok/s
+  PASS  merge_intervals      s1   1956tok   40.6s  48.2tok/s
+  PASS  lru_cache            s0   4036tok   85.7s  47.1tok/s
+  PASS  edit_distance        s0   1433tok   30.4s  47.2tok/s
+  PASS  edit_distance        s1   1474tok   30.3s  48.7tok/s
+  PASS  version_cmp          s0   1874tok   39.6s  47.3tok/s
+  PASS  flatten_json         s1   4052tok   86.4s  46.9tok/s
+  PASS  version_cmp          s1   1804tok   38.3s  47.1tok/s
+  PASS  flatten_json         s0   5214tok  112.7s  46.3tok/s
+  PASS  retry_decorator      s0   1699tok   36.9s  46.0tok/s
+  PASS  sql_parse            s1   4762tok  107.6s  44.3tok/s
+  FAIL  lru_cache            s1  16000tok  317.8s  50.3tok/s   <NameError: name 'LRUCache' is not defined>
+  PASS  sql_parse            s0   5742tok  128.1s  44.8tok/s
+  PASS  topo_sort            s0   2992tok   64.0s  46.7tok/s
+  PASS  word_ladder          s0   4337tok   93.8s  46.2tok/s
+  PASS  topo_sort            s1   4933tok  107.9s  45.7tok/s
+  PASS  word_ladder          s1   3523tok   77.0s  45.7tok/s
+  FAIL  retry_decorator      s1  16000tok  332.3s  48.2tok/s   <NameError: name 'retry' is not defined. Did you mean: 'repr'?>
+  PASS  expr_eval            s0   8596tok  185.0s  46.5tok/s
+  PASS  diff_lines           s0   9107tok  193.9s  47.0tok/s
+  PASS  rate_limiter         s0   3236tok   72.3s  44.8tok/s
+  PASS  expr_eval            s1  12070tok  251.7s  48.0tok/s
+  FAIL  diff_lines           s1   7649tok  168.1s  45.5tok/s   <AssertionError>
+  PASS  rate_limiter         s1   3533tok   78.9s  44.8tok/s
+  PASS  regex_match          s0   5826tok  121.2s  48.1tok/s
+  PASS  regex_match          s1   5760tok  117.6s  49.0tok/s
+  PASS  weighted_intervals   s0   5565tok  118.1s  47.1tok/s
+  PASS  weighted_intervals   s1   4443tok   95.2s  46.7tok/s
+  PASS  topo_batches         s0   4644tok   98.7s  47.1tok/s
+  PASS  topo_batches         s1   6399tok  134.8s  47.5tok/s
+  FAIL  json5_parse          s0  13403tok  284.2s  47.2tok/s   <UnboundLocalError: cannot access local variable 'pos' where it is not >
+  FAIL  json5_parse          s1  13922tok  285.0s  48.9tok/s   <ValueError: Expected ',' or '}' in object>
+  PASS  wrap_min_raggedness  s0  10038tok  218.8s  45.9tok/s
+  PASS  wrap_min_raggedness  s1  11861tok  259.4s  45.7tok/s
+  PASS  range_module         s0   9257tok  197.6s  46.9tok/s
+  PASS  unify                s1  11313tok  242.5s  46.7tok/s
+  PASS  unify                s0  12162tok  254.7s  47.8tok/s
+  FAIL  bigint_div           s0   7651tok  165.4s  46.3tok/s   <AssertionError>
+  PASS  range_module         s1  13499tok  292.2s  46.2tok/s
+  FAIL  cron_next            s0  10904tok  234.3s  46.5tok/s   <AttributeError: type object 'datetime.datetime' has no attribute 'date>
+  FAIL  cron_next            s1  12446tok  264.1s  47.1tok/s   <AssertionError>
+  PASS  bigint_div           s1   8719tok  185.5s  47.0tok/s
+  PASS  tx_dict              s1   6993tok  154.8s  45.2tok/s
+  PASS  tx_dict              s0  10250tok  221.6s  46.2tok/s
+  FAIL  sql_select           s0  13807tok  289.9s  47.6tok/s   <ValueError: too many values to unpack (expected 3)>
+  PASS  running_median       s0  12047tok  258.8s  46.6tok/s
+  PASS  running_median       s1  11835tok  250.7s  47.2tok/s
+  FAIL  sql_select           s1  16000tok  327.8s  48.8tok/s   <NameError: name 'run_query' is not defined>
+
+================================================================
+solve rate             82.1 %  (95% CI 70.2–90.0, n=56)
+tokens / task          136 in / 6,711 out
+time / task            142.6 s
+by difficulty          easy=100.0%  medium=87.5%  hard=75.0%
+wall                   2051 s
+mean output tokens     6711
+truncated / errored    3 / 0
+================================================================
+
+written to results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-all-on.json
+suite=agentic-hard (8 tasks)  qwen3.6-35b-a3b agentic-OFF
+endpoint=http://localhost:8001/v1  samples=2  concurrency=4
+
+  PASS  cascading_failures       s1   6 turns  11 calls (0 failed) finished        639tok   18.9s
+  PASS  cascading_failures       s0   9 turns  11 calls (0 failed) finished        715tok   21.4s
+  PASS  decoy_bug                s0   5 turns   8 calls (0 failed) finished        388tok   10.2s
+  PASS  decoy_bug                s1   6 turns   9 calls (0 failed) finished        422tok   12.2s
+  PASS  hidden_spec_compliance   s1   7 turns   9 calls (0 failed) finished       1366tok   39.9s
+  PASS  api_migration            s1  12 turns  22 calls (0 failed) finished        911tok   30.3s
+  PASS  api_migration            s0  12 turns  18 calls (1 failed) finished       1093tok   35.5s
+  FAIL  perf_budget              s0   8 turns  10 calls (1 failed) finished       1034tok   32.3s   <AssertionError: scaled 12.6x when the input grew 4x (0.0140s>
+  PASS  generalise_migration     s1   7 turns   8 calls (0 failed) finished        736tok   21.8s
+  PASS  generalise_migration     s0  10 turns  11 calls (1 failed) finished       1045tok   31.7s
+  PASS  perf_budget              s1   9 turns  11 calls (1 failed) finished       1344tok   41.6s
+  PASS  conflicting_docs         s0   5 turns  13 calls (0 failed) finished        632tok   19.3s
+  PASS  conflicting_docs         s1   8 turns  15 calls (0 failed) finished        908tok   28.4s
+  PASS  hidden_spec_compliance   s0  20 turns  22 calls (1 failed) finished       4618tok  134.9s
+  PASS  wrong_test_not_code      s1  10 turns  12 calls (1 failed) finished       1103tok   37.7s
+  PASS  wrong_test_not_code      s0  25 turns  27 calls (2 failed) max_turns      1377tok   47.3s
+
+================================================================
+solve rate             93.8 %  (95% CI 71.7–98.9, n=16)
+efficiency             49.9 %  (par / calls, solved tasks only; reported separately)
+tokens / task          22,262 in / 1,146 out
+time / task            35.2 s
+by difficulty          hard=93.8%
+wall                   153 s
+mean output tokens     1146
+truncated / errored    0 / 0
+agent score            46.7   (composite solve x efficiency; does not rank)
+mean calls vs par      13.6 vs 5.9
+mean turns / calls     9.9 / 13.6
+valid tool-call rate   96.3 %
+malformed / unknown    0 / 0
+turn-limit / stalled   1 / 0
+================================================================
+
+written to results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-agentic-off.json
+suite=agentic-hard (8 tasks)  qwen3.6-35b-a3b agentic-ON
+endpoint=http://localhost:8001/v1  samples=2  concurrency=4
+
+  PASS  cascading_failures       s1   6 turns   9 calls (0 failed) no_tool_call   1032tok   24.8s
+  PASS  cascading_failures       s0   5 turns  10 calls (0 failed) finished       1149tok   27.6s
+  PASS  decoy_bug                s0   5 turns   8 calls (0 failed) finished        812tok   18.9s
+  PASS  decoy_bug                s1   5 turns   8 calls (0 failed) finished       1058tok   25.3s
+  PASS  api_migration            s0   7 turns  17 calls (0 failed) finished       1155tok   28.1s
+  PASS  api_migration            s1  14 turns  26 calls (1 failed) finished       1871tok   48.8s
+  PASS  hidden_spec_compliance   s0   9 turns  11 calls (1 failed) finished       4183tok  103.3s
+  PASS  perf_budget              s0   9 turns  10 calls (0 failed) no_tool_call   2180tok   59.6s
+  PASS  perf_budget              s1   4 turns   6 calls (0 failed) finished       1314tok   36.0s
+  PASS  generalise_migration     s0  15 turns  17 calls (1 failed) finished       1624tok   43.6s
+  PASS  generalise_migration     s1   9 turns  11 calls (1 failed) finished       1206tok   32.5s
+  PASS  conflicting_docs         s0   7 turns  14 calls (0 failed) finished       1739tok   45.3s
+  PASS  conflicting_docs         s1   8 turns  16 calls (0 failed) finished       1779tok   45.8s
+  PASS  wrong_test_not_code      s0   6 turns   8 calls (0 failed) finished       1712tok   41.5s
+  FAIL  hidden_spec_compliance   s1   2 turns   3 calls (0 failed) no_tool_call  10101tok  229.4s   <NotImplementedError>
+  PASS  wrong_test_not_code      s1  13 turns  15 calls (4 failed) finished       2772tok   54.7s
+
+================================================================
+solve rate             93.8 %  (95% CI 71.7–98.9, n=16)
+efficiency             55.7 %  (par / calls, solved tasks only; reported separately)
+tokens / task          13,298 in / 2,230 out
+time / task            54.1 s
+by difficulty          hard=93.8%
+wall                   238 s
+mean output tokens     2230
+truncated / errored    0 / 0
+agent score            52.2   (composite solve x efficiency; does not rank)
+mean calls vs par      11.8 vs 5.9
+mean turns / calls     7.8 / 11.8
+valid tool-call rate   95.8 %
+malformed / unknown    0 / 0
+turn-limit / stalled   0 / 3
+================================================================
+
+written to results/2026-10-13-lfm2.5-vs-qwen3.6/qwen3.6-35b-a3b-agentic-on.json
+ALL-DONE
