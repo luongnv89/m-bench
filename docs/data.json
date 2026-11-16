@@ -1,49 +1,49 @@
 {
   "generated": "2026-11-16",
-  "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
+  "noiseFloor": "\u22488 points at --samples 2; live runs are samples 1",
   "machines": [
     {
       "id": "dgx-spark",
       "name": "NVIDIA DGX Spark",
       "chip": "GB10",
       "memory": "120 GiB unified",
-      "cpu": "Cortex-X925 + A725 · 20 threads",
-      "gpu": "NVIDIA GB10 · sm_121a · CUDA 13.0",
+      "cpu": "Cortex-X925 + A725 \u00b7 20 threads",
+      "gpu": "NVIDIA GB10 \u00b7 sm_121a \u00b7 CUDA 13.0",
       "os": "Ubuntu 24.04 aarch64",
       "tagline": "Reference hardware. Room for 35B MoE at NVFP4.",
       "recommendations": [
         {
-          "workload": "Tool loops · coding agents",
+          "workload": "Tool loops \u00b7 coding agents",
           "harness": "claude-code",
           "model": "Qwen3.6-35B-A3B-NVFP4",
-          "thinking": "OFF · ON ties within noise",
-          "serving": "vLLM TP1 · MTP k=2 · prefix caching",
+          "thinking": "OFF \u00b7 ON ties within noise",
+          "serving": "vLLM TP1 \u00b7 MTP k=2 \u00b7 prefix caching",
           "score": 68.2,
-          "metric": "agent score · agentic-hard",
-          "runnerUp": "opencode 60.3 · same weights · within noise",
+          "metric": "agent score \u00b7 agentic-hard",
+          "runnerUp": "opencode 60.3 \u00b7 same weights \u00b7 within noise",
           "config": "qwen3.6-35b-a3b-nvfp4",
           "report": "results/2026-08-20-pi-harness/REPORT-hard.md"
         },
         {
-          "workload": "One-shot code · 28-task suite",
+          "workload": "One-shot code \u00b7 28-task suite",
           "harness": "benchkit built-in loop",
           "model": "Qwen3.6-35B-A3B-NVFP4",
           "thinking": "OFF",
-          "serving": "vLLM · 6k max tokens",
+          "serving": "vLLM \u00b7 6k max tokens",
           "score": 80.4,
-          "metric": "pass@1 · all",
-          "runnerUp": "think-ON 82.1 % · +1.7 is noise at 7.8× the tokens",
+          "metric": "pass@1 \u00b7 all",
+          "runnerUp": "think-ON 82.1 % \u00b7 +1.7 is noise at 7.8\u00d7 the tokens",
           "config": "qwen3.6-35b-a3b-nvfp4",
           "report": "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"
         },
         {
-          "workload": "Free hosted model · live daily setup",
+          "workload": "Free hosted model \u00b7 live daily setup",
           "harness": "opencode (live)",
-          "model": "Ox Alpha Free · x-preview-f-free",
+          "model": "Ox Alpha Free \u00b7 x-preview-f-free",
           "thinking": "OFF",
-          "serving": "Hosted · 1M ctx · $0",
+          "serving": "Hosted \u00b7 1M ctx \u00b7 $0",
           "score": 75.5,
-          "metric": "agent score · agentic-hard · 4 samples",
+          "metric": "agent score \u00b7 agentic-hard \u00b7 4 samples",
           "runnerUp": "Isolated arm 74.8 on agentic-all",
           "config": null,
           "report": "results/2026-08-25/REPORT-live.3.md"
@@ -55,44 +55,44 @@
       "name": "Apple M1 Max",
       "chip": "M1 Max",
       "memory": "32 GiB unified",
-      "cpu": "10-core CPU · 32-core GPU",
-      "gpu": "Apple GPU · Metal / MLX",
+      "cpu": "10-core CPU \u00b7 32-core GPU",
+      "gpu": "Apple GPU \u00b7 Metal / MLX",
       "os": "macOS 26.6 arm64",
       "tagline": "Local 2-bit models work; hosted models win.",
       "recommendations": [
         {
-          "workload": "Tool loops · coding agents",
+          "workload": "Tool loops \u00b7 coding agents",
           "harness": "claude-code (live)",
-          "model": "Opus 5.5 · 1M ctx · effort medium",
+          "model": "Opus 5.5 \u00b7 1M ctx \u00b7 effort medium",
           "thinking": "default (effort medium)",
-          "serving": "Hosted · Anthropic",
+          "serving": "Hosted \u00b7 Anthropic",
           "score": 100.0,
-          "metric": "agent score · agentic-hard · 1 sample",
-          "runnerUp": "devin SWE-2 Max 72.6 · 2.8 calls vs par 5.9",
+          "metric": "agent score \u00b7 agentic-hard \u00b7 1 sample",
+          "runnerUp": "devin SWE-2 Max 72.6 \u00b7 2.8 calls vs par 5.9",
           "config": null,
           "report": "results/2026-09-22/REPORT-live.1.md"
         },
         {
-          "workload": "One-shot code · local weights",
+          "workload": "One-shot code \u00b7 local weights",
           "harness": "benchkit built-in loop",
           "model": "Ternary-Bonsai-2-27B-mlx-2bit",
           "thinking": "OFF",
-          "serving": "MLX · 127.0.0.1:8080",
+          "serving": "MLX \u00b7 127.0.0.1:8080",
           "score": 69.6,
-          "metric": "pass@1 · all",
-          "runnerUp": "MiniCPM5-2B incumbent 46.4 % · 3.5× faster",
+          "metric": "pass@1 \u00b7 all",
+          "runnerUp": "MiniCPM5-2B incumbent 46.4 % \u00b7 3.5\u00d7 faster",
           "config": null,
           "report": "results/2026-09-20/candidate-ternary-bonsai-2-27b-mlx-2bit-think-off.json"
         },
         {
-          "workload": "Free hosted · light daily agent",
+          "workload": "Free hosted \u00b7 light daily agent",
           "harness": "opencode (live)",
           "model": "MiMo v2.6 Flash Free",
           "thinking": "OFF",
-          "serving": "Hosted · opencode 1.18.32",
+          "serving": "Hosted \u00b7 opencode 1.18.32",
           "score": 64.5,
-          "metric": "agent score · agentic-hard · 100 % solved",
-          "runnerUp": "union-alpha 55.6 · pi+remote Qwen 63.9",
+          "metric": "agent score \u00b7 agentic-hard \u00b7 100 % solved",
+          "runnerUp": "union-alpha 55.6 \u00b7 pi+remote Qwen 63.9",
           "config": null,
           "report": "results/2026-09-22/REPORT-live.md"
         }
@@ -102,21 +102,21 @@
       "id": "small-box",
       "name": "Small Linux box",
       "chip": "Intel i7-4578U",
-      "memory": "8 GiB · 4 GiB free",
-      "cpu": "4 threads · no discrete GPU",
+      "memory": "8 GiB \u00b7 4 GiB free",
+      "cpu": "4 threads \u00b7 no discrete GPU",
       "gpu": "None",
       "os": "Omarchy 7.1.8 x86_64",
       "tagline": "No local weights fit. Use a free hosted model.",
       "recommendations": [
         {
-          "workload": "Tool loops · coding agents",
+          "workload": "Tool loops \u00b7 coding agents",
           "harness": "opencode (isolated)",
           "model": "MiMo v2.5 Free",
           "thinking": "OFF",
-          "serving": "Hosted · stripped of idle skills",
+          "serving": "Hosted \u00b7 stripped of idle skills",
           "score": 71.0,
-          "metric": "agent score · agentic-hard",
-          "runnerUp": "Live arm 56.7 — isolation wins by +14.3",
+          "metric": "agent score \u00b7 agentic-hard",
+          "runnerUp": "Live arm 56.7 \u2014 isolation wins by +14.3",
           "config": null,
           "report": "results/2026-08-26/REPORT-live.1.md"
         },
@@ -127,8 +127,8 @@
           "thinking": "OFF",
           "serving": "Hosted",
           "score": 56.2,
-          "metric": "agent score · agentic-hard",
-          "runnerUp": "Live 44.1 — mimo wins isolated and live",
+          "metric": "agent score \u00b7 agentic-hard",
+          "runnerUp": "Live 44.1 \u2014 mimo wins isolated and live",
           "config": null,
           "report": "results/2026-08-26/REPORT-live.md"
         }
@@ -136,8 +136,8 @@
     }
   ],
   "harnessComparison": {
-    "setup": "Qwen3.6-35B-A3B · think-OFF · NVIDIA DGX Spark · agentic-hard",
-    "question": "Same weights, four agents — how far does the number move?",
+    "setup": "Qwen3.6-35B-A3B \u00b7 think-OFF \u00b7 NVIDIA DGX Spark \u00b7 agentic-hard",
+    "question": "Same weights, four agents \u2014 how far does the number move?",
     "rows": [
       {
         "harness": "claude-code",
@@ -168,38 +168,38 @@
         "score": 44.9,
         "solved": 93.8,
         "calls": 13.7,
-        "inTok": "—",
+        "inTok": "\u2014",
         "wall": 166
       }
     ],
     "report": "results/2026-08-20-pi-harness/REPORT-hard.md",
-    "note": "Top two tied inside the ~8-pt noise floor. The structural win: claude-code does it on ~11× less prefill than opencode."
+    "note": "Top two tied inside the ~8-pt noise floor. The structural win: claude-code does it on ~11\u00d7 less prefill than opencode."
   },
   "thinkingTradeoff": {
     "oneShot": {
-      "title": "One-shot code · `all` suite",
+      "title": "One-shot code \u00b7 `all` suite",
       "verdict": "Thinking OFF is the default. Same or better accuracy at a fraction of the cost.",
       "rows": [
         {
-          "label": "think-OFF · 6k cap",
+          "label": "think-OFF \u00b7 6k cap",
           "score": 80.4,
           "wall": 392,
           "meanTok": 852,
           "truncated": 0
         },
         {
-          "label": "think-ON · 16k cap",
+          "label": "think-ON \u00b7 16k cap",
           "score": 82.1,
           "wall": 1985,
           "meanTok": 6631,
           "truncated": 1
         }
       ],
-      "delta": "+1.7 pts for 5.1× wall · 7.8× mean output tokens",
+      "delta": "+1.7 pts for 5.1\u00d7 wall \u00b7 7.8\u00d7 mean output tokens",
       "report": "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"
     },
     "toolLoop": {
-      "title": "Tool loops · `agentic-hard`",
+      "title": "Tool loops \u00b7 `agentic-hard`",
       "verdict": "Thinking ON edges it: fewer turns at almost no extra wall time. +4.5 is inside the noise floor, so treat it as a tie.",
       "rows": [
         {
@@ -215,7 +215,7 @@
           "calls": 12.2
         }
       ],
-      "delta": "+4.5 pts (within noise) · 1.1× wall · −1.0 mean calls (par 5.9)",
+      "delta": "+4.5 pts (within noise) \u00b7 1.1\u00d7 wall \u00b7 \u22121.0 mean calls (par 5.9)",
       "report": "results/2026-08-20-agentic-hard/REPORT.md"
     },
     "lesson": "Run both modes on the workload you actually have. The winner flips between one-shot generation and tool loops."
@@ -227,11 +227,11 @@
     "samples": 1,
     "generations": 200,
     "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
-    "setup": "system1 v3 · 200 scenarios · 200 questions · 1 sample · concurrency 1 · typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls, Claude Haiku 5.5 and Sonnet 5.5 (low and high effort) through isolated Claude Code calls",
+    "setup": "system1 v3 \u00b7 200 scenarios \u00b7 200 questions \u00b7 1 sample \u00b7 concurrency 1 \u00b7 typed arms through the s1 gateway, Qwen direct on :8001, OpenAI models through isolated pi calls, Claude Haiku 5.5 and Sonnet 5.5 (low and high effort) through isolated Claude Code calls",
     "question": "With the arithmetic removed, which model makes the best System One decisions, and at what speed?",
     "report": "results/2026-10-10-system1-v3-200/REPORT.md",
-    "wallNote": "200 responses per model · concurrency 1",
-    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking and claude-sonnet-5-5 at both low and high effort answer all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. claude-haiku-5-5 through Claude Code scores 95.5% at high effort and 91.0% at low (a 4.5-point gain that is still inside noise). At high effort it matches Jev exactly and is tied with Qwen3.6 think-ON (−1.5), about 4 points behind the frontier tier, at 2.5 s/question; routing (80%) and injection (85%) remain its weakest families. Mercury Decide is not on the v3 roster.",
+    "wallNote": "200 responses per model \u00b7 concurrency 1",
+    "note": "v3 removes the arithmetic that decided v2: quantities arrive already computed, facts arrive in prose, and each answer names the decision and its reason. The frontier tier saturates it: gpt-6.1-sol at medium thinking and claude-sonnet-5-5 at both low and high effort answer all 200, and gpt-6-luna at max misses one phishing item, the same one Jev misses. TypeSafe Jev scores 95.5%, about 4 points behind the frontier tier (a small margin, just outside noise; on v2 it was about 20), statistically tied with local Qwen3.6 think-ON (97.0%) at 0.22 s/question instead of 9.6 s. Among non-thinking arms Jev leads Qwen3.6 think-OFF by 10.5 points and Kev-4B by 24.5. Kev-4B's weakest family is prompt injection (30%): it almost never flags planted instructions. Moderation and triage are near 100% for every strong arm and need harder cases. One sample per question, 200 items: margins under about 5 points are noise. claude-haiku-5-5 through Claude Code scores 95.5% at high effort and 91.0% at low (a 4.5-point gain that is still inside noise). At high effort it matches Jev exactly and is tied with Qwen3.6 think-ON (\u22121.5), about 4 points behind the frontier tier, at 2.5 s/question; routing (80%) and injection (85%) remain its weakest families. Mercury Decide is not on the v3 roster.",
     "families": [
       {
         "id": "returns",
@@ -428,10 +428,10 @@
     },
     "rows": [
       {
-        "model": "gpt-6.1-sol · think-medium",
+        "model": "gpt-6.1-sol \u00b7 think-medium",
         "modelKey": "gpt-6.1-sol (pi think-medium)",
         "score": 100.0,
-        "ci": "98.1–100.0",
+        "ci": "98.1\u2013100.0",
         "ciBounds": [
           98.11546736227335,
           100.0
@@ -440,16 +440,16 @@
         "secPerQ": 3.243,
         "outTok": 6.25,
         "wall": 648.69,
-        "serving": "hosted OpenAI via pi CLI · thinking medium",
-        "note": "200/200 correct · 0 generation errors",
+        "serving": "hosted OpenAI via pi CLI \u00b7 thinking medium",
+        "note": "200/200 correct \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-1-sol-thinkmedium-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "claude-sonnet-5-5 · effort-low",
+        "model": "claude-sonnet-5-5 \u00b7 effort-low",
         "modelKey": "claude-sonnet-5-5 (claude-code effort-low)",
         "score": 100.0,
-        "ci": "98.1–100.0",
+        "ci": "98.1\u2013100.0",
         "ciBounds": [
           98.11546736227335,
           100.0
@@ -458,16 +458,16 @@
         "secPerQ": 3.883,
         "outTok": 8.58,
         "wall": 776.54,
-        "serving": "hosted Anthropic via Claude Code CLI · effort low",
-        "note": "200/200 correct; thinking used on 1 of 200 calls · 0 generation errors",
+        "serving": "hosted Anthropic via Claude Code CLI \u00b7 effort low",
+        "note": "200/200 correct; thinking used on 1 of 200 calls \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-14-system1-v3-claude-code-sonnet/claude-sonnet-5-5-effortlow-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "claude-sonnet-5-5 · effort-high",
+        "model": "claude-sonnet-5-5 \u00b7 effort-high",
         "modelKey": "claude-sonnet-5-5 (claude-code effort-high)",
         "score": 100.0,
-        "ci": "98.1–100.0",
+        "ci": "98.1\u2013100.0",
         "ciBounds": [
           98.11546736227335,
           100.0
@@ -476,16 +476,16 @@
         "secPerQ": 4.343,
         "outTok": 10.94,
         "wall": 868.69,
-        "serving": "hosted Anthropic via Claude Code CLI · effort high",
-        "note": "200/200 correct; thinking used on 5 of 200 calls · 0 generation errors",
+        "serving": "hosted Anthropic via Claude Code CLI \u00b7 effort high",
+        "note": "200/200 correct; thinking used on 5 of 200 calls \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-14-system1-v3-claude-code-sonnet/claude-sonnet-5-5-efforthigh-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "gpt-6-luna · think-max",
+        "model": "gpt-6-luna \u00b7 think-max",
         "modelKey": "gpt-6-luna (pi think-max)",
         "score": 99.5,
-        "ci": "97.2–99.9",
+        "ci": "97.2\u201399.9",
         "ciBounds": [
           97.22262956021069,
           99.91168312843989
@@ -494,16 +494,16 @@
         "secPerQ": 4.914,
         "outTok": 76.15,
         "wall": 982.94,
-        "serving": "hosted OpenAI via pi CLI · thinking max",
-        "note": "199/200 correct · misses: phishing 1 · 0 generation errors",
+        "serving": "hosted OpenAI via pi CLI \u00b7 thinking max",
+        "note": "199/200 correct \u00b7 misses: phishing 1 \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/gpt-6-luna-thinkmax-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "Qwen3.6-35B-A3B · think-ON",
+        "model": "Qwen3.6-35B-A3B \u00b7 think-ON",
         "modelKey": "Qwen3.6-35B-A3B (vLLM think-ON)",
         "score": 97.0,
-        "ci": "93.6–98.6",
+        "ci": "93.6\u201398.6",
         "ciBounds": [
           93.61057075454808,
           98.61796856598886
@@ -512,16 +512,16 @@
         "secPerQ": 9.614,
         "outTok": 796.64,
         "wall": 1922.81,
-        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning enabled",
-        "note": "194/200 correct · misses: access 3, billing 1, moderation 1, phishing 1 · 0 generation errors",
+        "serving": "local vLLM NVFP4 \u00b7 plain chat endpoint \u00b7 reasoning enabled",
+        "note": "194/200 correct \u00b7 misses: access 3, billing 1, moderation 1, phishing 1 \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/qwen3-6-35b-a3b-nvfp4-thinkon-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "TypeSafe Jev · jev-1.13.0",
+        "model": "TypeSafe Jev \u00b7 jev-1.13.0",
         "modelKey": "TypeSafe Jev (jev-1.13.0)",
         "score": 95.5,
-        "ci": "91.7–97.6",
+        "ci": "91.7\u201397.6",
         "ciBounds": [
           91.67032959981803,
           97.6147456998507
@@ -530,16 +530,16 @@
         "secPerQ": 0.22,
         "outTok": 84.78,
         "wall": 44.03,
-        "serving": "hosted TypeSafe API · typesafe backend · private :8124 gateway",
-        "note": "191/200 correct · misses: returns 3, access 2, billing 2, evidence 1, phishing 1 · 0 generation errors",
+        "serving": "hosted TypeSafe API \u00b7 typesafe backend \u00b7 private :8124 gateway",
+        "note": "191/200 correct \u00b7 misses: returns 3, access 2, billing 2, evidence 1, phishing 1 \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/typesafe-jev-1-13-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "claude-haiku-5-5 · effort-high",
+        "model": "claude-haiku-5-5 \u00b7 effort-high",
         "modelKey": "claude-haiku-5-5 (claude-code effort-high)",
         "score": 95.5,
-        "ci": "91.7–97.6",
+        "ci": "91.7\u201397.6",
         "ciBounds": [
           91.67032959981803,
           97.6147456998507
@@ -548,16 +548,16 @@
         "secPerQ": 2.48,
         "outTok": 70.02,
         "wall": 496.0,
-        "serving": "hosted Anthropic via Claude Code CLI · effort high",
-        "note": "191/200 correct · misses: routing 4, injection 3, triage 1, evidence 1 · one is a format miss (triage_05: right option after a reasoning preamble) · 0 generation errors",
+        "serving": "hosted Anthropic via Claude Code CLI \u00b7 effort high",
+        "note": "191/200 correct \u00b7 misses: routing 4, injection 3, triage 1, evidence 1 \u00b7 one is a format miss (triage_05: right option after a reasoning preamble) \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-13-system1-v3-claude-code/claude-haiku-5-5-efforthigh-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "claude-haiku-5-5 · effort-low",
+        "model": "claude-haiku-5-5 \u00b7 effort-low",
         "modelKey": "claude-haiku-5-5 (claude-code effort-low)",
         "score": 91.0,
-        "ci": "86.2–94.2",
+        "ci": "86.2\u201394.2",
         "ciBounds": [
           86.22342812328347,
           94.23125511378069
@@ -566,16 +566,16 @@
         "secPerQ": 2.311,
         "outTok": 37.16,
         "wall": 462.28,
-        "serving": "hosted Anthropic via Claude Code CLI · effort low",
-        "note": "182/200 correct · misses: routing 6, injection 4, evidence 3, returns 1, triage 1, access 1, credentials 1, phishing 1 · 0 generation errors",
+        "serving": "hosted Anthropic via Claude Code CLI \u00b7 effort low",
+        "note": "182/200 correct \u00b7 misses: routing 6, injection 4, evidence 3, returns 1, triage 1, access 1, credentials 1, phishing 1 \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-13-system1-v3-claude-code/claude-haiku-5-5-effortlow-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "Qwen3.6-35B-A3B · think-OFF",
+        "model": "Qwen3.6-35B-A3B \u00b7 think-OFF",
         "modelKey": "Qwen3.6-35B-A3B (vLLM think-OFF)",
         "score": 85.0,
-        "ci": "79.4–89.3",
+        "ci": "79.4\u201389.3",
         "ciBounds": [
           79.39442071583333,
           89.286406437758
@@ -584,16 +584,16 @@
         "secPerQ": 0.233,
         "outTok": 7.01,
         "wall": 46.59,
-        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning disabled",
-        "note": "170/200 correct · misses: returns 6, access 5, routing 5, phishing 5, credentials 3, billing 2, evidence 2, injection 2 · 0 generation errors",
+        "serving": "local vLLM NVFP4 \u00b7 plain chat endpoint \u00b7 reasoning disabled",
+        "note": "170/200 correct \u00b7 misses: returns 6, access 5, routing 5, phishing 5, credentials 3, billing 2, evidence 2, injection 2 \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/qwen3-6-35b-a3b-nvfp4-thinkoff-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       },
       {
-        "model": "Kev-4B · bf16",
+        "model": "Kev-4B \u00b7 bf16",
         "modelKey": "Kev-4B (kev.serve bf16)",
         "score": 71.0,
-        "ci": "64.4–76.8",
+        "ci": "64.4\u201376.8",
         "ciBounds": [
           64.36252189922268,
           76.84597439293212
@@ -602,8 +602,8 @@
         "secPerQ": 0.151,
         "outTok": 136.66,
         "wall": 30.13,
-        "serving": "local kev.serve bf16 · shared :8123 gateway",
-        "note": "142/200 correct · misses: injection 14, routing 9, returns 8, evidence 7, triage 5, phishing 5, billing 4, access 3, credentials 3 · 0 generation errors",
+        "serving": "local kev.serve bf16 \u00b7 shared :8123 gateway",
+        "note": "142/200 correct \u00b7 misses: injection 14, routing 9, returns 8, evidence 7, triage 5, phishing 5, billing 4, access 3, credentials 3 \u00b7 0 generation errors",
         "sourceJson": "results/2026-10-10-system1-v3-200/kev-4b-kevserve-bf16-system1-v3.json",
         "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001"
       }
@@ -616,14 +616,14 @@
     "samples": 2,
     "generations": 800,
     "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
-    "setup": "system1 v2 · 200 scenarios · 400 questions · 2 samples/question · concurrency 1 · typed arms through the standard S1 gateway on a private :8124 instance; the incumbent vLLM measured directly on :8001",
-    "question": "Which decision model handles benchmark v2 best? The whole v1 roster re-measured on 400 questions — reasoning is the lever that separates them.",
+    "setup": "system1 v2 \u00b7 200 scenarios \u00b7 400 questions \u00b7 2 samples/question \u00b7 concurrency 1 \u00b7 typed arms through the standard S1 gateway on a private :8124 instance; the incumbent vLLM measured directly on :8001",
+    "question": "Which decision model handles benchmark v2 best? The whole v1 roster re-measured on 400 questions \u2014 reasoning is the lever that separates them.",
     "rows": [
       {
-        "model": "gpt-6.1-sol · think-high",
+        "model": "gpt-6.1-sol \u00b7 think-high",
         "modelKey": "gpt-6.1-sol (pi think-high)",
         "score": 100.0,
-        "ci": "99.5–100.0",
+        "ci": "99.5\u2013100.0",
         "ciBounds": [
           99.5221123794324,
           100.0
@@ -631,16 +631,16 @@
         "secPerQ": 3.921,
         "outTok": 28.89,
         "wall": 3136.77,
-        "serving": "hosted OpenAI via pi CLI · thinking high",
-        "note": "800/800 correct — saturates the suite, including every open records question; 0 generation errors",
+        "serving": "hosted OpenAI via pi CLI \u00b7 thinking high",
+        "note": "800/800 correct \u2014 saturates the suite, including every open records question; 0 generation errors",
         "sourceJson": "results/2026-10-09-system1-v2-pi-openai/gpt-6-1-sol-thinkhigh-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "gpt-6-luna · think-max",
+        "model": "gpt-6-luna \u00b7 think-max",
         "modelKey": "gpt-6-luna (pi think-max)",
         "score": 99.1,
-        "ci": "98.2–99.6",
+        "ci": "98.2\u201399.6",
         "ciBounds": [
           98.20495953265953,
           99.5755158801328
@@ -648,16 +648,16 @@
         "secPerQ": 5.678,
         "outTok": 76.61,
         "wall": 4542.55,
-        "serving": "hosted OpenAI via pi CLI · thinking max",
-        "note": "793/800 correct; 0 generation errors — all 7 misses in the records family, 5 on open questions",
+        "serving": "hosted OpenAI via pi CLI \u00b7 thinking max",
+        "note": "793/800 correct; 0 generation errors \u2014 all 7 misses in the records family, 5 on open questions",
         "sourceJson": "results/2026-10-09-system1-v2-pi-openai/gpt-6-luna-thinkmax-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "Qwen3.6-35B-A3B · think-ON",
+        "model": "Qwen3.6-35B-A3B \u00b7 think-ON",
         "modelKey": "Qwen3.6-35B-A3B (vLLM think-ON)",
         "score": 98.6,
-        "ci": "97.6–99.2",
+        "ci": "97.6\u201399.2",
         "ciBounds": [
           97.55473839327496,
           99.23051589572304
@@ -665,16 +665,16 @@
         "secPerQ": 9.016,
         "outTok": 766.61,
         "wall": 7213.26,
-        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning enabled",
-        "note": "789/800 correct; 0 generation errors — reasoning turns the same weights from mid-pack into near-saturation",
+        "serving": "local vLLM NVFP4 \u00b7 plain chat endpoint \u00b7 reasoning enabled",
+        "note": "789/800 correct; 0 generation errors \u2014 reasoning turns the same weights from mid-pack into near-saturation",
         "sourceJson": "results/2026-10-09-system1-v2-v1-roster/qwen3-6-35b-a3b-nvfp4-thinkon-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "Mercury Decide · free",
+        "model": "Mercury Decide \u00b7 free",
         "modelKey": "inception/mercury-decide:free",
         "score": 86.5,
-        "ci": "84.0–88.7",
+        "ci": "84.0\u201388.7",
         "ciBounds": [
           83.95682490318882,
           88.69431713379684
@@ -682,16 +682,16 @@
         "secPerQ": 0.49,
         "outTok": 1.0,
         "wall": 391.86,
-        "serving": "hosted OpenRouter · systemone backend · no local weights",
+        "serving": "hosted OpenRouter \u00b7 systemone backend \u00b7 no local weights",
         "note": "692/800 correct; 0 generation errors; no free-tier throttling this run",
         "sourceJson": "results/2026-10-09-system1-v2-v1-roster/mercury-decide-free-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "TypeSafe Jev · jev-1.13.0",
+        "model": "TypeSafe Jev \u00b7 jev-1.13.0",
         "modelKey": "TypeSafe Jev (jev-1.13.0)",
         "score": 79.5,
-        "ci": "76.6–82.2",
+        "ci": "76.6\u201382.2",
         "ciBounds": [
           76.56469891020764,
           82.15334739365748
@@ -699,16 +699,16 @@
         "secPerQ": 0.236,
         "outTok": 70.45,
         "wall": 189.04,
-        "serving": "hosted TypeSafe API · typesafe backend",
+        "serving": "hosted TypeSafe API \u00b7 typesafe backend",
         "note": "636/800 correct; 0 generation errors",
         "sourceJson": "results/2026-10-09-system1-v2-kev4b-vs-jev/typesafe-jev-1-13-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "Bespoke-Nimble-9B · Q8_0",
+        "model": "Bespoke-Nimble-9B \u00b7 Q8_0",
         "modelKey": "Bespoke-Nimble-9B (Ollama Q8_0)",
         "score": 68.0,
-        "ci": "64.7–71.1",
+        "ci": "64.7\u201371.1",
         "ciBounds": [
           64.68811072928293,
           71.13984972731275
@@ -716,17 +716,17 @@
         "secPerQ": 0.149,
         "outTok": 1.0,
         "wall": 113.51,
-        "serving": "local Ollama Q8_0 · nimble backend",
+        "serving": "local Ollama Q8_0 \u00b7 nimble backend",
         "transportErrors": 40,
-        "note": "544/800 correct; 40 open-question generations failed at transport (Ollama caps criteria at 26 vs the gateway's 64-token fallback) — 544/760 = 71.6% on the scored subset",
+        "note": "544/800 correct; 40 open-question generations failed at transport (Ollama caps criteria at 26 vs the gateway's 64-token fallback) \u2014 544/760 = 71.6% on the scored subset",
         "sourceJson": "results/2026-10-09-system1-v2-kev4b-vs-jev/bespoke-nimble-9b-ollama-q8-0-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "Qwen3.6-35B-A3B · think-OFF",
+        "model": "Qwen3.6-35B-A3B \u00b7 think-OFF",
         "modelKey": "Qwen3.6-35B-A3B (vLLM think-OFF)",
         "score": 61.8,
-        "ci": "58.3–65.1",
+        "ci": "58.3\u201365.1",
         "ciBounds": [
           58.333705359082174,
           65.05399105008445
@@ -734,16 +734,16 @@
         "secPerQ": 0.205,
         "outTok": 3.8,
         "wall": 164.16,
-        "serving": "local vLLM NVFP4 · plain chat endpoint · reasoning disabled",
-        "note": "494/800 correct; 0 generation errors — same weights as the leader, thinking off",
+        "serving": "local vLLM NVFP4 \u00b7 plain chat endpoint \u00b7 reasoning disabled",
+        "note": "494/800 correct; 0 generation errors \u2014 same weights as the leader, thinking off",
         "sourceJson": "results/2026-10-09-system1-v2-v1-roster/qwen3-6-35b-a3b-nvfp4-thinkoff-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       },
       {
-        "model": "Kev-4B · bf16",
+        "model": "Kev-4B \u00b7 bf16",
         "modelKey": "Kev-4B (kev.serve bf16)",
         "score": 59.8,
-        "ci": "56.3–63.1",
+        "ci": "56.3\u201363.1",
         "ciBounds": [
           56.31296799122511,
           63.093843922764215
@@ -751,7 +751,7 @@
         "secPerQ": 0.077,
         "outTok": 109.97,
         "wall": 61.75,
-        "serving": "local kev.serve bf16 · kev backend",
+        "serving": "local kev.serve bf16 \u00b7 kev backend",
         "note": "478/800 correct; 0 generation errors",
         "sourceJson": "results/2026-10-09-system1-v2-kev4b-vs-jev/kev-4b-kevserve-bf16-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
@@ -760,7 +760,7 @@
         "model": "Laya typed-decisions",
         "modelKey": "Laya typed-decisions",
         "score": 33.5,
-        "ci": "30.3–36.8",
+        "ci": "30.3\u201336.8",
         "ciBounds": [
           30.31505627087722,
           36.8426466439101
@@ -768,15 +768,15 @@
         "secPerQ": 0.473,
         "outTok": 0.0,
         "wall": 378.33,
-        "serving": "in-process scorer · laya backend · CPU-bound",
-        "note": "268/800 correct; 0 generation errors — non-autoregressive scorer collapses on v2's multi-step states",
+        "serving": "in-process scorer \u00b7 laya backend \u00b7 CPU-bound",
+        "note": "268/800 correct; 0 generation errors \u2014 non-autoregressive scorer collapses on v2's multi-step states",
         "sourceJson": "results/2026-10-09-system1-v2-v1-roster/laya-typed-decisions-system1-v2.json",
         "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e"
       }
     ],
     "report": "results/2026-10-09-system1-v2-v1-roster/REPORT.md",
-    "wallNote": "800 responses per model · concurrency 1",
-    "note": "Every v1-board model re-measured on v2, plus two frontier OpenAI models through pi. gpt-6.1-sol at high thinking saturates the suite outright (800/800 — v2 has stopped measuring this tier; the remaining headroom is in harder states, not better models); gpt-6-luna at max misses only 7 records questions. The incumbent Qwen3.6-35B with reasoning enabled scores 98.6% — the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included. Superseded by benchmark v3, which precomputes the multi-step arithmetic that decided most of v2.",
+    "wallNote": "800 responses per model \u00b7 concurrency 1",
+    "note": "Every v1-board model re-measured on v2, plus two frontier OpenAI models through pi. gpt-6.1-sol at high thinking saturates the suite outright (800/800 \u2014 v2 has stopped measuring this tier; the remaining headroom is in harder states, not better models); gpt-6-luna at max misses only 7 records questions. The incumbent Qwen3.6-35B with reasoning enabled scores 98.6% \u2014 the same weights score 61.8% with thinking off, the widest thinking-mode gap seen on this suite. Hosted Mercury Decide (86.5%) beats hosted Jev (79.5%); Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions \u2014 its 40 open-question generations failed at transport: Ollama caps criteria at 26 vs the gateway's 64-token fallback, and no v2 open answer sits inside a 26-candidate window); Kev-4B 59.8%; Laya's non-autoregressive scorer collapses to 33.5%. Gateway limitation: its 64-candidate cap excluded the correct code on three open questions, making 6/800 responses unwinnable for every backend. Not re-measured: Kev-27B (~63 GiB), Clef-27B (~55-65 GiB) and Clef-Flash-9B (~19 GiB) do not fit beside the shared services within ~20 GiB free. These are gateway-constrained measurements; sibling questions and repeated samples are correlated. No v1 scores are included. Superseded by benchmark v3, which precomputes the multi-step arithmetic that decided most of v2.",
     "families": [
       {
         "id": "policy",
@@ -857,7 +857,7 @@
       "model": "TypeSafe Jev (jev-1.13.0)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
@@ -872,7 +872,7 @@
       "model": "Kev-4B (kev.serve bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
@@ -887,7 +887,7 @@
       "model": "Bespoke-Nimble-9B (Ollama Q8_0)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
@@ -917,7 +917,7 @@
       "model": "inception/mercury-decide:free",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
@@ -947,7 +947,7 @@
       "model": "Laya typed-decisions",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-v2",
       "datasetVersion": 2,
       "suiteHash": "0a6ba6f96eb5585c0e89a14cf655756026ee1413a08afaaee936908d55ef1b7e",
@@ -992,7 +992,7 @@
       "model": "Clef-27B (Cloudflare/clef bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1005,7 +1005,7 @@
       "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1018,7 +1018,7 @@
       "model": "Kev-4B (kev.serve bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 95.9,
       "unit": "accuracy",
@@ -1031,7 +1031,7 @@
       "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1044,7 +1044,7 @@
       "model": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 100.0,
       "unit": "f1",
@@ -1056,7 +1056,7 @@
       "model": "inception/mercury-decide:free",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1069,7 +1069,7 @@
       "model": "inception/mercury-decide:free",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 100.0,
       "unit": "f1",
@@ -1081,7 +1081,7 @@
       "model": "Kev-27B (kev.serve bf16)",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 100.0,
       "unit": "f1",
@@ -1093,7 +1093,7 @@
       "model": "Kev-27B (kev.serve bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1106,7 +1106,7 @@
       "model": "Kev-4B (kev.serve bf16)",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 100.0,
       "unit": "f1",
@@ -1118,7 +1118,7 @@
       "model": "Kev-4B (kev.serve bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 95.9,
       "unit": "accuracy",
@@ -1131,7 +1131,7 @@
       "model": "TypeSafe Jev (jev-1.13.0)",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 100.0,
       "unit": "f1",
@@ -1143,7 +1143,7 @@
       "model": "Bespoke-Nimble-9B (Ollama Q8_0)",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 94.1,
       "unit": "f1",
@@ -1155,7 +1155,7 @@
       "model": "gpt-oss-120b (Groq)",
       "harness": "anti-phishing pipeline",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "phishing-eval",
       "score": 100.0,
       "unit": "f1",
@@ -1167,7 +1167,7 @@
       "model": "TypeSafe Jev (jev-1.13.0)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1180,7 +1180,7 @@
       "model": "Bespoke-Nimble-9B (Ollama Q8_0)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 98.0,
       "unit": "accuracy",
@@ -1193,7 +1193,7 @@
       "model": "Laya typed-decisions",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1-legacy",
       "score": 73.5,
       "unit": "accuracy",
@@ -1244,7 +1244,7 @@
       "model": "SWE-2 Max",
       "harness": "devin",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "agentic-all",
       "score": 75.8,
       "unit": "agent",
@@ -1256,7 +1256,7 @@
       "model": "Opus 5.5 (1M, effort medium)",
       "harness": "claude-code",
       "mode": "live",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "agentic-hard",
       "score": 100.0,
       "unit": "agent",
@@ -1304,7 +1304,7 @@
       "model": "SWE-2 Max",
       "harness": "devin",
       "mode": "live",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "agentic-hard",
       "score": 72.6,
       "unit": "agent",
@@ -1340,7 +1340,7 @@
       "model": "union-alpha",
       "harness": "opencode",
       "mode": "live",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "agentic-hard",
       "score": 55.6,
       "unit": "agent",
@@ -1709,7 +1709,7 @@
       "model": "TypeSafe Jev (jev-1.13.0)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1",
       "datasetVersion": 3,
       "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
@@ -1739,7 +1739,7 @@
       "model": "Kev-4B (kev.serve bf16)",
       "harness": "s1-gateway",
       "mode": "isolated",
-      "thinking": "—",
+      "thinking": "\u2014",
       "suite": "system1",
       "datasetVersion": 3,
       "suiteHash": "65631df69cafcb9ab9deddd6ccb99b61d0919b0e3a177ddd5f481e0a9fafc001",
@@ -1971,31 +1971,59 @@
       "unit": "agent",
       "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
       "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/llamacpp1-agentic-on.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "local",
+      "model": "hy4-flash-free (opencode)",
+      "harness": "opencode",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 68.0,
+      "unit": "agent",
+      "report": "results/2026-11-16/REPORT.md",
+      "sourceJson": "results/2026-11-16/opencode-opencode-hy4-flash-free-think-off.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "local",
+      "model": "hy4-flash-free (opencode)",
+      "harness": "opencode",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 70.3,
+      "unit": "agent",
+      "report": "results/2026-11-16/REPORT.md",
+      "sourceJson": "results/2026-11-16/opencode-opencode-hy4-flash-free-think-on.json"
     }
   ],
   "campaigns": [
     {
       "date": "2026-11-16",
       "question": "Should locally built llama.cpp 1.0 (CUDA) replace vLLM as the serving backend for montimage-dgx-spark?",
-      "answer": "No. Keep vLLM. At 2 samples no solve-rate margin's 95% interval excludes zero: all think-OFF is an exact tie at 76.8%, all think-ON favours vLLM by 1.7 pp, and the two agentic-hard arms favour llama.cpp by 6.3 pp and 6.2 pp with heavily overlapping intervals at n=16. The clear signal is speed: vLLM is 1.8x faster per task on all OFF (15.4 s vs 27.8 s) and 1.47x faster on all ON (132 s vs 194 s) at similar output-token counts (~50 vs ~35 tok/s). llama.cpp's mild efficiency edge on agentic calls does not outweigh that. Caveat: weights are not identical — vLLM serves NVFP4, llama.cpp serves UD-Q4_K_M of the same base model, so any quality delta is engine plus quantization. llama.cpp 1.0 was compiled locally with CUDA because the Homebrew bottle is Vulkan-only, and the 22 GB GGUF could not coexist with vLLM's ~72 GB reservation, so the shared endpoint had to be swapped during the candidate arm.",
+      "answer": "No. Keep vLLM. At 2 samples no solve-rate margin's 95% interval excludes zero: all think-OFF is an exact tie at 76.8%, all think-ON favours vLLM by 1.7 pp, and the two agentic-hard arms favour llama.cpp by 6.3 pp and 6.2 pp with heavily overlapping intervals at n=16. The clear signal is speed: vLLM is 1.8x faster per task on all OFF (15.4 s vs 27.8 s) and 1.47x faster on all ON (132 s vs 194 s) at similar output-token counts (~50 vs ~35 tok/s). llama.cpp's mild efficiency edge on agentic calls does not outweigh that. Caveat: weights are not identical \u2014 vLLM serves NVFP4, llama.cpp serves UD-Q4_K_M of the same base model, so any quality delta is engine plus quantization. llama.cpp 1.0 was compiled locally with CUDA because the Homebrew bottle is Vulkan-only, and the 22 GB GGUF could not coexist with vLLM's ~72 GB reservation, so the shared endpoint had to be swapped during the candidate arm.",
       "link": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md"
     },
     {
       "date": "2026-10-14",
       "question": "Does Claude Sonnet 5.5 through Claude Code saturate benchmark v3?",
-      "answer": "Yes. At low and at high effort it answers all 200 correctly (CI 98.1–100) and keeps every paraphrase pair, joining gpt-6.1-sol at 100%. It barely uses its thinking budget (thinking on 1 of 200 calls at low effort, 5 at high), at 3.9 and 4.3 s/question. It is 4.5 points above Haiku 5.5 at high effort (+1.7 to +8.3, real). v3 cannot separate the top tier.",
+      "answer": "Yes. At low and at high effort it answers all 200 correctly (CI 98.1\u2013100) and keeps every paraphrase pair, joining gpt-6.1-sol at 100%. It barely uses its thinking budget (thinking on 1 of 200 calls at low effort, 5 at high), at 3.9 and 4.3 s/question. It is 4.5 points above Haiku 5.5 at high effort (+1.7 to +8.3, real). v3 cannot separate the top tier.",
       "link": "results/2026-10-14-system1-v3-claude-code-sonnet/NOTES.md"
     },
     {
       "date": "2026-10-13",
       "question": "Can LFM2.5-24B-A2B replace Qwen3.6-35B-A3B as the main model on the DGX Spark?",
-      "answer": "No. Through the built-in loop at 2 samples, LFM2.5 (official FP8, vLLM) trails on every arm: 71.4% vs 82.1% pass@1 on all with thinking, 87.5% vs 93.8% solved on agentic-hard in both modes. It always thinks, so its think-OFF arm truncates 23 of 56 answers at 6k tokens (60.7%, the only margin outside its 95% CI). It also emits 2–4× the output tokens per agentic task, makes 77–81% valid tool calls vs 96%, and decodes at 27–28 tok/s vs 44–47 on this box. Worth a re-test once an NVFP4 checkpoint or its drafter lands, and through pi or OpenCode.",
+      "answer": "No. Through the built-in loop at 2 samples, LFM2.5 (official FP8, vLLM) trails on every arm: 71.4% vs 82.1% pass@1 on all with thinking, 87.5% vs 93.8% solved on agentic-hard in both modes. It always thinks, so its think-OFF arm truncates 23 of 56 answers at 6k tokens (60.7%, the only margin outside its 95% CI). It also emits 2\u20134\u00d7 the output tokens per agentic task, makes 77\u201381% valid tool calls vs 96%, and decodes at 27\u201328 tok/s vs 44\u201347 on this box. Worth a re-test once an NVFP4 checkpoint or its drafter lands, and through pi or OpenCode.",
       "link": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md"
     },
     {
       "date": "2026-10-13",
       "question": "Where does Claude Haiku 5.5 through Claude Code land on benchmark v3?",
-      "answer": "At high effort it scores 95.5% (CI 91.7–97.6), the same as Jev and statistically tied with Qwen3.6 think-ON (97.0%), about 4 points behind the frontier OpenAI tier; at low effort 91.0% (CI 86.2–94.2). The low-to-high gain of 4.5 points is inside noise. Both cost about $0.05 for 200 calls at 2.3–2.5 s/question. Routing and injection are its weak families at both levels. Each call is an isolated claude -p with tools, MCP, skills, hooks and CLAUDE.md off; latency includes about 1 s of CLI start-up.",
+      "answer": "At high effort it scores 95.5% (CI 91.7\u201397.6), the same as Jev and statistically tied with Qwen3.6 think-ON (97.0%), about 4 points behind the frontier OpenAI tier; at low effort 91.0% (CI 86.2\u201394.2). The low-to-high gain of 4.5 points is inside noise. Both cost about $0.05 for 200 calls at 2.3\u20132.5 s/question. Routing and injection are its weak families at both levels. Each call is an isolated claude -p with tools, MCP, skills, hooks and CLAUDE.md off; latency includes about 1 s of CLI start-up.",
       "link": "results/2026-10-13-system1-v3-claude-code/NOTES.md"
     },
     {
@@ -2007,25 +2035,25 @@
     {
       "date": "2026-10-09",
       "question": "Can frontier OpenAI models through pi beat the local winner on benchmark v2?",
-      "answer": "gpt-6.1-sol at high thinking scores 100.0% — all 800 generations, including every open records question; v2 is now saturated at the frontier. gpt-6-luna at max thinking scores 99.1% (7 misses, all records). Both run through the pi CLI per question with tools/extensions disabled; latency includes ~1 s process overhead per call. Reasoning depth, not the typed-decision transport, is what separates the top of the board.",
+      "answer": "gpt-6.1-sol at high thinking scores 100.0% \u2014 all 800 generations, including every open records question; v2 is now saturated at the frontier. gpt-6-luna at max thinking scores 99.1% (7 misses, all records). Both run through the pi CLI per question with tools/extensions disabled; latency includes ~1 s process overhead per call. Reasoning depth, not the typed-decision transport, is what separates the top of the board.",
       "link": "results/2026-10-09-system1-v2-pi-openai/REPORT.md"
     },
     {
       "date": "2026-10-09",
       "question": "How does the whole v1 roster rank on benchmark v2?",
-      "answer": "Reasoning separates them. The incumbent Qwen3.6-35B with thinking enabled leads at 98.6% (CI 97.6–99.2) — the same weights score 61.8% with thinking off, the widest thinking-mode gap on this suite. Hosted Mercury Decide 86.5% beats hosted Jev 79.5%. Laya's scorer collapses to 33.5% (was 73.5% on v1). Kev-27B, Clef-27B and Clef-Flash-9B did not fit beside the shared services (~20 GiB free) and were not re-measured.",
+      "answer": "Reasoning separates them. The incumbent Qwen3.6-35B with thinking enabled leads at 98.6% (CI 97.6\u201399.2) \u2014 the same weights score 61.8% with thinking off, the widest thinking-mode gap on this suite. Hosted Mercury Decide 86.5% beats hosted Jev 79.5%. Laya's scorer collapses to 33.5% (was 73.5% on v1). Kev-27B, Clef-27B and Clef-Flash-9B did not fit beside the shared services (~20 GiB free) and were not re-measured.",
       "link": "results/2026-10-09-system1-v2-v1-roster/REPORT.md"
     },
     {
       "date": "2026-10-09",
-      "question": "Benchmark v2 (200 scenarios, 400 questions): does the v1 Jev↔Nimble tie still hold, and where does local Kev-4B land?",
-      "answer": "The v1 tie is gone. Jev 79.5% > Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions — its 40 open-question generations hit Ollama's 26-criteria cap) > Kev-4B 59.8%. Jev wins all ten families except policy, where Nimble edges it (85.0 vs 78.8). Kev-4B is fastest at 0.077 s/question, Nimble cheapest per answer at 1 out-token. Jev stays the s1 baseline; Nimble is the strongest local backend.",
+      "question": "Benchmark v2 (200 scenarios, 400 questions): does the v1 Jev\u2194Nimble tie still hold, and where does local Kev-4B land?",
+      "answer": "The v1 tie is gone. Jev 79.5% > Nimble-9B 68.0% as-scored (71.6% on the 380 optioned questions \u2014 its 40 open-question generations hit Ollama's 26-criteria cap) > Kev-4B 59.8%. Jev wins all ten families except policy, where Nimble edges it (85.0 vs 78.8). Kev-4B is fastest at 0.077 s/question, Nimble cheapest per answer at 1 out-token. Jev stays the s1 baseline; Nimble is the strongest local backend.",
       "link": "results/2026-10-09-system1-v2-kev4b-vs-jev/REPORT-nimble-v2.md"
     },
     {
       "date": "2026-10-05",
       "question": "Can Cloudflare's clef decision model run locally behind the s1 endpoint without disturbing what is already served?",
-      "answer": "Clef-Flash-9B — yes, cleanly. 98.0% on system1 ties Jev with an identical failure set (error_log/q1 only), and F1 1.000 on the phishing corpus at 0.47 s/email — the only local arm whose phishing noul cleared the 0.5 gate unaided on the hardest lure (0.730 vs Jev's 0.710). At ~19 GiB bf16 it ran alongside every service; nothing was stopped. The requested 27B clef (~55-65 GiB) cannot coexist with the incumbent endpoint and was not benchmarked.",
+      "answer": "Clef-Flash-9B \u2014 yes, cleanly. 98.0% on system1 ties Jev with an identical failure set (error_log/q1 only), and F1 1.000 on the phishing corpus at 0.47 s/email \u2014 the only local arm whose phishing noul cleared the 0.5 gate unaided on the hardest lure (0.730 vs Jev's 0.710). At ~19 GiB bf16 it ran alongside every service; nothing was stopped. The requested 27B clef (~55-65 GiB) cannot coexist with the incumbent endpoint and was not benchmarked.",
       "link": "results/2026-10-05/REPORT-s1-phishing-clef-flash.md"
     },
     {
@@ -2037,55 +2065,55 @@
     {
       "date": "2026-09-30",
       "question": "Can Nimble or Laya replace Jev behind the standard s1 endpoint?",
-      "answer": "Nimble — yes. 98.0 % ties Jev over the identical gateway transport, fully local (Ollama Q8_0, ~9.5 GiB), no API key. Laya typed-decisions — no: 73.5 %, failures across 12 tasks at every difficulty.",
+      "answer": "Nimble \u2014 yes. 98.0 % ties Jev over the identical gateway transport, fully local (Ollama Q8_0, ~9.5 GiB), no API key. Laya typed-decisions \u2014 no: 73.5 %, failures across 12 tasks at every difficulty.",
       "link": "results/2026-09-30/REPORT-s1-candidates.md"
     },
     {
       "date": "2026-09-30",
-      "question": "Does the swap hold on a real workload — the anti-phishing classifier?",
-      "answer": "Almost. Nimble scored 94.1 F1 vs Jev's 100 on the 16-email adjudicated corpus through the unchanged typesafe analyzer — one missed credential-harvesting lure, and its threat-type head disagrees with its own verdict on benign mail. Proven hot-spare via env vars alone, not yet a primary.",
+      "question": "Does the swap hold on a real workload \u2014 the anti-phishing classifier?",
+      "answer": "Almost. Nimble scored 94.1 F1 vs Jev's 100 on the 16-email adjudicated corpus through the unchanged typesafe analyzer \u2014 one missed credential-harvesting lure, and its threat-type head disagrees with its own verdict on benign mail. Proven hot-spare via env vars alone, not yet a primary.",
       "link": "results/2026-09-30/REPORT-s1-phishing-nimble-vs-jev.md"
     },
     {
       "date": "2026-08-17",
       "question": "Does thinking mode help a coding agent?",
-      "answer": "No for one-shot. Thinking off: same or better pass@1, ~13× fewer output tokens, ~32× lower wall-clock.",
+      "answer": "No for one-shot. Thinking off: same or better pass@1, ~13\u00d7 fewer output tokens, ~32\u00d7 lower wall-clock.",
       "link": "results/2026-08-17-thinking-mode/"
     },
     {
       "date": "2026-08-20",
       "question": "Should Ornith-1.5 replace Qwen3.6-35B-A3B?",
-      "answer": "No. Ties at its best config, −20 points at the config we deploy.",
+      "answer": "No. Ties at its best config, \u221220 points at the config we deploy.",
       "link": "results/2026-08-20-ornith-vs-qwen3.6/REPORT.md"
     },
     {
       "date": "2026-08-20",
       "question": "Does the harness around the model change the answer?",
-      "answer": "Yes, by as much as a model swap. Same model: 44.9 built-in → 68.2 claude-code on agentic-hard.",
+      "answer": "Yes, by as much as a model swap. Same model: 44.9 built-in \u2192 68.2 claude-code on agentic-hard.",
       "link": "results/2026-08-20-pi-harness/REPORT-hard.md"
     },
     {
       "date": "2026-08-21",
       "question": "Can a free stealth cloud model drive a real tool loop?",
-      "answer": "Yes. 74.8 agent score, 96.9 % solve via opencode — use thinking OFF.",
+      "answer": "Yes. 74.8 agent score, 96.9 % solve via opencode \u2014 use thinking OFF.",
       "link": "results/2026-08-21/REPORT.md"
     },
     {
       "date": "2026-08-26",
       "question": "muse-spark-1.2 vs mimo-v2.5-free on opencode",
-      "answer": "mimo-v2.5-free wins. Isolated beats live by 12–14 points on an 8 GiB box.",
+      "answer": "mimo-v2.5-free wins. Isolated beats live by 12\u201314 points on an 8 GiB box.",
       "link": "results/2026-08-26/"
     },
     {
       "date": "2026-09-04",
       "question": "Should Qwen3.8-Flash-Next replace Qwen3.6 locally?",
-      "answer": "No. Wins only think-OFF (+7 pp, noise); loses think-ON and both agentic modes at 2–17× wall time.",
+      "answer": "No. Wins only think-OFF (+7 pp, noise); loses think-ON and both agentic modes at 2\u201317\u00d7 wall time.",
       "link": "results/2026-09-04/REPORT-flash-next-analysis.md"
     },
     {
       "date": "2026-09-14",
       "question": "Is MiniCPM5-2B via mlx-dspark good for agentic work on M1 Max?",
-      "answer": "Usable, but not strong. Thinking OFF by default — ON costs 3.5× tokens for no real gain.",
+      "answer": "Usable, but not strong. Thinking OFF by default \u2014 ON costs 3.5\u00d7 tokens for no real gain.",
       "link": "results/2026-09-14/REPORT-minicpm5-2b-mlx-dspark-cap7.md"
     },
     {
@@ -2109,7 +2137,7 @@
     {
       "date": "2026-09-23",
       "question": "Hosted harnesses on the new agentic-all (hidden tests sandboxed): devin SWE-2 Max vs opencode Muse Spark 1.3 Free",
-      "answer": "A tie on solving: Muse 48/48 (100 %, CI 93–100), SWE-2 Max 47/48 (97.9 %, CI 89–100; one 900 s timeout). SWE-2 Max is more efficient (77 % vs 70 %); Muse is ~1.8× faster with ~4× fewer input tokens per task. Near-saturated at 3 samples.",
+      "answer": "A tie on solving: Muse 48/48 (100 %, CI 93\u2013100), SWE-2 Max 47/48 (97.9 %, CI 89\u2013100; one 900 s timeout). SWE-2 Max is more efficient (77 % vs 70 %); Muse is ~1.8\u00d7 faster with ~4\u00d7 fewer input tokens per task. Near-saturated at 3 samples.",
       "link": "results/2026-09-23/REPORT-harness.md"
     }
   ],
@@ -2117,17 +2145,17 @@
     {
       "name": "core16",
       "tasks": 16,
-      "desc": "Algorithms, parsing, Python idiom — saturated at 100 %"
+      "desc": "Algorithms, parsing, Python idiom \u2014 saturated at 100 %"
     },
     {
       "name": "hard12",
       "tasks": 12,
-      "desc": "DP, parsers, cron, bigint — models land 45–75 %"
+      "desc": "DP, parsers, cron, bigint \u2014 models land 45\u201375 %"
     },
     {
       "name": "all",
       "tasks": 28,
-      "desc": "core16 + hard12 · one-shot pass@1"
+      "desc": "core16 + hard12 \u00b7 one-shot pass@1"
     },
     {
       "name": "agentic",
@@ -2137,7 +2165,7 @@
     {
       "name": "agentic-hard",
       "tasks": 8,
-      "desc": "Ranking suite · agent score vs oracle par"
+      "desc": "Ranking suite \u00b7 agent score vs oracle par"
     },
     {
       "name": "agentic-all",
@@ -2147,220 +2175,220 @@
     {
       "name": "system1",
       "tasks": 200,
-      "desc": "Benchmark v3 · 200 decision questions, arithmetic precomputed · 200 calls per model"
+      "desc": "Benchmark v3 \u00b7 200 decision questions, arithmetic precomputed \u00b7 200 calls per model"
     },
     {
       "name": "system1-v2",
       "tasks": 200,
-      "desc": "Benchmark v2 reference · 400 questions, arithmetic-heavy · superseded by v3"
+      "desc": "Benchmark v2 reference \u00b7 400 questions, arithmetic-heavy \u00b7 superseded by v3"
     },
     {
       "name": "phishing-eval",
       "tasks": 16,
-      "desc": "Real use case · adjudicated phishing corpus through the anti-phishing service pipeline"
+      "desc": "Real use case \u00b7 adjudicated phishing corpus through the anti-phishing service pipeline"
     },
     {
       "name": "system1-legacy",
       "tasks": 23,
-      "desc": "Benchmark v1 reference · original 49 typed questions · saturated historical suite"
+      "desc": "Benchmark v1 reference \u00b7 original 49 typed questions \u00b7 saturated historical suite"
     }
   ],
   "systemOneV1": {
-    "setup": "system1 suite · 49 typed questions · 2 samples · standard S1 gateway; Clef runs used temporary :8124; full 27B Clef required pausing Qwen vLLM",
+    "setup": "system1 suite \u00b7 49 typed questions \u00b7 2 samples \u00b7 standard S1 gateway; Clef runs used temporary :8124; full 27B Clef required pausing Qwen vLLM",
     "question": "Historical reference: how did models perform on the original 49 questions?",
     "rows": [
       {
-        "model": "TypeSafe Jev · baseline",
+        "model": "TypeSafe Jev \u00b7 baseline",
         "modelKey": "TypeSafe Jev (jev-1.13.0)",
         "score": 98.0,
-        "ci": "93–99",
+        "ci": "93\u201399",
         "secPerQ": 0.3,
         "outTok": 38,
         "wall": 7,
-        "serving": "hosted API · typesafe backend",
+        "serving": "hosted API \u00b7 typesafe backend",
         "note": "the standard every candidate is measured against"
       },
       {
         "model": "Bespoke-Nimble-9B",
         "modelKey": "Bespoke-Nimble-9B (Ollama Q8_0)",
         "score": 98.0,
-        "ci": "93–99",
+        "ci": "93\u201399",
         "secPerQ": 0.5,
         "outTok": 1,
         "wall": 13,
-        "serving": "local Ollama Q8_0 ~9.5 GiB · nimble backend",
+        "serving": "local Ollama Q8_0 ~9.5 GiB \u00b7 nimble backend",
         "note": "drop-in replacement: same contract, same score, no API key"
       },
       {
         "model": "Kev-27B",
         "modelKey": "Kev-27B (kev.serve bf16)",
         "score": 98.0,
-        "ci": "93–99",
+        "ci": "93\u201399",
         "secPerQ": 1.1,
         "outTok": 61,
         "wall": 26,
-        "serving": "local kev.serve bf16 ~63 GiB · kev backend",
-        "note": "ties Jev — only miss is error_log/q1, same as Jev's; does not fit beside the incumbent vLLM endpoint (needed it stopped to benchmark)"
+        "serving": "local kev.serve bf16 ~63 GiB \u00b7 kev backend",
+        "note": "ties Jev \u2014 only miss is error_log/q1, same as Jev's; does not fit beside the incumbent vLLM endpoint (needed it stopped to benchmark)"
       },
       {
         "model": "Mercury Decide (free)",
         "modelKey": "inception/mercury-decide:free",
         "score": 98.0,
-        "ci": "92.9–99.4",
+        "ci": "92.9\u201399.4",
         "secPerQ": 2.64,
         "outTok": 2.91,
         "wall": 258.87,
-        "serving": "hosted OpenRouter · systemone backend · no local weights",
+        "serving": "hosted OpenRouter \u00b7 systemone backend \u00b7 no local weights",
         "note": "96/98, no generation errors; ties historical Jev; latency includes free-tier quota waits"
       },
       {
         "model": "Clef-Flash-9B",
         "modelKey": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
         "score": 98.0,
-        "ci": "92.9–99.4",
+        "ci": "92.9\u201399.4",
         "secPerQ": 0.69,
         "outTok": 0,
         "wall": 17.1,
-        "serving": "local in-process bf16 ~19 GiB · clef backend · Qwen stayed up",
+        "serving": "local in-process bf16 ~19 GiB \u00b7 clef backend \u00b7 Qwen stayed up",
         "note": "96/98; ties Jev and full Clef with the same error_log/q1 misses; fits alongside the active Qwen service"
       },
       {
         "model": "Clef-27B",
         "modelKey": "Clef-27B (Cloudflare/clef bf16)",
         "score": 98.0,
-        "ci": "92.9–99.4",
+        "ci": "92.9\u201399.4",
         "secPerQ": 1.93,
         "outTok": 0,
         "wall": 47.7,
-        "serving": "local in-process bf16 · clef backend · Qwen paused",
+        "serving": "local in-process bf16 \u00b7 clef backend \u00b7 Qwen paused",
         "note": "96/98; ties Jev and Clef-Flash with the same error_log/q1 misses; required pausing shared Qwen vLLM to fit"
       },
       {
         "model": "Qwen3.6-35B think-OFF",
         "modelKey": "Qwen3.6-35B-A3B",
         "score": 96.9,
-        "ci": "91–99",
+        "ci": "91\u201399",
         "secPerQ": 0.7,
         "outTok": 4,
         "wall": 17,
-        "serving": "local vLLM · plain chat endpoint",
-        "note": "general model for reference — untyped output cost it one parse failure"
+        "serving": "local vLLM \u00b7 plain chat endpoint",
+        "note": "general model for reference \u2014 untyped output cost it one parse failure"
       },
       {
         "model": "Kev-4B",
         "modelKey": "Kev-4B (kev.serve bf16)",
         "score": 95.9,
-        "ci": "90.0–98.4",
+        "ci": "90.0\u201398.4",
         "secPerQ": 0.24,
         "outTok": 61,
         "wall": 6.0,
-        "serving": "local kev.serve bf16 ~15 GiB · kev backend",
+        "serving": "local kev.serve bf16 ~15 GiB \u00b7 kev backend",
         "note": "historical incumbent reference: 94/98; remains fastest local backend, with the margin to 98% candidates inside uncertainty"
       },
       {
         "model": "Qwen3.6-35B think-ON",
         "modelKey": "Qwen3.6-35B-A3B",
         "score": 93.9,
-        "ci": "87–97",
+        "ci": "87\u201397",
         "secPerQ": 22.6,
         "outTok": 1149,
         "wall": 602,
-        "serving": "local vLLM · plain chat endpoint",
-        "note": "deliberation buys nothing on typed questions — 75× slower, worse"
+        "serving": "local vLLM \u00b7 plain chat endpoint",
+        "note": "deliberation buys nothing on typed questions \u2014 75\u00d7 slower, worse"
       },
       {
         "model": "Laya typed-decisions",
         "modelKey": "Laya typed-decisions",
         "score": 73.5,
-        "ci": "64–81",
+        "ci": "64\u201381",
         "secPerQ": 0.5,
         "outTok": 0,
         "wall": 13,
-        "serving": "in-process scorer · laya backend · CPU-bound",
-        "note": "not a replacement at this checkpoint — fails 12 tasks across all difficulties"
+        "serving": "in-process scorer \u00b7 laya backend \u00b7 CPU-bound",
+        "note": "not a replacement at this checkpoint \u2014 fails 12 tasks across all difficulties"
       }
     ],
     "report": "results/2026-09-30/REPORT-s1-candidates.md",
     "latestReport": "results/2026-10-09/REPORT-cloudflare-s1-final.md",
     "note": "Benchmark v1 reference only. Fresh local runs put both Cloudflare Clef variants at 98.0% (96/98), matching historical Jev with the same error_log/q1 misses. Their margins over current Kev-4B (95.9%, 94/98) are within uncertainty. Clef-Flash takes 0.69 s/question and fits alongside Qwen; full Clef takes 1.93 s and required pausing Qwen vLLM to fit. Latencies reflect those actual deployment conditions, not a controlled co-tenancy comparison. The system1 suite is near saturation; these scores do not establish a perfect model or significant winner.",
     "realUseCase": {
-      "setup": "anti-phishing-email-service · 16 adjudicated emails · typesafe_only arm, zero code changes",
+      "setup": "anti-phishing-email-service \u00b7 16 adjudicated emails \u00b7 typesafe_only arm, zero code changes",
       "question": "Real workload, same contract: can local or hosted models replace Jev on the phishing classifier?",
       "rows": [
         {
-          "model": "Jev · typesafe arm",
+          "model": "Jev \u00b7 typesafe arm",
           "modelKey": "TypeSafe Jev (jev-1.13.0)",
           "score": 100.0,
-          "ci": "81–100",
+          "ci": "81\u2013100",
           "secPerQ": 0.31,
           "wall": 5.0,
           "serving": "hosted TypeSafe API",
-          "note": "16/16 — no misses"
+          "note": "16/16 \u2014 no misses"
         },
         {
-          "model": "Kev-4B · same arm",
+          "model": "Kev-4B \u00b7 same arm",
           "modelKey": "Kev-4B (kev.serve bf16)",
           "score": 100.0,
-          "ci": "81–100",
+          "ci": "81\u2013100",
           "secPerQ": 0.35,
           "wall": 5.5,
-          "serving": "local kev.serve :8009 · env-only swap",
-          "note": "16/16 — matches Jev, fastest local; on the hardest lure its noul sat just under the gate and the risk pipeline carried it over"
+          "serving": "local kev.serve :8009 \u00b7 env-only swap",
+          "note": "16/16 \u2014 matches Jev, fastest local; on the hardest lure its noul sat just under the gate and the risk pipeline carried it over"
         },
         {
-          "model": "Kev-27B · same arm",
+          "model": "Kev-27B \u00b7 same arm",
           "modelKey": "Kev-27B (kev.serve bf16)",
           "score": 100.0,
-          "ci": "81–100",
+          "ci": "81\u2013100",
           "secPerQ": 1.71,
           "wall": 27.4,
-          "serving": "local kev.serve :8009 · env-only swap · ~63 GiB",
-          "note": "16/16 — matches Jev, slower than Kev-4B; named the right attack type on the hardest lure, still needed the risk pipeline over a borderline noul"
+          "serving": "local kev.serve :8009 \u00b7 env-only swap \u00b7 ~63 GiB",
+          "note": "16/16 \u2014 matches Jev, slower than Kev-4B; named the right attack type on the hardest lure, still needed the risk pipeline over a borderline noul"
         },
         {
-          "model": "Clef-Flash-9B · same arm",
+          "model": "Clef-Flash-9B \u00b7 same arm",
           "modelKey": "Clef-Flash-9B (Cloudflare/clef-flash bf16)",
           "score": 100.0,
-          "ci": "81–100",
+          "ci": "81\u2013100",
           "secPerQ": 0.47,
           "wall": 7.5,
-          "serving": "local s1 gateway :8124 · env-only swap · ~19 GiB",
-          "note": "16/16 — matches Jev; the only local arm whose noul cleared the 0.5 gate unaided on the hardest lure (0.730), naming credential_harvesting at 0.72"
+          "serving": "local s1 gateway :8124 \u00b7 env-only swap \u00b7 ~19 GiB",
+          "note": "16/16 \u2014 matches Jev; the only local arm whose noul cleared the 0.5 gate unaided on the hardest lure (0.730), naming credential_harvesting at 0.72"
         },
         {
-          "model": "Mercury Decide · same arm",
+          "model": "Mercury Decide \u00b7 same arm",
           "modelKey": "inception/mercury-decide:free",
           "score": 100.0,
           "ci": null,
           "secPerQ": 2.93,
           "wall": 46.81,
-          "serving": "hosted OpenRouter · native typed decisions · env-only swap",
+          "serving": "hosted OpenRouter \u00b7 native typed decisions \u00b7 env-only swap",
           "note": "F1 1.000; TP 9, TN 7, FP 0, FN 0; all 16 analyzer calls succeeded, fallback disabled; p95 4.81 s; F1 interval not estimated"
         },
         {
-          "model": "Nimble-9B · same arm",
+          "model": "Nimble-9B \u00b7 same arm",
           "modelKey": "Bespoke-Nimble-9B (Ollama Q8_0)",
           "score": 94.1,
-          "ci": "72–99",
+          "ci": "72\u201399",
           "secPerQ": 0.77,
           "wall": 12.3,
-          "serving": "local Ollama · env-only swap",
-          "note": "15/16 — missed a credential-harvesting lure: its own choice head named the attack while noul said benign"
+          "serving": "local Ollama \u00b7 env-only swap",
+          "note": "15/16 \u2014 missed a credential-harvesting lure: its own choice head named the attack while noul said benign"
         },
         {
-          "model": "gpt-oss-120b · llm arm",
+          "model": "gpt-oss-120b \u00b7 llm arm",
           "modelKey": "gpt-oss-120b (Groq)",
           "score": 100.0,
-          "ci": "81–100",
+          "ci": "81\u2013100",
           "secPerQ": 1.49,
           "wall": 23.9,
           "serving": "hosted Groq",
-          "note": "incumbent LLM for context — untyped, 5× Jev's latency"
+          "note": "incumbent LLM for context \u2014 untyped, 5\u00d7 Jev's latency"
         }
       ],
       "report": "results/2026-09-30/REPORT-s1-phishing-kev.md",
       "latestReport": "results/2026-10-05/REPORT-s1-phishing-clef-flash.md",
-      "note": "Clef-Flash-9B scored F1 1.000 on all 16 emails at 0.47 s/email — the only local arm whose phishing noul cleared the 0.5 analyzer gate unaided on the hardest credential-harvesting lure (0.730 vs Jev's 0.710), where both Kev variants needed the risk pipeline and Nimble missed outright. The existing typesafe_only pipeline makes the final risk decision — this is not a raw noul-head score. Jev, both Kevs, Mercury Decide and gpt-oss-120b also solved 16/16; Nimble scored 0.941. n=16 is saturated, not proof of generalization: one flip changes F1 by about 6 points."
+      "note": "Clef-Flash-9B scored F1 1.000 on all 16 emails at 0.47 s/email \u2014 the only local arm whose phishing noul cleared the 0.5 analyzer gate unaided on the hardest credential-harvesting lure (0.730 vs Jev's 0.710), where both Kev variants needed the risk pipeline and Nimble missed outright. The existing typesafe_only pipeline makes the final risk decision \u2014 this is not a raw noul-head score. Jev, both Kevs, Mercury Decide and gpt-oss-120b also solved 16/16; Nimble scored 0.941. n=16 is saturated, not proof of generalization: one flip changes F1 by about 6 points."
     },
     "version": 1,
     "scenarios": 23,
