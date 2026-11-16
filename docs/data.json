@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-14",
+  "generated": "2026-11-16",
   "noiseFloor": "≈8 points at --samples 2; live runs are samples 1",
   "machines": [
     {
@@ -1859,9 +1859,127 @@
       "unit": "agent",
       "report": "results/2026-10-13-lfm2.5-vs-qwen3.6/REPORT.md",
       "sourceJson": "results/2026-10-13-lfm2.5-vs-qwen3.6/lfm2.5-24b-a2b-fp8-agentic-on.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-NVFP4 (vLLM)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 76.8,
+      "unit": "pass@1",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/vllm-all-off.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-NVFP4 (vLLM)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 82.1,
+      "unit": "pass@1",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/vllm-all-on.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-NVFP4 (vLLM)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 43.6,
+      "unit": "agent",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/vllm-agentic-off.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-NVFP4 (vLLM)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 51.0,
+      "unit": "agent",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/vllm-agentic-on.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-Q4_K_M (llama.cpp 1.0)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 76.8,
+      "unit": "pass@1",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/llamacpp1-all-off.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-Q4_K_M (llama.cpp 1.0)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "all",
+      "suiteHash": "51c224bb9b72fc75eeebc89b23fd3c1bd7f66514fc70080013120e5d76268584",
+      "score": 80.4,
+      "unit": "pass@1",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/llamacpp1-all-on.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-Q4_K_M (llama.cpp 1.0)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "OFF",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 51.4,
+      "unit": "agent",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/llamacpp1-agentic-off.json"
+    },
+    {
+      "date": "2026-11-16",
+      "machine": "dgx-spark",
+      "model": "Qwen3.6-35B-A3B-Q4_K_M (llama.cpp 1.0)",
+      "harness": "built-in",
+      "mode": "isolated",
+      "thinking": "ON",
+      "suite": "agentic-hard",
+      "suiteHash": "3fd5138172957cdea6c530d711286b6ced5c02f17f364884264c6fee3e0d5e5e",
+      "score": 59.3,
+      "unit": "agent",
+      "report": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md",
+      "sourceJson": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/llamacpp1-agentic-on.json"
     }
   ],
   "campaigns": [
+    {
+      "date": "2026-11-16",
+      "question": "Should locally built llama.cpp 1.0 (CUDA) replace vLLM as the serving backend for montimage-dgx-spark?",
+      "answer": "No. Keep vLLM. At 2 samples no solve-rate margin's 95% interval excludes zero: all think-OFF is an exact tie at 76.8%, all think-ON favours vLLM by 1.7 pp, and the two agentic-hard arms favour llama.cpp by 6.3 pp and 6.2 pp with heavily overlapping intervals at n=16. The clear signal is speed: vLLM is 1.8x faster per task on all OFF (15.4 s vs 27.8 s) and 1.47x faster on all ON (132 s vs 194 s) at similar output-token counts (~50 vs ~35 tok/s). llama.cpp's mild efficiency edge on agentic calls does not outweigh that. Caveat: weights are not identical — vLLM serves NVFP4, llama.cpp serves UD-Q4_K_M of the same base model, so any quality delta is engine plus quantization. llama.cpp 1.0 was compiled locally with CUDA because the Homebrew bottle is Vulkan-only, and the 22 GB GGUF could not coexist with vLLM's ~72 GB reservation, so the shared endpoint had to be swapped during the candidate arm.",
+      "link": "results/2026-11-16-llamacpp1-cuda-vs-vllm-valid/REPORT-analysis.md"
+    },
     {
       "date": "2026-10-14",
       "question": "Does Claude Sonnet 5.5 through Claude Code saturate benchmark v3?",
