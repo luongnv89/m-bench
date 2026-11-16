@@ -69,6 +69,37 @@ class OpenCodeHarness(Harness):
         return f"{self.provider}/{self.model}" if self.provider else self.model
 
     # --- discovery ------------------------------------------------------
+    _pure_cache = None  # cached result of --pure support check
+    _dir_cache = None   # cached result of --dir support check
+
+    def _supports_pure(self):
+        """True if this opencode binary understands --pure."""
+        if self._pure_cache is not None:
+            return self._pure_cache
+        try:
+            result = subprocess.run(
+                [self.binary, "run", "--help"],
+                capture_output=True, text=True, timeout=15,
+            )
+            self._pure_cache = "--pure" in (result.stdout or "")
+        except Exception:  # noqa: BLE001
+            self._pure_cache = False
+        return self._pure_cache
+
+    def _supports_dir(self):
+        """True if this opencode binary understands --dir."""
+        if self._dir_cache is not None:
+            return self._dir_cache
+        try:
+            result = subprocess.run(
+                [self.binary, "run", "--help"],
+                capture_output=True, text=True, timeout=15,
+            )
+            self._dir_cache = "--dir" in (result.stdout or "")
+        except Exception:  # noqa: BLE001
+            self._dir_cache = False
+        return self._dir_cache
+
     def _version(self):
         path = shutil.which(self.binary)
         if not path:
@@ -211,13 +242,15 @@ class OpenCodeHarness(Harness):
     def _argv(self, prompt, workdir):
         argv = [
             self.binary, "run",
-            # --dir is not redundant with cwd: pointing OPENCODE_CONFIG at a file
-            # outside the workspace moves opencode's idea of the project root with
-            # it, and the model then reports it cannot find the task's files.
-            "--dir", workdir,
+            # --dir: points opencode at the workspace. Not all versions support it
+            # (v2.3.0 dropped it). When absent, opencode uses cwd which is already
+            # set to workdir by the runner, so the model still finds the task files.
+            *([] if not self._supports_dir() else ["--dir", workdir]),
             "--format", "json",
             "--auto",     # approve tool use; the workspace is a throwaway temp dir
-            *([] if self.live else ["--pure"]),   # live mode keeps the user's plugins (#76)
+            # --pure: run without external plugins (counterpart to pi's --no-extensions).
+            # Not all opencode versions support it — detect at runtime.
+            *([] if self.live or not self._supports_pure() else ["--pure"]),
             "-m", self.model_spec,
         ]
         if self.variant:
